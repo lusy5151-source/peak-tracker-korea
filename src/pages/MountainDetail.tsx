@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import type { WeatherCondition } from "@/hooks/useMountainStore";
 
 const weatherOptions: { value: WeatherCondition; label: string; icon: any }[] = [
@@ -14,10 +14,34 @@ const weatherOptions: { value: WeatherCondition; label: string; icon: any }[] = 
   { value: "안개", label: "안개", icon: CloudFog },
 ];
 
+function resizeImage(file: File, maxSize = 800): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = (h / w) * maxSize; w = maxSize; }
+          else { w = (w / h) * maxSize; h = maxSize; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = e.target!.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 const MountainDetail = () => {
   const { id } = useParams<{ id: string }>();
   const mountain = mountains.find((m) => m.id === Number(id));
-  const { isCompleted, toggleComplete, getRecord, updateNotes, updateDate, updateWeather } = useStore();
+  const { isCompleted, toggleComplete, getRecord, updateNotes, updateDate, updateWeather, addPhotos, removePhoto } = useStore();
 
   if (!mountain) {
     return (
@@ -78,6 +102,8 @@ const MountainDetail = () => {
           updateNotes={updateNotes}
           updateDate={updateDate}
           updateWeather={updateWeather}
+          addPhotos={addPhotos}
+          removePhoto={removePhoto}
         />
       )}
     </div>
@@ -101,21 +127,36 @@ function JournalSection({
   updateNotes,
   updateDate,
   updateWeather,
+  addPhotos,
+  removePhoto,
 }: {
-  record: { completedAt: string; notes: string; weather?: WeatherCondition };
+  record: { completedAt: string; notes: string; weather?: WeatherCondition; photos?: string[] };
   mountainId: number;
   mountainName: string;
   updateNotes: (id: number, notes: string) => void;
   updateDate: (id: number, date: string) => void;
   updateWeather: (id: number, weather: WeatherCondition) => void;
+  addPhotos: (id: number, photos: string[]) => void;
+  removePhoto: (id: number, index: number) => void;
 }) {
   const [notes, setNotes] = useState(record.notes);
   const [date, setDate] = useState(record.completedAt.slice(0, 10));
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const photos = record.photos || [];
 
   useEffect(() => {
     setNotes(record.notes);
     setDate(record.completedAt.slice(0, 10));
   }, [record]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const resized = await Promise.all(files.map((f) => resizeImage(f)));
+    addPhotos(mountainId, resized);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
@@ -168,6 +209,44 @@ function JournalSection({
         </div>
       </div>
 
+      {/* Photos */}
+      <div>
+        <label className="mb-2 block text-xs font-medium text-muted-foreground">사진</label>
+        <div className="grid grid-cols-3 gap-2">
+          {photos.map((src, i) => (
+            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+              <img
+                src={src}
+                alt={`등산 사진 ${i + 1}`}
+                className="h-full w-full object-cover cursor-pointer transition-transform hover:scale-105"
+                onClick={() => setLightboxIndex(i)}
+              />
+              <button
+                onClick={() => removePhoto(mountainId, i)}
+                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+          >
+            <ImagePlus className="h-5 w-5" />
+            <span className="text-[10px]">추가</span>
+          </button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </div>
+
       {/* Diary Notes */}
       <div>
         <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
@@ -182,6 +261,27 @@ function JournalSection({
           className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 p-4"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <button
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-background"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={photos[lightboxIndex]}
+            alt="사진 확대"
+            className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

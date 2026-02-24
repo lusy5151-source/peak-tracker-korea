@@ -7,6 +7,7 @@ export interface CompletionRecord {
   completedAt: string;
   notes: string;
   weather: WeatherCondition;
+  photos: string[]; // base64 data URLs
 }
 
 const STORAGE_KEY = "korea-100-mountains";
@@ -49,7 +50,7 @@ export function useMountainStore() {
         }
         return [
           ...prev,
-          { mountainId: id, completedAt: new Date().toISOString(), notes: "", weather: "" },
+          { mountainId: id, completedAt: new Date().toISOString(), notes: "", weather: "", photos: [] },
         ];
       });
     },
@@ -74,6 +75,24 @@ export function useMountainStore() {
     );
   }, []);
 
+  const addPhotos = useCallback((id: number, newPhotos: string[]) => {
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.mountainId === id ? { ...r, photos: [...(r.photos || []), ...newPhotos] } : r
+      )
+    );
+  }, []);
+
+  const removePhoto = useCallback((id: number, index: number) => {
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.mountainId === id
+          ? { ...r, photos: (r.photos || []).filter((_, i) => i !== index) }
+          : r
+      )
+    );
+  }, []);
+
   return {
     records,
     isCompleted,
@@ -82,6 +101,8 @@ export function useMountainStore() {
     updateNotes,
     updateDate,
     updateWeather,
+    addPhotos,
+    removePhoto,
     completedCount: records.length,
   };
 }
