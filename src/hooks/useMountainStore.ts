@@ -1,9 +1,12 @@
 import { useState, useCallback, useEffect } from "react";
 
+export type WeatherCondition = "맑음" | "구름" | "흐림" | "비" | "눈" | "안개" | "";
+
 export interface CompletionRecord {
   mountainId: number;
   completedAt: string;
   notes: string;
+  weather: WeatherCondition;
 }
 
 const STORAGE_KEY = "korea-100-mountains";
