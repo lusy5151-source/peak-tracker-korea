@@ -49,7 +49,7 @@ export function useMountainStore() {
         }
         return [
           ...prev,
-          { mountainId: id, completedAt: new Date().toISOString(), notes: "" },
+          { mountainId: id, completedAt: new Date().toISOString(), notes: "", weather: "" },
         ];
       });
     },
