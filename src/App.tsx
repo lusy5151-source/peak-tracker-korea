@@ -8,6 +8,7 @@ import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import MountainList from "@/pages/MountainList";
 import MountainDetail from "@/pages/MountainDetail";
+import MapView from "@/pages/MapView";
 import Records from "@/pages/Records";
 import NotFound from "./pages/NotFound";
 
