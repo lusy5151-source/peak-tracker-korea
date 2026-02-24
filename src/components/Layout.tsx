@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, BarChart3, List, BookOpen } from "lucide-react";
+import { Mountain, BarChart3, List, BookOpen, MapPinned } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "대시보드", icon: BarChart3 },
   { to: "/mountains", label: "산 목록", icon: List },
+  { to: "/map", label: "지도", icon: MapPinned },
   { to: "/records", label: "내 기록", icon: BookOpen },
 ];
 

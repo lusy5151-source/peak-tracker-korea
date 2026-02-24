@@ -52,6 +52,7 @@ const Records = () => {
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  {r.weather && <span>{r.weather}</span>}
                   <Calendar className="h-3.5 w-3.5" />
                   {new Date(r.completedAt).toLocaleDateString("ko-KR")}
                 </div>
