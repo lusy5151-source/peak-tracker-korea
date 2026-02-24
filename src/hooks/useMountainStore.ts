@@ -68,6 +68,12 @@ export function useMountainStore() {
     );
   }, []);
 
+  const updateWeather = useCallback((id: number, weather: WeatherCondition) => {
+    setRecords((prev) =>
+      prev.map((r) => (r.mountainId === id ? { ...r, weather } : r))
+    );
+  }, []);
+
   return {
     records,
     isCompleted,
@@ -75,6 +81,7 @@ export function useMountainStore() {
     toggleComplete,
     updateNotes,
     updateDate,
+    updateWeather,
     completedCount: records.length,
   };
 }

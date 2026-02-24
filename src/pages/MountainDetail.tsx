@@ -1,13 +1,23 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar } from "lucide-react";
+import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun } from "lucide-react";
 import { useState, useEffect } from "react";
+import type { WeatherCondition } from "@/hooks/useMountainStore";
+
+const weatherOptions: { value: WeatherCondition; label: string; icon: any }[] = [
+  { value: "맑음", label: "맑음", icon: Sun },
+  { value: "구름", label: "구름 조금", icon: CloudSun },
+  { value: "흐림", label: "흐림", icon: Cloud },
+  { value: "비", label: "비", icon: CloudRain },
+  { value: "눈", label: "눈", icon: CloudSnow },
+  { value: "안개", label: "안개", icon: CloudFog },
+];
 
 const MountainDetail = () => {
   const { id } = useParams<{ id: string }>();
   const mountain = mountains.find((m) => m.id === Number(id));
-  const { isCompleted, toggleComplete, getRecord, updateNotes, updateDate } = useStore();
+  const { isCompleted, toggleComplete, getRecord, updateNotes, updateDate, updateWeather } = useStore();
 
   if (!mountain) {
     return (
@@ -59,8 +69,17 @@ const MountainDetail = () => {
         <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{mountain.description}</p>
       </div>
 
-      {/* Notes */}
-      {completed && record && <NotesSection record={record} mountainId={mountain.id} updateNotes={updateNotes} updateDate={updateDate} />}
+      {/* Hiking Journal */}
+      {completed && record && (
+        <JournalSection
+          record={record}
+          mountainId={mountain.id}
+          mountainName={mountain.nameKo}
+          updateNotes={updateNotes}
+          updateDate={updateDate}
+          updateWeather={updateWeather}
+        />
+      )}
     </div>
   );
 };
@@ -75,16 +94,20 @@ function InfoItem({ icon: Icon, label, value }: { icon: any; label: string; valu
   );
 }
 
-function NotesSection({
+function JournalSection({
   record,
   mountainId,
+  mountainName,
   updateNotes,
   updateDate,
+  updateWeather,
 }: {
-  record: { completedAt: string; notes: string };
+  record: { completedAt: string; notes: string; weather?: WeatherCondition };
   mountainId: number;
+  mountainName: string;
   updateNotes: (id: number, notes: string) => void;
   updateDate: (id: number, date: string) => void;
+  updateWeather: (id: number, weather: WeatherCondition) => void;
 }) {
   const [notes, setNotes] = useState(record.notes);
   const [date, setDate] = useState(record.completedAt.slice(0, 10));
@@ -95,12 +118,19 @@ function NotesSection({
   }, [record]);
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-      <h2 className="text-lg font-semibold text-foreground">내 기록</h2>
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
+      <div className="flex items-center gap-2">
+        <div className="h-8 w-1 rounded-full bg-primary" />
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">등산 일지</h2>
+          <p className="text-xs text-muted-foreground">{mountainName}에서의 기억</p>
+        </div>
+      </div>
 
+      {/* Date */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-          <Calendar className="mr-1 inline h-3.5 w-3.5" />
+        <label className="mb-1.5 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <Calendar className="h-3.5 w-3.5" />
           방문 날짜
         </label>
         <input
@@ -114,15 +144,42 @@ function NotesSection({
         />
       </div>
 
+      {/* Weather */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">메모</label>
+        <label className="mb-2 block text-xs font-medium text-muted-foreground">날씨</label>
+        <div className="flex flex-wrap gap-2">
+          {weatherOptions.map(({ value, label, icon: Icon }) => {
+            const selected = record.weather === value;
+            return (
+              <button
+                key={value}
+                onClick={() => updateWeather(mountainId, selected ? "" : value)}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                  selected
+                    ? "bg-primary/10 text-primary ring-1 ring-primary/30"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Diary Notes */}
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          오늘의 산행 일지
+        </label>
         <textarea
-          rows={4}
+          rows={6}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           onBlur={() => updateNotes(mountainId, notes)}
-          placeholder="등산 후기, 코스 정보, 날씨 등을 기록하세요..."
-          className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          placeholder={`${mountainName}에서의 하루를 기록해보세요.\n\n어떤 코스로 올랐나요? 정상에서 본 풍경은 어떠했나요?\n함께한 사람, 느꼈던 감정, 기억하고 싶은 순간들을 자유롭게 적어주세요...`}
+          className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
     </div>
