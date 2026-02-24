@@ -50,7 +50,7 @@ export function useMountainStore() {
         }
         return [
           ...prev,
-          { mountainId: id, completedAt: new Date().toISOString(), notes: "", weather: "" },
+          { mountainId: id, completedAt: new Date().toISOString(), notes: "", weather: "", photos: [] },
         ];
       });
     },
