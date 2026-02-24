@@ -7,6 +7,7 @@ export interface CompletionRecord {
   completedAt: string;
   notes: string;
   weather: WeatherCondition;
+  photos: string[]; // base64 data URLs
 }
 
 const STORAGE_KEY = "korea-100-mountains";
