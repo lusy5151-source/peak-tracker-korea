@@ -1,3 +1,10 @@
+export interface TrailInfo {
+  name: string;
+  distance: string;
+  duration: string;
+  startingPoint: string;
+}
+
 export interface Mountain {
   id: number;
   name: string;
@@ -8,6 +15,7 @@ export interface Mountain {
   description: string;
   lat: number;
   lng: number;
+  trails?: TrailInfo[];
 }
 
 export const regions = [
@@ -25,16 +33,16 @@ export const regions = [
 export type Region = (typeof regions)[number];
 
 export const mountains: Mountain[] = [
-  { id: 1, name: "Hallasan", nameKo: "한라산", height: 1950, region: "제주", difficulty: "어려움", description: "대한민국 최고봉으로 제주도 중앙에 위치한 화산. 백록담이 유명하며, 사계절 아름다운 자연경관을 자랑합니다.", lat: 33.3617, lng: 126.5292 },
-  { id: 2, name: "Jirisan", nameKo: "지리산", height: 1915, region: "전남", difficulty: "어려움", description: "한국 최초의 국립공원으로, 천왕봉을 정상으로 하는 웅장한 산. 종주 코스가 유명합니다.", lat: 35.3370, lng: 127.7306 },
-  { id: 3, name: "Seoraksan", nameKo: "설악산", height: 1708, region: "강원", difficulty: "어려움", description: "강원도를 대표하는 산으로 기암괴석과 단풍이 아름답습니다. 대청봉이 최고봉입니다.", lat: 38.1197, lng: 128.4656 },
-  { id: 4, name: "Deogyusan", nameKo: "덕유산", height: 1614, region: "전북", difficulty: "보통", description: "겨울 설경이 특히 아름다운 산으로, 향적봉이 정상입니다. 무주리조트와 인접해 있습니다.", lat: 35.8524, lng: 127.7457 },
-  { id: 5, name: "Gyeryongsan", nameKo: "계룡산", height: 845, region: "충남", difficulty: "보통", description: "풍수지리적으로 명산으로 꼽히며, 다양한 등산 코스가 있습니다.", lat: 36.3424, lng: 127.2054 },
-  { id: 6, name: "Bukhansan", nameKo: "북한산", height: 836, region: "서울·경기", difficulty: "보통", description: "서울 도심에서 가까운 국립공원. 백운대, 인수봉, 만경대 세 봉우리가 유명합니다.", lat: 37.6608, lng: 126.9936 },
-  { id: 7, name: "Chiaksan", nameKo: "치악산", height: 1288, region: "강원", difficulty: "어려움", description: "원주시에 위치한 산으로 비로봉이 최고봉입니다. 가을 단풍이 아름답습니다.", lat: 37.3700, lng: 128.0500 },
-  { id: 8, name: "Songnisan", nameKo: "속리산", height: 1058, region: "충북", difficulty: "보통", description: "법주사와 함께 유명한 산으로, 천왕봉이 최고봉입니다. 정이품송이 유명합니다.", lat: 36.5375, lng: 127.8661 },
-  { id: 9, name: "Naejangsan", nameKo: "내장산", height: 763, region: "전북", difficulty: "쉬움", description: "한국 최고의 단풍 명소로 유명합니다. 가을이면 온 산이 붉게 물듭니다.", lat: 35.4833, lng: 126.8833 },
-  { id: 10, name: "Gayasan", nameKo: "가야산", height: 1430, region: "경남", difficulty: "보통", description: "해인사와 팔만대장경이 있는 산. 상왕봉이 최고봉입니다.", lat: 35.8167, lng: 128.1000 },
+  { id: 1, name: "Hallasan", nameKo: "한라산", height: 1950, region: "제주", difficulty: "어려움", description: "대한민국 최고봉으로 제주도 중앙에 위치한 화산. 백록담이 유명하며, 사계절 아름다운 자연경관을 자랑합니다.", lat: 33.3617, lng: 126.5292, trails: [{ name: "성판악 코스", distance: "9.6km", duration: "4시간 30분", startingPoint: "성판악 탐방로 입구" }, { name: "관음사 코스", distance: "8.7km", duration: "5시간", startingPoint: "관음사 야영장" }] },
+  { id: 2, name: "Jirisan", nameKo: "지리산", height: 1915, region: "전남", difficulty: "어려움", description: "한국 최초의 국립공원으로, 천왕봉을 정상으로 하는 웅장한 산. 종주 코스가 유명합니다.", lat: 35.3370, lng: 127.7306, trails: [{ name: "중산리 코스", distance: "5.4km", duration: "3시간 30분", startingPoint: "중산리 탐방안내소" }, { name: "백무동 코스", distance: "7.0km", duration: "5시간", startingPoint: "백무동 탐방안내소" }] },
+  { id: 3, name: "Seoraksan", nameKo: "설악산", height: 1708, region: "강원", difficulty: "어려움", description: "강원도를 대표하는 산으로 기암괴석과 단풍이 아름답습니다. 대청봉이 최고봉입니다.", lat: 38.1197, lng: 128.4656, trails: [{ name: "한계령 코스", distance: "8.0km", duration: "4시간", startingPoint: "한계령 휴게소" }, { name: "오색 코스", distance: "5.0km", duration: "3시간 30분", startingPoint: "오색 탐방안내소" }] },
+  { id: 4, name: "Deogyusan", nameKo: "덕유산", height: 1614, region: "전북", difficulty: "보통", description: "겨울 설경이 특히 아름다운 산으로, 향적봉이 정상입니다. 무주리조트와 인접해 있습니다.", lat: 35.8524, lng: 127.7457, trails: [{ name: "곤도라 코스", distance: "1.5km", duration: "30분", startingPoint: "무주리조트 곤도라 정상" }, { name: "백련사 코스", distance: "6.0km", duration: "3시간", startingPoint: "백련사 주차장" }] },
+  { id: 5, name: "Gyeryongsan", nameKo: "계룡산", height: 845, region: "충남", difficulty: "보통", description: "풍수지리적으로 명산으로 꼽히며, 다양한 등산 코스가 있습니다.", lat: 36.3424, lng: 127.2054, trails: [{ name: "동학사 코스", distance: "3.5km", duration: "2시간", startingPoint: "동학사 주차장" }] },
+  { id: 6, name: "Bukhansan", nameKo: "북한산", height: 836, region: "서울·경기", difficulty: "보통", description: "서울 도심에서 가까운 국립공원. 백운대, 인수봉, 만경대 세 봉우리가 유명합니다.", lat: 37.6608, lng: 126.9936, trails: [{ name: "백운대 코스", distance: "3.4km", duration: "2시간 30분", startingPoint: "북한산성 탐방지원센터" }, { name: "둘레길 코스", distance: "6.0km", duration: "2시간", startingPoint: "우이동 탐방안내소" }] },
+  { id: 7, name: "Chiaksan", nameKo: "치악산", height: 1288, region: "강원", difficulty: "어려움", description: "원주시에 위치한 산으로 비로봉이 최고봉입니다. 가을 단풍이 아름답습니다.", lat: 37.3700, lng: 128.0500, trails: [{ name: "구룡사 코스", distance: "5.5km", duration: "3시간", startingPoint: "구룡사 주차장" }] },
+  { id: 8, name: "Songnisan", nameKo: "속리산", height: 1058, region: "충북", difficulty: "보통", description: "법주사와 함께 유명한 산으로, 천왕봉이 최고봉입니다. 정이품송이 유명합니다.", lat: 36.5375, lng: 127.8661, trails: [{ name: "법주사 코스", distance: "4.4km", duration: "2시간 30분", startingPoint: "법주사 매표소" }] },
+  { id: 9, name: "Naejangsan", nameKo: "내장산", height: 763, region: "전북", difficulty: "쉬움", description: "한국 최고의 단풍 명소로 유명합니다. 가을이면 온 산이 붉게 물듭니다.", lat: 35.4833, lng: 126.8833, trails: [{ name: "내장사 코스", distance: "3.0km", duration: "1시간 30분", startingPoint: "내장사 주차장" }] },
+  { id: 10, name: "Gayasan", nameKo: "가야산", height: 1430, region: "경남", difficulty: "보통", description: "해인사와 팔만대장경이 있는 산. 상왕봉이 최고봉입니다.", lat: 35.8167, lng: 128.1000, trails: [{ name: "해인사 코스", distance: "4.0km", duration: "2시간 30분", startingPoint: "해인사 주차장" }] },
   { id: 11, name: "Taebaeksan", nameKo: "태백산", height: 1567, region: "강원", difficulty: "보통", description: "민족의 영산으로 불리며, 천제단에서 매년 개천제가 열립니다.", lat: 37.0956, lng: 128.9158 },
   { id: 12, name: "Odaesan", nameKo: "오대산", height: 1563, region: "강원", difficulty: "보통", description: "월정사와 상원사가 있는 불교 성지. 비로봉이 최고봉입니다.", lat: 37.7983, lng: 128.5428 },
   { id: 13, name: "Woraksan", nameKo: "월악산", height: 1094, region: "충북", difficulty: "보통", description: "충주호와 어우러진 절경이 아름다운 산. 영봉이 최고봉입니다.", lat: 36.8833, lng: 128.0833 },

@@ -1,11 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, BarChart3, List, BookOpen, MapPinned } from "lucide-react";
+import { Mountain, BarChart3, List, BookOpen, MapPinned, Shirt, Users } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "대시보드", icon: BarChart3 },
   { to: "/mountains", label: "산 목록", icon: List },
   { to: "/map", label: "지도", icon: MapPinned },
   { to: "/records", label: "내 기록", icon: BookOpen },
+  { to: "/gear", label: "장비", icon: Shirt },
+  { to: "/social", label: "함께", icon: Users },
 ];
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

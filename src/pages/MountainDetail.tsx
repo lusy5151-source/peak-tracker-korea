@@ -1,9 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X } from "lucide-react";
+import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { WeatherCondition } from "@/hooks/useMountainStore";
+import { WeatherCard } from "@/components/WeatherCard";
+import { TrailInfoSection } from "@/components/TrailInfo";
+import { mockFriends } from "@/data/mockFriends";
 
 const weatherOptions: { value: WeatherCondition; label: string; icon: any }[] = [
   { value: "맑음", label: "맑음", icon: Sun },
@@ -93,6 +96,12 @@ const MountainDetail = () => {
         <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{mountain.description}</p>
       </div>
 
+      {/* Trail info */}
+      <TrailInfoSection trails={mountain.trails || []} />
+
+      {/* Weather & outfit */}
+      <WeatherCard mountainId={mountain.id} />
+
       {/* Hiking Journal */}
       {completed && record && (
         <JournalSection
@@ -130,7 +139,7 @@ function JournalSection({
   addPhotos,
   removePhoto,
 }: {
-  record: { completedAt: string; notes: string; weather?: WeatherCondition; photos?: string[] };
+  record: { completedAt: string; notes: string; weather?: WeatherCondition; photos?: string[]; taggedFriends?: string[] };
   mountainId: number;
   mountainName: string;
   updateNotes: (id: number, notes: string) => void;
@@ -144,6 +153,7 @@ function JournalSection({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photos = record.photos || [];
+  const taggedFriends = record.taggedFriends || [];
 
   useEffect(() => {
     setNotes(record.notes);
@@ -208,6 +218,26 @@ function JournalSection({
           })}
         </div>
       </div>
+
+      {/* Tagged friends */}
+      {taggedFriends.length > 0 && (
+        <div>
+          <label className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+            <Users className="h-3.5 w-3.5" />
+            함께한 친구
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {taggedFriends.map((fId) => {
+              const friend = mockFriends.find((f) => f.id === fId);
+              return friend ? (
+                <span key={fId} className="flex items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                  {friend.avatar} {friend.name}
+                </span>
+              ) : null;
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Photos */}
       <div>
