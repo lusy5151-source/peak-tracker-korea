@@ -10,6 +10,8 @@ import MountainList from "@/pages/MountainList";
 import MountainDetail from "@/pages/MountainDetail";
 import MapView from "@/pages/MapView";
 import Records from "@/pages/Records";
+import GearPage from "@/pages/GearPage";
+import SocialPage from "@/pages/SocialPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
               <Route path="/mountains/:id" element={<MountainDetail />} />
               <Route path="/map" element={<MapView />} />
               <Route path="/records" element={<Records />} />
+              <Route path="/gear" element={<GearPage />} />
+              <Route path="/social" element={<SocialPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
