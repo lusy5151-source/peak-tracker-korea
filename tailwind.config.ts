@@ -68,6 +68,13 @@ export default {
           600: "hsl(var(--nature-600))",
           700: "hsl(var(--nature-700))",
         },
+        sky: {
+          50: "hsl(var(--sky-50))",
+          100: "hsl(var(--sky-100))",
+          200: "hsl(var(--sky-200))",
+          500: "hsl(var(--sky-500))",
+          600: "hsl(var(--sky-600))",
+        },
         earth: {
           50: "hsl(var(--earth-50))",
           100: "hsl(var(--earth-100))",
