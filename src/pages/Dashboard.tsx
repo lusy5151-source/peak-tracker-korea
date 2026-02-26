@@ -4,12 +4,14 @@ import { getMockWeather, getOutfitRecommendations } from "@/data/mockWeather";
 import { mockFriends } from "@/data/mockFriends";
 import { useGearStore } from "@/hooks/useGearStore";
 import {
-  Mountain, Plus, Calendar, MapPin, CloudSun, Wind, Droplets,
-  ChevronRight, Shirt, Users, Route, Sun, Cloud, CloudRain, CloudSnow,
-  TrendingUp, ArrowRight, Thermometer,
+  Mountain, Plus, Calendar, MapPin, Wind, Droplets,
+  ChevronRight, Shirt, Users, Route, Sun, Cloud, CloudRain, CloudSnow, CloudSun,
+  ArrowRight, Thermometer, Search,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useMemo, useState, useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const conditionIcons: Record<string, any> = {
   "맑음": Sun, "구름": CloudSun, "흐림": Cloud, "비": CloudRain, "눈": CloudSnow,
@@ -18,8 +20,8 @@ const conditionIcons: Record<string, any> = {
 const Dashboard = () => {
   const { records, completedCount, isCompleted } = useStore();
   const { items: gearItems } = useGearStore();
+  const navigate = useNavigate();
 
-  // Pick a featured mountain (first uncompleted with trails, or first with trails)
   const featuredMountain = useMemo(() => {
     return mountains.find((m) => m.trails?.length && !isCompleted(m.id))
       || mountains.find((m) => m.trails?.length)
@@ -38,58 +40,107 @@ const Dashboard = () => {
       .filter((r) => r.mountain);
   }, [records]);
 
-  // Recommended routes (mountains with trail data)
   const recommendedRoutes = useMemo(() => {
-    return mountains
-      .filter((m) => m.trails && m.trails.length > 0)
-      .slice(0, 4);
+    return mountains.filter((m) => m.trails && m.trails.length > 0).slice(0, 4);
   }, []);
+
+  // Search
+  const [search, setSearch] = useState("");
+  const searchResults = useMemo(() => {
+    if (!search.trim()) return [];
+    const q = search.trim().toLowerCase();
+    return mountains.filter((m) =>
+      m.nameKo.includes(q) || m.name.toLowerCase().includes(q) || m.region.includes(q)
+    ).slice(0, 6);
+  }, [search]);
 
   return (
     <div className="space-y-6 pb-24">
-      {/* 1. Today's Mountain & Weather */}
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">오늘의 산</p>
-            <h2 className="mt-1 text-xl font-bold text-foreground">{featuredMountain.nameKo}</h2>
-            <p className="text-xs text-muted-foreground">{featuredMountain.region} · {featuredMountain.height}m</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <CondIcon className="h-8 w-8 text-primary" />
-            <div className="text-right">
-              <p className="text-2xl font-bold text-foreground">{weather.temp}°</p>
-              <p className="text-[10px] text-muted-foreground">체감 {weather.feelsLike}°</p>
+      {/* ── Hero: Map (left) + Search & Today's Mountain (right) ── */}
+      <section className="grid gap-4 lg:grid-cols-5">
+        {/* Map */}
+        <div className="lg:col-span-3 rounded-2xl border border-border overflow-hidden shadow-sm bg-card min-h-[320px] lg:min-h-[400px]">
+          <MiniMap isCompleted={isCompleted} onMarkerClick={(id) => navigate(`/mountains/${id}`)} />
+        </div>
+
+        {/* Right column */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          {/* Search */}
+          <div className="relative">
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="산 이름, 지역으로 검색..."
+                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+              />
             </div>
+            {searchResults.length > 0 && (
+              <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+                {searchResults.map((m) => (
+                  <Link
+                    key={m.id}
+                    to={`/mountains/${m.id}`}
+                    onClick={() => setSearch("")}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/60 transition-colors"
+                  >
+                    <Mountain className="h-4 w-4 text-primary" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{m.nameKo}</p>
+                      <p className="text-[10px] text-muted-foreground">{m.region} · {m.height}m · {m.difficulty}</p>
+                    </div>
+                    {isCompleted(m.id) && (
+                      <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">완등</span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Today's Mountain & Weather */}
+          <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-sky-500">오늘의 산</p>
+            <h2 className="mt-1 text-xl font-bold text-foreground">{featuredMountain.nameKo}</h2>
+            <p className="text-xs text-muted-foreground">{featuredMountain.region} · {featuredMountain.height}m · {featuredMountain.difficulty}</p>
+
+            <div className="mt-4 flex items-center gap-3">
+              <CondIcon className="h-9 w-9 text-sky-500" />
+              <div>
+                <p className="text-2xl font-bold text-foreground">{weather.temp}°</p>
+                <p className="text-[10px] text-muted-foreground">체감 {weather.feelsLike}°C</p>
+              </div>
+              <div className="ml-auto grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1"><Wind className="h-3 w-3" /> {weather.windSpeed}km/h</span>
+                <span className="flex items-center gap-1"><Droplets className="h-3 w-3" /> {weather.precipChance}%</span>
+                <span className="flex items-center gap-1"><Thermometer className="h-3 w-3" /> 습도 {weather.humidity}%</span>
+              </div>
+            </div>
+
+            {/* Outfit rec */}
+            <div className="mt-4 rounded-xl bg-accent/40 p-3">
+              <p className="text-[10px] font-medium text-accent-foreground/70 mb-1">🧥 복장 추천</p>
+              <p className="text-xs text-foreground leading-relaxed">
+                {outfitRecs.slice(0, 3).map((r) => r.item).join(" · ")}
+              </p>
+            </div>
+
+            <Link
+              to={`/mountains/${featuredMountain.id}`}
+              className="mt-auto pt-3 flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              상세 보기 <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <MiniStat icon={Thermometer} label="기온" value={`${weather.temp}°C`} />
-          <MiniStat icon={Wind} label="풍속" value={`${weather.windSpeed}km/h`} />
-          <MiniStat icon={Droplets} label="강수" value={`${weather.precipChance}%`} />
-        </div>
-
-        {/* Quick outfit rec */}
-        <div className="mt-4 rounded-xl bg-secondary/50 p-3">
-          <p className="text-[10px] font-medium text-muted-foreground mb-1.5">🧥 복장 추천</p>
-          <p className="text-xs text-foreground leading-relaxed">
-            {outfitRecs.slice(0, 3).map((r) => r.item).join(" · ")}
-          </p>
-        </div>
-
-        <Link
-          to={`/mountains/${featuredMountain.id}`}
-          className="mt-3 flex items-center justify-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-        >
-          상세 날씨 보기 <ArrowRight className="h-3 w-3" />
-        </Link>
       </section>
 
       {/* 2. Add Hiking Record CTA */}
       <Link
         to="/mountains"
-        className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+        className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-sky-500 px-6 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
       >
         <Plus className="h-5 w-5" />
         등산 기록 추가하기
@@ -108,7 +159,6 @@ const Dashboard = () => {
                 to={`/mountains/${r.mountainId}`}
                 className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm transition-colors hover:bg-secondary/50"
               >
-                {/* Photo thumbnail or icon */}
                 {r.photos && r.photos.length > 0 ? (
                   <img src={r.photos[0]} alt="" className="h-12 w-12 rounded-lg object-cover" />
                 ) : (
@@ -140,35 +190,6 @@ const Dashboard = () => {
         )}
       </section>
 
-      {/* 4. Map Preview */}
-      <section>
-        <SectionHeader title="지도" linkTo="/map" linkLabel="전체 보기" />
-        <Link to="/map" className="block rounded-2xl border border-border bg-card p-5 shadow-sm transition-colors hover:bg-secondary/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <MapPin className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">백대명산 지도</p>
-                <p className="text-xs text-muted-foreground">
-                  완등 {completedCount}개 · 미등 {100 - completedCount}개
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-primary" /> 완등</span>
-              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" /> 미등</span>
-              <ChevronRight className="h-4 w-4" />
-            </div>
-          </div>
-          {/* Progress bar */}
-          <div className="mt-3 h-2 rounded-full bg-secondary">
-            <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${completedCount}%` }} />
-          </div>
-        </Link>
-      </section>
-
       {/* 5. Recommended Hiking Routes */}
       <section>
         <SectionHeader title="추천 등산 코스" linkTo="/mountains" linkLabel="더 보기" />
@@ -180,7 +201,7 @@ const Dashboard = () => {
               className="rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-secondary/50"
             >
               <div className="flex items-center gap-2 mb-2">
-                <Route className="h-4 w-4 text-primary" />
+                <Route className="h-4 w-4 text-sky-500" />
                 <p className="font-medium text-foreground text-sm">{m.nameKo}</p>
                 <DifficultyBadge difficulty={m.difficulty} />
               </div>
@@ -227,9 +248,7 @@ const Dashboard = () => {
                 </Link>
               )}
             </div>
-
-            {/* Weather-based suggestion */}
-            <div className="mt-3 rounded-lg bg-primary/5 p-3">
+            <div className="mt-3 rounded-lg bg-accent/30 p-3">
               <p className="text-[10px] font-medium text-primary mb-1">오늘 날씨에 맞는 장비</p>
               <p className="text-xs text-foreground">
                 {outfitRecs.slice(0, 2).map((r) => r.item).join(", ")}
@@ -275,7 +294,66 @@ const Dashboard = () => {
   );
 };
 
-/* ─── Helper Components ─── */
+/* ─── Mini Map ─── */
+
+function MiniMap({ isCompleted, onMarkerClick }: { isCompleted: (id: number) => boolean; onMarkerClick: (id: number) => void }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      center: [36.0, 127.8],
+      zoom: 7,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 18,
+    }).addTo(map);
+
+    mountains.forEach((m) => {
+      const completed = isCompleted(m.id);
+      const color = completed ? "hsl(160, 40%, 40%)" : "hsl(200, 30%, 70%)";
+
+      const icon = L.divIcon({
+        className: "custom-marker",
+        html: `<div style="
+          width: 10px; height: 10px;
+          background: ${color};
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        "></div>`,
+        iconSize: [10, 10],
+        iconAnchor: [5, 5],
+      });
+
+      const marker = L.marker([m.lat, m.lng], { icon }).addTo(map);
+      marker.bindTooltip(
+        `<strong>${m.nameKo}</strong><br/>${m.height}m${completed ? " ✓" : ""}`,
+        { direction: "top", offset: [0, -6] }
+      );
+      marker.on("click", () => onMarkerClick(m.id));
+    });
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [isCompleted, onMarkerClick]);
+
+  return <div ref={mapRef} className="h-full w-full min-h-[320px]" />;
+}
+
+/* ─── Helpers ─── */
 
 function SectionHeader({ title, linkTo, linkLabel }: { title: string; linkTo: string; linkLabel: string }) {
   return (
@@ -292,16 +370,6 @@ function EmptyState({ icon: Icon, message, linkTo, linkLabel }: { icon: any; mes
       <Icon className="mx-auto h-8 w-8 text-muted-foreground/30" />
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
       <Link to={linkTo} className="mt-1 inline-block text-xs text-primary hover:underline">{linkLabel}</Link>
-    </div>
-  );
-}
-
-function MiniStat({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
-      <Icon className="mx-auto h-3.5 w-3.5 text-muted-foreground" />
-      <p className="mt-0.5 text-[10px] text-muted-foreground">{label}</p>
-      <p className="text-xs font-semibold text-foreground">{value}</p>
     </div>
   );
 }
