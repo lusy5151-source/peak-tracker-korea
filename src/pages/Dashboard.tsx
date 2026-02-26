@@ -124,10 +124,10 @@ const Dashboard = () => {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
                     {new Date(r.completedAt).toLocaleDateString("ko-KR")}
-                    {r.taggedFriends && r.taggedFriends.length > 0 && (
+                    {(r as any).taggedFriends && (r as any).taggedFriends.length > 0 && (
                       <span className="flex items-center gap-0.5">
                         <Users className="h-3 w-3" />
-                        {r.taggedFriends.length}명
+                        {(r as any).taggedFriends.length}명
                       </span>
                     )}
                   </div>
