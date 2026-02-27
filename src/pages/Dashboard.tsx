@@ -22,7 +22,10 @@ const conditionIcons: Record<string, any> = {
 const Dashboard = () => {
   const { records, completedCount, isCompleted } = useStore();
   const { items: gearItems } = useGearStore();
+  const { earnedCount, totalBadges, nextMilestone, newlyEarned, dismissNewBadge, featuredBadge } =
+    useAchievementStore(records, gearItems);
   const navigate = useNavigate();
+  const completionPercent = Math.round((completedCount / mountains.length) * 100);
 
   const featuredMountain = useMemo(() => {
     return mountains.find((m) => m.trails?.length && !isCompleted(m.id))
