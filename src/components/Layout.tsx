@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, BarChart3, MapPinned, BookOpen, Shirt, Users, Home } from "lucide-react";
+import { Mountain, MapPinned, BookOpen, Shirt, Users, Home, Trophy, User } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
@@ -21,12 +21,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Mountain className="h-5 w-5 text-primary" />
             <span className="text-base font-bold text-foreground">백대명산</span>
           </Link>
-          <Link
-            to="/mountains"
-            className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-          >
-            산 목록
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/achievements"
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-primary"
+            >
+              <Trophy className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/profile"
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-primary"
+            >
+              <User className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/mountains"
+              className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+            >
+              산 목록
+            </Link>
+          </div>
         </div>
       </header>
 

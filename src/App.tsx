@@ -12,6 +12,8 @@ import MapView from "@/pages/MapView";
 import Records from "@/pages/Records";
 import GearPage from "@/pages/GearPage";
 import SocialPage from "@/pages/SocialPage";
+import AchievementsPage from "@/pages/AchievementsPage";
+import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
               <Route path="/records" element={<Records />} />
               <Route path="/gear" element={<GearPage />} />
               <Route path="/social" element={<SocialPage />} />
+              <Route path="/achievements" element={<AchievementsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
