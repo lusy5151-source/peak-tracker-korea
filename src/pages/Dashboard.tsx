@@ -3,10 +3,12 @@ import { mountains } from "@/data/mountains";
 import { getMockWeather, getOutfitRecommendations } from "@/data/mockWeather";
 import { mockFriends } from "@/data/mockFriends";
 import { useGearStore } from "@/hooks/useGearStore";
+import { useAchievementStore } from "@/hooks/useAchievementStore";
+import AchievementModal from "@/components/AchievementModal";
 import {
   Mountain, Plus, Calendar, MapPin, Wind, Droplets,
   ChevronRight, Shirt, Users, Route, Sun, Cloud, CloudRain, CloudSnow, CloudSun,
-  ArrowRight, Thermometer, Search,
+  ArrowRight, Thermometer, Search, Trophy,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useRef } from "react";
