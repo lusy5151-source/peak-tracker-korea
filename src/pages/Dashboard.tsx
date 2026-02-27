@@ -61,6 +61,70 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Achievement unlock modal */}
+      <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />
+
+      {/* ── Progress & Achievements ── */}
+      <section className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="relative h-16 w-16 shrink-0">
+              <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--secondary))" strokeWidth="5" />
+                <circle
+                  cx="32" cy="32" r="28" fill="none"
+                  stroke="hsl(var(--primary))" strokeWidth="5"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 28}`}
+                  strokeDashoffset={`${2 * Math.PI * 28 * (1 - completionPercent / 100)}`}
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-sm font-bold text-foreground">{completionPercent}%</span>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">완등 진행률</p>
+              <p className="text-xs text-muted-foreground">{completedCount} / {mountains.length} 산</p>
+              {nextMilestone && (
+                <p className="mt-1 text-[10px] text-primary">
+                  다음 목표: {nextMilestone.icon} {nextMilestone.name}
+                </p>
+              )}
+            </div>
+          </div>
+          <Link
+            to="/profile"
+            className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+          >
+            지역별 상세 보기 <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 shrink-0">
+              <Trophy className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">업적</p>
+              <p className="text-xs text-muted-foreground">{earnedCount} / {totalBadges} 달성</p>
+              {featuredBadge && (
+                <p className="mt-0.5 text-[10px] text-primary">
+                  ⭐ {featuredBadge.icon} {featuredBadge.name}
+                </p>
+              )}
+            </div>
+          </div>
+          <Link
+            to="/achievements"
+            className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+          >
+            업적 보기 <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
+      </section>
+
       {/* ── Hero: Map (left) + Search & Today's Mountain (right) ── */}
       <section className="grid gap-4 lg:grid-cols-5">
         {/* Map */}
