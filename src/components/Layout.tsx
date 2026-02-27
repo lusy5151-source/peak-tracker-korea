@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, BarChart3, MapPinned, BookOpen, Shirt, Users, Home } from "lucide-react";
+import { Mountain, MapPinned, BookOpen, Shirt, Users, Home, Trophy, User } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
