@@ -47,7 +47,7 @@ const PlansPage = () => {
     
     const { data: participants } = await supabase
       .from("plan_participants")
-      .select("id, plan_id, invited_at, status")
+      .select("id, plan_id, invited_at, status, invited_by")
       .eq("user_id", user.id)
       .eq("status", "pending");
 
@@ -65,24 +65,31 @@ const PlansPage = () => {
 
     if (!planData) { setInvitations([]); setInvitationsLoading(false); return; }
 
+    // Resolve inviter names from invited_by field (fallback to creator_id)
+    const inviterIds = [...new Set((participants as any[]).map((p) => p.invited_by).filter(Boolean))];
     const creatorIds = [...new Set((planData as any[]).map((p) => p.creator_id))];
+    const allUserIds = [...new Set([...inviterIds, ...creatorIds])];
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, nickname")
-      .in("user_id", creatorIds);
+      .in("user_id", allUserIds);
 
     const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.nickname || "알 수 없음"]));
     const planMap = new Map((planData as any[]).map((p) => [p.id, p]));
 
     const mapped: PendingInvitation[] = (participants as any[])
       .filter((p) => planMap.has(p.plan_id))
-      .map((p) => ({
-        id: p.id,
-        plan_id: p.plan_id,
-        invited_at: p.invited_at,
-        plan: planMap.get(p.plan_id)!,
-        inviterName: profileMap.get(planMap.get(p.plan_id)!.creator_id) || "알 수 없음",
-      }));
+      .map((p) => {
+        const plan = planMap.get(p.plan_id)!;
+        const inviterUserId = p.invited_by || plan.creator_id;
+        return {
+          id: p.id,
+          plan_id: p.plan_id,
+          invited_at: p.invited_at,
+          plan,
+          inviterName: profileMap.get(inviterUserId) || "알 수 없음",
+        };
+      });
 
     setInvitations(mapped);
     setInvitationsLoading(false);

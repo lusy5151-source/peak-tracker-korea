@@ -281,6 +281,7 @@ export type Database = {
         Row: {
           id: string
           invited_at: string
+          invited_by: string | null
           plan_id: string
           responded_at: string | null
           rsvp_status: string
@@ -290,6 +291,7 @@ export type Database = {
         Insert: {
           id?: string
           invited_at?: string
+          invited_by?: string | null
           plan_id: string
           responded_at?: string | null
           rsvp_status?: string
@@ -299,6 +301,7 @@ export type Database = {
         Update: {
           id?: string
           invited_at?: string
+          invited_by?: string | null
           plan_id?: string
           responded_at?: string | null
           rsvp_status?: string
