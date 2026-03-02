@@ -5,13 +5,14 @@ import { useStore } from "@/context/StoreContext";
 import {
   Users, Mountain, Search, UserPlus, Check, X, ChevronRight, Bell, Trash2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
 
 const SocialPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { completedCount } = useStore();
   const {
@@ -150,20 +151,26 @@ const SocialPage = () => {
           ) : (
             friends.map((f) => (
               <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-                {f.friendProfile.avatar_url ? (
-                  <img src={f.friendProfile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-lg">👤</div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground">{f.friendProfile.nickname || "사용자"}</p>
-                  {f.friendProfile.bio && (
-                    <p className="text-xs text-muted-foreground truncate">{f.friendProfile.bio}</p>
+                <button
+                  onClick={() => navigate(`/profile/${f.friendProfile.user_id}`)}
+                  className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                >
+                  {f.friendProfile.avatar_url ? (
+                    <img src={f.friendProfile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-lg shrink-0">👤</div>
                   )}
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground">{f.friendProfile.nickname || "사용자"}</p>
+                    {f.friendProfile.bio && (
+                      <p className="text-xs text-muted-foreground truncate">{f.friendProfile.bio}</p>
+                    )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                </button>
                 <button
                   onClick={() => removeFriend(f.id)}
-                  className="rounded-lg p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  className="rounded-lg p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
