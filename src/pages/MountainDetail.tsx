@@ -4,7 +4,7 @@ import { useStore } from "@/context/StoreContext";
 import {
   ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
   Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users,
-  Clock, Route, Flag, Save, UserPlus, UserMinus,
+  Clock, Route, Flag, Save, UserPlus, UserMinus, Globe, Lock, Upload,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { WeatherCondition, CompletionRecord } from "@/hooks/useMountainStore";
@@ -12,6 +12,7 @@ import { WeatherCard } from "@/components/WeatherCard";
 import { TrailInfoSection } from "@/components/TrailInfo";
 import { useFriends } from "@/hooks/useFriends";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHikingJournals } from "@/hooks/useHikingJournals";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -186,6 +187,7 @@ function JournalSection({
   const { user } = useAuth();
   const { friends } = useFriends();
   const { toast } = useToast();
+  const { createJournal, uploadPhoto } = useHikingJournals();
 
   const [notes, setNotes] = useState(record.notes);
   const [date, setDate] = useState(record.completedAt.slice(0, 10));
@@ -193,6 +195,8 @@ function JournalSection({
   const [courseStartingPoint, setCourseStartingPoint] = useState(record.courseStartingPoint || "");
   const [courseNotes, setCourseNotes] = useState(record.courseNotes || "");
   const [duration, setDuration] = useState(record.duration || "");
+  const [visibility, setVisibility] = useState<"public" | "friends" | "private">("public");
+  const [publishing, setPublishing] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showFriendPicker, setShowFriendPicker] = useState(false);
   const [friendProfiles, setFriendProfiles] = useState<Map<string, { nickname: string | null; avatar_url: string | null }>>(new Map());
@@ -235,11 +239,10 @@ function JournalSection({
     const newTagged = [...taggedFriends, friendUserId];
     updateTaggedFriends(mountainId, newTagged);
 
-    // Notify tagged friend
     if (user) {
       await supabase.from("plan_notifications").insert({
         user_id: friendUserId,
-        plan_id: "00000000-0000-0000-0000-000000000000", // placeholder since no plan
+        plan_id: "00000000-0000-0000-0000-000000000000",
         type: "tag",
         message: `${mountainName} 등산 일지에 함께한 친구로 태그되었습니다 🏔️`,
       } as any);
@@ -263,6 +266,38 @@ function JournalSection({
     updateCourseInfo(mountainId, { courseName, courseStartingPoint, courseNotes });
     updateDuration(mountainId, duration);
     toast({ title: "일지가 저장되었습니다 ✅" });
+  };
+
+  const handlePublish = async () => {
+    if (!user) {
+      toast({ title: "로그인이 필요합니다", variant: "destructive" });
+      return;
+    }
+    setPublishing(true);
+    // Save locally first
+    handleSave();
+
+    const { error } = await createJournal({
+      mountain_id: mountainId,
+      course_name: courseName || undefined,
+      course_starting_point: courseStartingPoint || undefined,
+      course_notes: courseNotes || undefined,
+      duration: duration || undefined,
+      difficulty: record.difficulty || undefined,
+      weather: record.weather || undefined,
+      notes: notes || undefined,
+      photos: photos.length > 0 ? photos : undefined,
+      tagged_friends: taggedFriends.length > 0 ? taggedFriends : undefined,
+      visibility,
+      hiked_at: date,
+    });
+    setPublishing(false);
+
+    if (error) {
+      toast({ title: "게시 실패", description: (error as any).message, variant: "destructive" });
+    } else {
+      toast({ title: "일지가 피드에 게시되었습니다! 🎉" });
+    }
   };
 
   const untaggedFriends = friends.filter(
