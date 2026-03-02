@@ -176,7 +176,10 @@ const Dashboard = () => {
 
           {/* Today's Mountain & Weather */}
           <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-sky-500">오늘의 산</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-primary">오늘의 산</p>
+              {!isRealWeather && <span className="text-[8px] bg-secondary text-muted-foreground rounded px-1">예상</span>}
+            </div>
             <h2 className="mt-1 text-xl font-bold text-foreground">{featuredMountain.nameKo}</h2>
             <p className="text-xs text-muted-foreground">{featuredMountain.region} · {featuredMountain.height}m · {featuredMountain.difficulty}</p>
 
