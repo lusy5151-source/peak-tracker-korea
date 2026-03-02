@@ -19,9 +19,23 @@ serve(async (req) => {
       );
     }
 
-    const { lat, lon, type } = await req.json();
+    let lat: number | undefined;
+    let lon: number | undefined;
+    let type: string | undefined;
 
-    if (!lat || !lon) {
+    try {
+      const body = await req.json();
+      lat = body.lat;
+      lon = body.lon;
+      type = body.type;
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (lat == null || lon == null) {
       return new Response(
         JSON.stringify({ error: 'lat and lon are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
