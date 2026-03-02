@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { StoreProvider } from "@/context/StoreContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import MountainList from "@/pages/MountainList";
@@ -14,33 +15,52 @@ import GearPage from "@/pages/GearPage";
 import SocialPage from "@/pages/SocialPage";
 import AchievementsPage from "@/pages/AchievementsPage";
 import ProfilePage from "@/pages/ProfilePage";
+import AuthPage from "@/pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+}
+
+const AppRoutes = () => {
+  const { user, loading } = useAuth();
+
+  return (
+    <Routes>
+      <Route path="/auth" element={user && !loading ? <Navigate to="/" replace /> : <AuthPage />} />
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/mountains" element={<MountainList />} />
+      <Route path="/mountains/:id" element={<MountainDetail />} />
+      <Route path="/map" element={<MapView />} />
+      <Route path="/records" element={<Records />} />
+      <Route path="/gear" element={<GearPage />} />
+      <Route path="/social" element={<SocialPage />} />
+      <Route path="/achievements" element={<AchievementsPage />} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <StoreProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/mountains" element={<MountainList />} />
-              <Route path="/mountains/:id" element={<MountainDetail />} />
-              <Route path="/map" element={<MapView />} />
-              <Route path="/records" element={<Records />} />
-              <Route path="/gear" element={<GearPage />} />
-              <Route path="/social" element={<SocialPage />} />
-              <Route path="/achievements" element={<AchievementsPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </StoreProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Layout>
+              <AppRoutes />
+            </Layout>
+          </BrowserRouter>
+        </StoreProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
