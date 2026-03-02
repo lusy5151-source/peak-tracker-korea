@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Mountain, BookOpen, Shirt, Users, Home, Trophy, User, LogIn, CalendarDays } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationCenter from "@/components/NotificationCenter";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
@@ -25,6 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <span className="text-base font-bold text-foreground">백대명산</span>
           </Link>
           <div className="flex items-center gap-2">
+            {user && <NotificationCenter />}
             <Link
               to="/achievements"
               className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-primary"

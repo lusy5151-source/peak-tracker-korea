@@ -39,6 +39,19 @@ export interface PlanNotification {
   created_at: string;
 }
 
+export interface PlanEditHistory {
+  id: string;
+  plan_id: string;
+  user_id: string;
+  field_name: string;
+  old_value: string | null;
+  new_value: string | null;
+  created_at: string;
+  profile?: {
+    nickname: string | null;
+  };
+}
+
 export function useHikingPlans() {
   const { user } = useAuth();
   const [plans, setPlans] = useState<HikingPlan[]>([]);
@@ -47,12 +60,10 @@ export function useHikingPlans() {
 
   const fetchPlans = useCallback(async () => {
     if (!user) { setLoading(false); return; }
-    
     const { data } = await supabase
       .from("hiking_plans")
       .select("*")
       .order("planned_date", { ascending: true });
-
     setPlans((data as HikingPlan[]) || []);
     setLoading(false);
   }, [user]);
@@ -99,6 +110,63 @@ export function useHikingPlans() {
     return { error };
   };
 
+  const updatePlanWithHistory = async (
+    planId: string,
+    updates: Partial<HikingPlan>,
+    oldPlan: HikingPlan,
+    fieldLabel: Record<string, string>
+  ) => {
+    if (!user) return { error: { message: "Not authenticated" } };
+
+    // Record edit history
+    const historyEntries = Object.entries(updates)
+      .filter(([key]) => key in fieldLabel)
+      .map(([key, value]) => ({
+        plan_id: planId,
+        user_id: user.id,
+        field_name: fieldLabel[key] || key,
+        old_value: String((oldPlan as any)[key] ?? ""),
+        new_value: String(value ?? ""),
+      }));
+
+    const { error } = await supabase
+      .from("hiking_plans")
+      .update(updates as any)
+      .eq("id", planId);
+
+    if (!error && historyEntries.length > 0) {
+      await supabase.from("plan_edit_history").insert(historyEntries as any);
+
+      // Notify other participants about the update
+      const { data: participants } = await supabase
+        .from("plan_participants")
+        .select("user_id")
+        .eq("plan_id", planId);
+
+      const plan = plans.find((p) => p.id === planId);
+      const otherUsers = [
+        ...(participants || []).map((p: any) => p.user_id),
+        plan?.creator_id,
+      ].filter((uid) => uid && uid !== user.id);
+
+      const uniqueUsers = [...new Set(otherUsers)];
+      if (uniqueUsers.length > 0) {
+        const changedFields = historyEntries.map((h) => h.field_name).join(", ");
+        await supabase.from("plan_notifications").insert(
+          uniqueUsers.map((uid) => ({
+            user_id: uid,
+            plan_id: planId,
+            type: "plan_update",
+            message: `계획이 수정되었습니다: ${changedFields}`,
+          })) as any
+        );
+      }
+    }
+
+    if (!error) fetchPlans();
+    return { error };
+  };
+
   const deletePlan = async (planId: string) => {
     const { error } = await supabase
       .from("hiking_plans")
@@ -113,27 +181,41 @@ export function useHikingPlans() {
       .from("plan_participants")
       .select("*")
       .eq("plan_id", planId);
-
     if (!participants || participants.length === 0) return [];
-
     const userIds = participants.map((p: any) => p.user_id);
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, nickname, avatar_url")
       .in("user_id", userIds);
-
     const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
-
     return (participants as any[]).map((p) => ({
       ...p,
       profile: profileMap.get(p.user_id) || null,
     }));
   };
 
+  const fetchEditHistory = async (planId: string): Promise<PlanEditHistory[]> => {
+    const { data } = await supabase
+      .from("plan_edit_history")
+      .select("*")
+      .eq("plan_id", planId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (!data || data.length === 0) return [];
+    const userIds = [...new Set((data as any[]).map((d) => d.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, nickname")
+      .in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    return (data as any[]).map((d) => ({
+      ...d,
+      profile: profileMap.get(d.user_id) || null,
+    }));
+  };
+
   const inviteFriend = async (planId: string, friendUserId: string) => {
     if (!user) return { error: { message: "Not authenticated" } };
-    // With current RLS, only the user themselves can insert their participation.
-    // So we send a notification instead, and they join via the plan or invite code.
     const plan = plans.find((p) => p.id === planId);
     const { error } = await supabase.from("plan_notifications").insert({
       user_id: friendUserId,
@@ -162,7 +244,6 @@ export function useHikingPlans() {
       .eq("user_id", user.id);
 
     if (!error) {
-      // Notify plan creator
       const plan = plans.find((p) => p.id === planId);
       if (plan) {
         const statusLabels: Record<string, string> = {
@@ -181,6 +262,67 @@ export function useHikingPlans() {
     return { error };
   };
 
+  const acceptInvitation = async (planId: string) => {
+    if (!user) return { error: { message: "Not authenticated" } };
+    // Join then set going
+    const { error: joinErr } = await supabase
+      .from("plan_participants")
+      .insert({ plan_id: planId, user_id: user.id, rsvp_status: "going" } as any);
+    
+    if (joinErr) {
+      // Maybe already a participant, just update
+      const { error: updateErr } = await supabase
+        .from("plan_participants")
+        .update({ rsvp_status: "going", responded_at: new Date().toISOString() } as any)
+        .eq("plan_id", planId)
+        .eq("user_id", user.id);
+      if (updateErr) return { error: updateErr };
+    }
+
+    // Notify creator
+    const plan = plans.find((p) => p.id === planId);
+    if (plan) {
+      await supabase.from("plan_notifications").insert({
+        user_id: plan.creator_id,
+        plan_id: planId,
+        type: "rsvp_change",
+        message: "초대를 수락했습니다 ✅",
+      } as any);
+    }
+
+    fetchPlans();
+    return { error: null };
+  };
+
+  const declineInvitation = async (planId: string) => {
+    if (!user) return { error: { message: "Not authenticated" } };
+    // Join with declined status or update existing
+    const { error: joinErr } = await supabase
+      .from("plan_participants")
+      .insert({ plan_id: planId, user_id: user.id, rsvp_status: "declined" } as any);
+    
+    if (joinErr) {
+      await supabase
+        .from("plan_participants")
+        .update({ rsvp_status: "declined", responded_at: new Date().toISOString() } as any)
+        .eq("plan_id", planId)
+        .eq("user_id", user.id);
+    }
+
+    const plan = plans.find((p) => p.id === planId);
+    if (plan) {
+      await supabase.from("plan_notifications").insert({
+        user_id: plan.creator_id,
+        plan_id: planId,
+        type: "rsvp_change",
+        message: "초대를 거절했습니다 ❌",
+      } as any);
+    }
+
+    fetchPlans();
+    return { error: null };
+  };
+
   const markNotificationRead = async (notificationId: string) => {
     await supabase
       .from("plan_notifications")
@@ -191,19 +333,15 @@ export function useHikingPlans() {
 
   const joinByCode = async (code: string) => {
     if (!user) return { error: { message: "Not authenticated" } };
-
     const { data: plan } = await supabase
       .from("hiking_plans")
       .select("*")
       .eq("invite_code", code)
       .single();
-
     if (!plan) return { error: { message: "유효하지 않은 초대 코드입니다" } };
-
     const { error } = await supabase
       .from("plan_participants")
       .insert({ plan_id: (plan as any).id, user_id: user.id } as any);
-
     if (!error) fetchPlans();
     return { data: plan as HikingPlan, error };
   };
@@ -214,11 +352,15 @@ export function useHikingPlans() {
     notifications,
     createPlan,
     updatePlan,
+    updatePlanWithHistory,
     deletePlan,
     fetchParticipants,
+    fetchEditHistory,
     inviteFriend,
     joinPlan,
     updateRsvp,
+    acceptInvitation,
+    declineInvitation,
     markNotificationRead,
     joinByCode,
     refetch: fetchPlans,
