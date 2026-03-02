@@ -8,19 +8,21 @@ const MountainList = () => {
   const { isCompleted, toggleComplete, completedCount } = useStore();
   const [search, setSearch] = useState("");
   const [regionFilter, setRegionFilter] = useState<string>("전체");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("전체");
   const [showCompleted, setShowCompleted] = useState<"all" | "done" | "todo">("all");
 
   const filtered = useMemo(() => {
     return mountains.filter((m) => {
       const matchSearch = m.nameKo.includes(search) || m.name.toLowerCase().includes(search.toLowerCase());
       const matchRegion = regionFilter === "전체" || m.region === regionFilter;
+      const matchDifficulty = difficultyFilter === "전체" || m.difficulty === difficultyFilter;
       const matchStatus =
         showCompleted === "all" ||
         (showCompleted === "done" && isCompleted(m.id)) ||
         (showCompleted === "todo" && !isCompleted(m.id));
-      return matchSearch && matchRegion && matchStatus;
+      return matchSearch && matchRegion && matchDifficulty && matchStatus;
     });
-  }, [search, regionFilter, showCompleted, isCompleted]);
+  }, [search, regionFilter, difficultyFilter, showCompleted, isCompleted]);
 
   return (
     <div className="space-y-6">
