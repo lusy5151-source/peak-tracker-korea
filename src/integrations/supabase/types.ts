@@ -41,6 +41,63 @@ export type Database = {
         }
         Relationships: []
       }
+      hiking_journals: {
+        Row: {
+          course_name: string | null
+          course_notes: string | null
+          course_starting_point: string | null
+          created_at: string
+          difficulty: string | null
+          duration: string | null
+          hiked_at: string
+          id: string
+          mountain_id: number
+          notes: string | null
+          photos: string[] | null
+          tagged_friends: string[] | null
+          updated_at: string
+          user_id: string
+          visibility: string
+          weather: string | null
+        }
+        Insert: {
+          course_name?: string | null
+          course_notes?: string | null
+          course_starting_point?: string | null
+          created_at?: string
+          difficulty?: string | null
+          duration?: string | null
+          hiked_at?: string
+          id?: string
+          mountain_id: number
+          notes?: string | null
+          photos?: string[] | null
+          tagged_friends?: string[] | null
+          updated_at?: string
+          user_id: string
+          visibility?: string
+          weather?: string | null
+        }
+        Update: {
+          course_name?: string | null
+          course_notes?: string | null
+          course_starting_point?: string | null
+          created_at?: string
+          difficulty?: string | null
+          duration?: string | null
+          hiked_at?: string
+          id?: string
+          mountain_id?: number
+          notes?: string | null
+          photos?: string[] | null
+          tagged_friends?: string[] | null
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+          weather?: string | null
+        }
+        Relationships: []
+      }
       hiking_plans: {
         Row: {
           created_at: string
@@ -82,6 +139,67 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      journal_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          journal_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          journal_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          journal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_comments_journal_id_fkey"
+            columns: ["journal_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_journals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_likes: {
+        Row: {
+          created_at: string
+          id: string
+          journal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journal_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_likes_journal_id_fkey"
+            columns: ["journal_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_journals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plan_edit_history: {
         Row: {
