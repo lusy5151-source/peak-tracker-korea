@@ -217,6 +217,7 @@ export function useHikingPlans() {
     deletePlan,
     fetchParticipants,
     inviteFriend,
+    joinPlan,
     updateRsvp,
     markNotificationRead,
     joinByCode,
