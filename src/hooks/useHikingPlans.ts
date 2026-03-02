@@ -216,6 +216,18 @@ export function useHikingPlans() {
 
   const inviteFriend = async (planId: string, friendUserId: string) => {
     if (!user) return { error: { message: "Not authenticated" } };
+    // Insert participant with status=pending and invited_by
+    const { error: partErr } = await supabase
+      .from("plan_participants")
+      .insert({
+        plan_id: planId,
+        user_id: friendUserId,
+        status: "pending",
+        rsvp_status: "pending",
+        invited_by: user.id,
+      } as any);
+    if (partErr) return { error: partErr };
+
     const plan = plans.find((p) => p.id === planId);
     const { error } = await supabase.from("plan_notifications").insert({
       user_id: friendUserId,
@@ -264,29 +276,38 @@ export function useHikingPlans() {
 
   const acceptInvitation = async (planId: string) => {
     if (!user) return { error: { message: "Not authenticated" } };
-    // Join then set going
-    const { error: joinErr } = await supabase
+    // Update existing participant record to accepted
+    const { error: updateErr } = await supabase
       .from("plan_participants")
-      .insert({ plan_id: planId, user_id: user.id, rsvp_status: "going" } as any);
-    
-    if (joinErr) {
-      // Maybe already a participant, just update
-      const { error: updateErr } = await supabase
-        .from("plan_participants")
-        .update({ rsvp_status: "going", responded_at: new Date().toISOString() } as any)
-        .eq("plan_id", planId)
-        .eq("user_id", user.id);
-      if (updateErr) return { error: updateErr };
-    }
+      .update({
+        status: "accepted",
+        rsvp_status: "going",
+        responded_at: new Date().toISOString(),
+      } as any)
+      .eq("plan_id", planId)
+      .eq("user_id", user.id);
+    if (updateErr) return { error: updateErr };
 
     // Notify creator
-    const plan = plans.find((p) => p.id === planId);
-    if (plan) {
+    const { data: planData } = await supabase
+      .from("hiking_plans")
+      .select("creator_id")
+      .eq("id", planId)
+      .single();
+
+    if (planData) {
+      // Get current user's nickname
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("nickname")
+        .eq("user_id", user.id)
+        .single();
+      const name = (profile as any)?.nickname || "누군가";
       await supabase.from("plan_notifications").insert({
-        user_id: plan.creator_id,
+        user_id: (planData as any).creator_id,
         plan_id: planId,
-        type: "rsvp_change",
-        message: "초대를 수락했습니다 ✅",
+        type: "plan_accept",
+        message: `${name}님이 등산 계획에 참여했습니다`,
       } as any);
     }
 
@@ -296,28 +317,17 @@ export function useHikingPlans() {
 
   const declineInvitation = async (planId: string) => {
     if (!user) return { error: { message: "Not authenticated" } };
-    // Join with declined status or update existing
-    const { error: joinErr } = await supabase
+    // Update existing participant record to rejected
+    const { error: updateErr } = await supabase
       .from("plan_participants")
-      .insert({ plan_id: planId, user_id: user.id, rsvp_status: "declined" } as any);
-    
-    if (joinErr) {
-      await supabase
-        .from("plan_participants")
-        .update({ rsvp_status: "declined", responded_at: new Date().toISOString() } as any)
-        .eq("plan_id", planId)
-        .eq("user_id", user.id);
-    }
-
-    const plan = plans.find((p) => p.id === planId);
-    if (plan) {
-      await supabase.from("plan_notifications").insert({
-        user_id: plan.creator_id,
-        plan_id: planId,
-        type: "rsvp_change",
-        message: "초대를 거절했습니다 ❌",
-      } as any);
-    }
+      .update({
+        status: "rejected",
+        rsvp_status: "declined",
+        responded_at: new Date().toISOString(),
+      } as any)
+      .eq("plan_id", planId)
+      .eq("user_id", user.id);
+    if (updateErr) return { error: updateErr };
 
     fetchPlans();
     return { error: null };
