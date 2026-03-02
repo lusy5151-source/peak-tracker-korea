@@ -1,12 +1,22 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar, Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users } from "lucide-react";
+import {
+  ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
+  Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users,
+  Clock, Route, Flag, Save, UserPlus, UserMinus,
+} from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import type { WeatherCondition } from "@/hooks/useMountainStore";
+import type { WeatherCondition, CompletionRecord } from "@/hooks/useMountainStore";
 import { WeatherCard } from "@/components/WeatherCard";
 import { TrailInfoSection } from "@/components/TrailInfo";
-import { mockFriends } from "@/data/mockFriends";
+import { useFriends } from "@/hooks/useFriends";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const weatherOptions: { value: WeatherCondition; label: string; icon: any }[] = [
   { value: "맑음", label: "맑음", icon: Sun },
@@ -15,6 +25,12 @@ const weatherOptions: { value: WeatherCondition; label: string; icon: any }[] = 
   { value: "비", label: "비", icon: CloudRain },
   { value: "눈", label: "눈", icon: CloudSnow },
   { value: "안개", label: "안개", icon: CloudFog },
+];
+
+const difficultyOptions = [
+  { value: "쉬움", label: "쉬움", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  { value: "보통", label: "보통", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  { value: "어려움", label: "어려움", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
 ];
 
 function resizeImage(file: File, maxSize = 800): Promise<string> {
@@ -44,7 +60,11 @@ function resizeImage(file: File, maxSize = 800): Promise<string> {
 const MountainDetail = () => {
   const { id } = useParams<{ id: string }>();
   const mountain = mountains.find((m) => m.id === Number(id));
-  const { isCompleted, toggleComplete, getRecord, updateNotes, updateDate, updateWeather, addPhotos, removePhoto } = useStore();
+  const {
+    isCompleted, toggleComplete, getRecord, updateNotes, updateDate,
+    updateWeather, addPhotos, removePhoto, updateTaggedFriends,
+    updateCourseInfo, updateDuration, updateDifficulty,
+  } = useStore();
 
   if (!mountain) {
     return (
@@ -108,11 +128,16 @@ const MountainDetail = () => {
           record={record}
           mountainId={mountain.id}
           mountainName={mountain.nameKo}
+          mountainTrails={mountain.trails}
           updateNotes={updateNotes}
           updateDate={updateDate}
           updateWeather={updateWeather}
           addPhotos={addPhotos}
           removePhoto={removePhoto}
+          updateTaggedFriends={updateTaggedFriends}
+          updateCourseInfo={updateCourseInfo}
+          updateDuration={updateDuration}
+          updateDifficulty={updateDifficulty}
         />
       )}
     </div>
@@ -133,24 +158,44 @@ function JournalSection({
   record,
   mountainId,
   mountainName,
+  mountainTrails,
   updateNotes,
   updateDate,
   updateWeather,
   addPhotos,
   removePhoto,
+  updateTaggedFriends,
+  updateCourseInfo,
+  updateDuration,
+  updateDifficulty,
 }: {
-  record: { completedAt: string; notes: string; weather?: WeatherCondition; photos?: string[]; taggedFriends?: string[] };
+  record: CompletionRecord;
   mountainId: number;
   mountainName: string;
+  mountainTrails?: { name: string; distance: string; duration: string; startingPoint: string }[];
   updateNotes: (id: number, notes: string) => void;
   updateDate: (id: number, date: string) => void;
   updateWeather: (id: number, weather: WeatherCondition) => void;
   addPhotos: (id: number, photos: string[]) => void;
   removePhoto: (id: number, index: number) => void;
+  updateTaggedFriends: (id: number, friends: string[]) => void;
+  updateCourseInfo: (id: number, course: { courseName?: string; courseStartingPoint?: string; courseNotes?: string }) => void;
+  updateDuration: (id: number, duration: string) => void;
+  updateDifficulty: (id: number, difficulty: string) => void;
 }) {
+  const { user } = useAuth();
+  const { friends } = useFriends();
+  const { toast } = useToast();
+
   const [notes, setNotes] = useState(record.notes);
   const [date, setDate] = useState(record.completedAt.slice(0, 10));
+  const [courseName, setCourseName] = useState(record.courseName || "");
+  const [courseStartingPoint, setCourseStartingPoint] = useState(record.courseStartingPoint || "");
+  const [courseNotes, setCourseNotes] = useState(record.courseNotes || "");
+  const [duration, setDuration] = useState(record.duration || "");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [showFriendPicker, setShowFriendPicker] = useState(false);
+  const [friendProfiles, setFriendProfiles] = useState<Map<string, { nickname: string | null; avatar_url: string | null }>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photos = record.photos || [];
   const taggedFriends = record.taggedFriends || [];
@@ -158,7 +203,25 @@ function JournalSection({
   useEffect(() => {
     setNotes(record.notes);
     setDate(record.completedAt.slice(0, 10));
+    setCourseName(record.courseName || "");
+    setCourseStartingPoint(record.courseStartingPoint || "");
+    setCourseNotes(record.courseNotes || "");
+    setDuration(record.duration || "");
   }, [record]);
+
+  // Load profiles for tagged friends
+  useEffect(() => {
+    if (taggedFriends.length === 0) return;
+    supabase
+      .from("profiles")
+      .select("user_id, nickname, avatar_url")
+      .in("user_id", taggedFriends)
+      .then(({ data }) => {
+        if (data) {
+          setFriendProfiles(new Map(data.map((p) => [p.user_id, p])));
+        }
+      });
+  }, [taggedFriends]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -168,14 +231,57 @@ function JournalSection({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleTagFriend = async (friendUserId: string) => {
+    const newTagged = [...taggedFriends, friendUserId];
+    updateTaggedFriends(mountainId, newTagged);
+
+    // Notify tagged friend
+    if (user) {
+      await supabase.from("plan_notifications").insert({
+        user_id: friendUserId,
+        plan_id: "00000000-0000-0000-0000-000000000000", // placeholder since no plan
+        type: "tag",
+        message: `${mountainName} 등산 일지에 함께한 친구로 태그되었습니다 🏔️`,
+      } as any);
+    }
+
+    toast({ title: "친구를 태그했습니다" });
+  };
+
+  const handleUntagFriend = (friendUserId: string) => {
+    updateTaggedFriends(mountainId, taggedFriends.filter((id) => id !== friendUserId));
+  };
+
+  const handleSelectTrail = (trail: { name: string; startingPoint: string }) => {
+    setCourseName(trail.name);
+    setCourseStartingPoint(trail.startingPoint);
+    updateCourseInfo(mountainId, { courseName: trail.name, courseStartingPoint: trail.startingPoint });
+  };
+
+  const handleSave = () => {
+    updateNotes(mountainId, notes);
+    updateCourseInfo(mountainId, { courseName, courseStartingPoint, courseNotes });
+    updateDuration(mountainId, duration);
+    toast({ title: "일지가 저장되었습니다 ✅" });
+  };
+
+  const untaggedFriends = friends.filter(
+    (f) => !taggedFriends.includes(f.friendProfile.user_id)
+  );
+
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-1 rounded-full bg-primary" />
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">등산 일지</h2>
-          <p className="text-xs text-muted-foreground">{mountainName}에서의 기억</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-1 rounded-full bg-primary" />
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">등산 일지</h2>
+            <p className="text-xs text-muted-foreground">{mountainName}에서의 기억</p>
+          </div>
         </div>
+        <Button size="sm" onClick={handleSave} className="gap-1.5">
+          <Save className="h-3.5 w-3.5" /> 저장
+        </Button>
       </div>
 
       {/* Date */}
@@ -193,6 +299,106 @@ function JournalSection({
           }}
           className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
+      </div>
+
+      {/* Course Info */}
+      <div className="space-y-3">
+        <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <Route className="h-3.5 w-3.5" />
+          등산 코스
+        </label>
+
+        {/* Quick select from mountain trails */}
+        {mountainTrails && mountainTrails.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {mountainTrails.map((trail) => (
+              <button
+                key={trail.name}
+                onClick={() => handleSelectTrail(trail)}
+                className={cn(
+                  "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  courseName === trail.name
+                    ? "bg-primary/10 text-primary ring-1 ring-primary/30"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                )}
+              >
+                {trail.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div>
+            <input
+              type="text"
+              value={courseName}
+              onChange={(e) => setCourseName(e.target.value)}
+              onBlur={() => updateCourseInfo(mountainId, { courseName })}
+              placeholder="코스 이름"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div>
+            <div className="relative">
+              <Flag className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                value={courseStartingPoint}
+                onChange={(e) => setCourseStartingPoint(e.target.value)}
+                onBlur={() => updateCourseInfo(mountainId, { courseStartingPoint })}
+                placeholder="출발지점"
+                className="w-full rounded-lg border border-input bg-background pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+        </div>
+
+        <textarea
+          rows={2}
+          value={courseNotes}
+          onChange={(e) => setCourseNotes(e.target.value)}
+          onBlur={() => updateCourseInfo(mountainId, { courseNotes })}
+          placeholder="코스 관련 메모 (선택)"
+          className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
+      {/* Duration */}
+      <div>
+        <label className="mb-1.5 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <Clock className="h-3.5 w-3.5" />
+          소요 시간
+        </label>
+        <input
+          type="text"
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          onBlur={() => updateDuration(mountainId, duration)}
+          placeholder="예: 3시간 30분"
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
+      {/* Difficulty */}
+      <div>
+        <label className="mb-2 block text-xs font-medium text-muted-foreground">체감 난이도</label>
+        <div className="flex gap-2">
+          {difficultyOptions.map(({ value, label, color }) => (
+            <button
+              key={value}
+              onClick={() => updateDifficulty(mountainId, record.difficulty === value ? "" : value)}
+              className={cn(
+                "rounded-lg px-3 py-2 text-xs font-medium transition-colors",
+                record.difficulty === value
+                  ? `${color} ring-1 ring-current/20`
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Weather */}
@@ -219,25 +425,78 @@ function JournalSection({
         </div>
       </div>
 
-      {/* Tagged friends */}
-      {taggedFriends.length > 0 && (
-        <div>
-          <label className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+      {/* Tagged Friends */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
             <Users className="h-3.5 w-3.5" />
             함께한 친구
           </label>
-          <div className="flex flex-wrap gap-2">
-            {taggedFriends.map((fId) => {
-              const friend = mockFriends.find((f) => f.id === fId);
-              return friend ? (
-                <span key={fId} className="flex items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
-                  {friend.avatar} {friend.name}
-                </span>
-              ) : null;
-            })}
-          </div>
+          {user && friends.length > 0 && (
+            <button
+              onClick={() => setShowFriendPicker(!showFriendPicker)}
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              <UserPlus className="h-3 w-3" /> 태그하기
+            </button>
+          )}
         </div>
-      )}
+
+        {taggedFriends.length > 0 && (
+          <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 mb-2">
+            <p className="text-xs text-primary font-medium mb-2">
+              🤝 {mountainName}을 함께 완등했습니다
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {taggedFriends.map((fId) => {
+                const profile = friendProfiles.get(fId);
+                return (
+                  <div key={fId} className="flex items-center gap-1.5 rounded-lg bg-card border border-border px-2.5 py-1.5">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={profile?.avatar_url || ""} />
+                      <AvatarFallback className="text-[8px]">{profile?.nickname?.[0] || "?"}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs font-medium text-foreground">{profile?.nickname || "친구"}</span>
+                    <button
+                      onClick={() => handleUntagFriend(fId)}
+                      className="text-muted-foreground hover:text-destructive ml-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {showFriendPicker && (
+          <div className="rounded-xl border border-border bg-card p-3 space-y-1.5">
+            {untaggedFriends.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-2">태그할 수 있는 친구가 없습니다</p>
+            ) : (
+              untaggedFriends.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => handleTagFriend(f.friendProfile.user_id)}
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary/60 transition-colors"
+                >
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={f.friendProfile.avatar_url || ""} />
+                    <AvatarFallback className="text-[9px]">{f.friendProfile.nickname?.[0] || "?"}</AvatarFallback>
+                  </Avatar>
+                  <span className="flex-1 text-sm text-foreground text-left">{f.friendProfile.nickname}</span>
+                  <UserPlus className="h-3.5 w-3.5 text-primary" />
+                </button>
+              ))
+            )}
+          </div>
+        )}
+
+        {!user && taggedFriends.length === 0 && (
+          <p className="text-xs text-muted-foreground">로그인하면 함께한 친구를 태그할 수 있습니다</p>
+        )}
+      </div>
 
       {/* Photos */}
       <div>
@@ -291,6 +550,11 @@ function JournalSection({
           className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
+
+      {/* Save Button (bottom) */}
+      <Button onClick={handleSave} className="w-full gap-2">
+        <Save className="h-4 w-4" /> 일지 저장하기
+      </Button>
 
       {/* Lightbox */}
       {lightboxIndex !== null && (

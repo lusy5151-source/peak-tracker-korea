@@ -8,6 +8,12 @@ export interface CompletionRecord {
   notes: string;
   weather: WeatherCondition;
   photos: string[]; // base64 data URLs
+  taggedFriends?: string[]; // user_ids of tagged friends
+  courseName?: string;
+  courseStartingPoint?: string;
+  courseNotes?: string;
+  duration?: string; // e.g. "3시간 30분"
+  difficulty?: string; // personal perceived difficulty
 }
 
 const STORAGE_KEY = "korea-100-mountains";
@@ -50,7 +56,19 @@ export function useMountainStore() {
         }
         return [
           ...prev,
-          { mountainId: id, completedAt: new Date().toISOString(), notes: "", weather: "", photos: [] },
+          {
+            mountainId: id,
+            completedAt: new Date().toISOString(),
+            notes: "",
+            weather: "",
+            photos: [],
+            taggedFriends: [],
+            courseName: "",
+            courseStartingPoint: "",
+            courseNotes: "",
+            duration: "",
+            difficulty: "",
+          },
         ];
       });
     },
@@ -93,6 +111,33 @@ export function useMountainStore() {
     );
   }, []);
 
+  const updateTaggedFriends = useCallback((id: number, taggedFriends: string[]) => {
+    setRecords((prev) =>
+      prev.map((r) => (r.mountainId === id ? { ...r, taggedFriends } : r))
+    );
+  }, []);
+
+  const updateCourseInfo = useCallback(
+    (id: number, course: { courseName?: string; courseStartingPoint?: string; courseNotes?: string }) => {
+      setRecords((prev) =>
+        prev.map((r) => (r.mountainId === id ? { ...r, ...course } : r))
+      );
+    },
+    []
+  );
+
+  const updateDuration = useCallback((id: number, duration: string) => {
+    setRecords((prev) =>
+      prev.map((r) => (r.mountainId === id ? { ...r, duration } : r))
+    );
+  }, []);
+
+  const updateDifficulty = useCallback((id: number, difficulty: string) => {
+    setRecords((prev) =>
+      prev.map((r) => (r.mountainId === id ? { ...r, difficulty } : r))
+    );
+  }, []);
+
   return {
     records,
     isCompleted,
@@ -103,6 +148,10 @@ export function useMountainStore() {
     updateWeather,
     addPhotos,
     removePhoto,
+    updateTaggedFriends,
+    updateCourseInfo,
+    updateDuration,
+    updateDifficulty,
     completedCount: records.length,
   };
 }
