@@ -1,0 +1,70 @@
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Profile = Tables<"profiles">;
+
+export function useProfile() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = useCallback(async () => {
+    if (!user) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    setProfile(data);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const updateProfile = async (updates: Partial<Pick<Profile, "nickname" | "bio" | "location" | "hiking_styles" | "avatar_url">>) => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (!error && data) {
+      setProfile(data);
+    }
+    return { data, error };
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) return { error: uploadError };
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(path);
+
+    return updateProfile({ avatar_url: publicUrl });
+  };
+
+  return { profile, loading, updateProfile, uploadAvatar, refetch: fetchProfile };
+}
