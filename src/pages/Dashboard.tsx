@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
 import AchievementModal from "@/components/AchievementModal";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   Mountain, Plus, Calendar, MapPin, Wind, Droplets,
   ChevronRight, Shirt, Users, Route, Sun, Cloud, CloudRain, CloudSnow, CloudSun,
