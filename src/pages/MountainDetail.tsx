@@ -586,10 +586,46 @@ function JournalSection({
         />
       </div>
 
-      {/* Save Button (bottom) */}
-      <Button onClick={handleSave} className="w-full gap-2">
-        <Save className="h-4 w-4" /> 일지 저장하기
-      </Button>
+      {/* Visibility & Actions */}
+      <div className="space-y-3">
+        {user && (
+          <div>
+            <label className="mb-2 block text-xs font-medium text-muted-foreground">공개 설정</label>
+            <div className="flex gap-2">
+              {([
+                { v: "public" as const, icon: Globe, label: "전체 공개" },
+                { v: "friends" as const, icon: Users, label: "친구 공개" },
+                { v: "private" as const, icon: Lock, label: "나만 보기" },
+              ]).map(({ v, icon: Icon, label }) => (
+                <button
+                  key={v}
+                  onClick={() => setVisibility(v)}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
+                    visibility === v
+                      ? "bg-primary/10 text-primary ring-1 ring-primary/30"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleSave} className="flex-1 gap-2">
+            <Save className="h-4 w-4" /> 저장
+          </Button>
+          {user && (
+            <Button onClick={handlePublish} disabled={publishing} className="flex-1 gap-2">
+              <Upload className="h-4 w-4" /> {publishing ? "게시 중..." : "피드에 게시"}
+            </Button>
+          )}
+        </div>
+      </div>
 
       {/* Lightbox */}
       {lightboxIndex !== null && (
