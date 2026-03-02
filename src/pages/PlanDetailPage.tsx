@@ -33,7 +33,7 @@ const PlanDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { plans, fetchParticipants, inviteFriend, updateRsvp, deletePlan } = useHikingPlans();
+  const { plans, fetchParticipants, inviteFriend, joinPlan, updateRsvp, deletePlan } = useHikingPlans();
   const { friends } = useFriends();
   const { toast } = useToast();
 
