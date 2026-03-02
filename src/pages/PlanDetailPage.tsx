@@ -33,7 +33,7 @@ const PlanDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { plans, fetchParticipants, inviteFriend, updateRsvp, deletePlan } = useHikingPlans();
+  const { plans, fetchParticipants, inviteFriend, joinPlan, updateRsvp, deletePlan } = useHikingPlans();
   const { friends } = useFriends();
   const { toast } = useToast();
 
@@ -287,6 +287,26 @@ const PlanDetailPage = () => {
       </div>
 
       {/* RSVP buttons for participants */}
+      {/* Join button for non-participants */}
+      {!myParticipation && !isCreator && user && (
+        <Button
+          className="w-full"
+          onClick={async () => {
+            if (!id) return;
+            const { error } = await joinPlan(id);
+            if (error) {
+              toast({ title: "참여 실패", description: error.message, variant: "destructive" });
+            } else {
+              toast({ title: "계획에 참여했습니다!" });
+              fetchParticipants(id).then(setParticipants);
+            }
+          }}
+        >
+          참여하기
+        </Button>
+      )}
+
+      {/* RSVP for participants */}
       {myParticipation && !isCreator && (
         <div className="rounded-2xl border border-border bg-card p-4">
           <p className="text-xs font-medium text-muted-foreground mb-3">내 응답</p>

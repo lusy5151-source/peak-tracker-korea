@@ -132,20 +132,24 @@ export function useHikingPlans() {
 
   const inviteFriend = async (planId: string, friendUserId: string) => {
     if (!user) return { error: { message: "Not authenticated" } };
+    // With current RLS, only the user themselves can insert their participation.
+    // So we send a notification instead, and they join via the plan or invite code.
+    const plan = plans.find((p) => p.id === planId);
+    const { error } = await supabase.from("plan_notifications").insert({
+      user_id: friendUserId,
+      plan_id: planId,
+      type: "invitation",
+      message: `등산 계획에 초대되었습니다${plan ? ` (${plan.planned_date})` : ""}`,
+    } as any);
+    return { error };
+  };
+
+  const joinPlan = async (planId: string) => {
+    if (!user) return { error: { message: "Not authenticated" } };
     const { error } = await supabase
       .from("plan_participants")
-      .insert({ plan_id: planId, user_id: friendUserId } as any);
-
-    if (!error) {
-      // Create notification for invited user
-      const plan = plans.find((p) => p.id === planId);
-      await supabase.from("plan_notifications").insert({
-        user_id: friendUserId,
-        plan_id: planId,
-        type: "invitation",
-        message: `등산 계획에 초대되었습니다${plan ? ` (${plan.planned_date})` : ""}`,
-      } as any);
-    }
+      .insert({ plan_id: planId, user_id: user.id } as any);
+    if (!error) fetchPlans();
     return { error };
   };
 
@@ -213,6 +217,7 @@ export function useHikingPlans() {
     deletePlan,
     fetchParticipants,
     inviteFriend,
+    joinPlan,
     updateRsvp,
     markNotificationRead,
     joinByCode,
