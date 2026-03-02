@@ -28,6 +28,8 @@ const Dashboard = () => {
   const { earnedCount, totalBadges, nextMilestone, newlyEarned, dismissNewBadge, featuredBadge } =
     useAchievementStore(records, gearItems);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { friends, loading: friendsLoading } = useFriends();
   const completionPercent = Math.round((completedCount / mountains.length) * 100);
 
   const featuredMountain = useMemo(() => {
@@ -36,7 +38,7 @@ const Dashboard = () => {
       || mountains[0];
   }, [isCompleted]);
 
-  const weather = getMockWeather(featuredMountain.id);
+  const { weather, isReal: isRealWeather } = useWeather(featuredMountain.id, featuredMountain.lat, featuredMountain.lng);
   const outfitRecs = getOutfitRecommendations(weather);
   const CondIcon = conditionIcons[weather.condition] || Cloud;
 
