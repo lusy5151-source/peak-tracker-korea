@@ -1,21 +1,45 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/context/StoreContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
-import { badges, badgeCategories, BadgeCategory } from "@/data/badges";
+import { useProfile } from "@/hooks/useProfile";
+import { badges, BadgeCategory } from "@/data/badges";
 import { mountains, regions } from "@/data/mountains";
 import { Link } from "react-router-dom";
-import { User, Trophy, Mountain, ChevronRight, Star } from "lucide-react";
-import { useMemo } from "react";
+import {
+  User, Trophy, Mountain, ChevronRight, Star, Camera, MapPin,
+  Settings, LogOut, Shield, Edit3,
+} from "lucide-react";
+import { useMemo, useState, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+const HIKING_STYLES = [
+  { id: "solo", label: "솔로 등산", emoji: "🧍" },
+  { id: "trekking", label: "트레킹", emoji: "🥾" },
+  { id: "photography", label: "사진촬영", emoji: "📸" },
+  { id: "summit", label: "정상 도전", emoji: "⛰️" },
+  { id: "healing", label: "힐링 하이킹", emoji: "🌿" },
+];
 
 const ProfilePage = () => {
+  const { user, signOut } = useAuth();
   const { records, completedCount } = useStore();
   const { items: gearItems } = useGearStore();
   const { earnedBadges, earnedCount, totalBadges, featuredBadge, setFeatured, featuredBadgeId } =
     useAchievementStore(records, gearItems);
+  const { profile, loading: profileLoading, updateProfile, uploadAvatar } = useProfile();
+  const { toast } = useToast();
+
+  const [editing, setEditing] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const percentage = Math.round((completedCount / mountains.length) * 100);
 
-  // Region progress
   const regionProgress = useMemo(() => {
     return regions.map((region) => {
       const total = mountains.filter((m) => m.region === region).length;
@@ -27,28 +51,160 @@ const ProfilePage = () => {
     });
   }, [records]);
 
-  // Most recent earned badge
   const recentBadge = useMemo(() => {
     if (earnedBadges.length === 0) return null;
-    const sorted = [...earnedBadges].sort(
+    return [...earnedBadges].sort(
       (a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
-    );
-    return sorted[0];
+    )[0];
   }, [earnedBadges]);
+
+  const startEditing = () => {
+    setNickname(profile?.nickname || "");
+    setBio(profile?.bio || "");
+    setLocation(profile?.location || "");
+    setSelectedStyles(profile?.hiking_styles || []);
+    setEditing(true);
+  };
+
+  const saveProfile = async () => {
+    await updateProfile({
+      nickname,
+      bio,
+      location,
+      hiking_styles: selectedStyles,
+    });
+    setEditing(false);
+    toast({ title: "프로필이 저장되었습니다" });
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadAvatar(file);
+    toast({ title: "프로필 사진이 업데이트되었습니다" });
+  };
+
+  const toggleStyle = (id: string) => {
+    setSelectedStyles((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  if (!user) return null;
 
   return (
     <div className="space-y-6 pb-24">
       {/* Profile header */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm text-center">
-        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-          <User className="h-8 w-8 text-primary" />
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm text-center relative">
+        <button
+          onClick={editing ? saveProfile : startEditing}
+          className="absolute top-4 right-4 rounded-lg p-2 text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
+        >
+          {editing ? <span className="text-xs font-medium text-primary">저장</span> : <Edit3 className="h-4 w-4" />}
+        </button>
+
+        <div className="relative mx-auto mb-3 h-20 w-20">
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt="프로필"
+              className="h-20 w-20 rounded-full object-cover border-2 border-primary/20"
+            />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+              <User className="h-9 w-9 text-primary" />
+            </div>
+          )}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute -bottom-1 -right-1 rounded-full bg-primary p-1.5 text-primary-foreground shadow-sm"
+          >
+            <Camera className="h-3 w-3" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarUpload}
+          />
         </div>
-        <h1 className="text-lg font-bold text-foreground">나의 프로필</h1>
-        {featuredBadge && (
-          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
-            <span className="text-base">{featuredBadge.icon}</span>
-            <span className="text-xs font-medium text-primary">{featuredBadge.name}</span>
+
+        {editing ? (
+          <div className="space-y-3 mt-2">
+            <input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="닉네임"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="자기소개"
+              rows={2}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+            />
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="지역 (선택)"
+                className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-2">등산 스타일</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {HIKING_STYLES.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => toggleStyle(s.id)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                      selectedStyles.includes(s.id)
+                        ? "bg-primary/10 text-primary ring-1 ring-primary/30"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    {s.emoji} {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+        ) : (
+          <>
+            <h1 className="text-lg font-bold text-foreground">
+              {profile?.nickname || user.email?.split("@")[0]}
+            </h1>
+            {profile?.bio && (
+              <p className="mt-1 text-sm text-muted-foreground">{profile.bio}</p>
+            )}
+            {profile?.location && (
+              <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3" /> {profile.location}
+              </p>
+            )}
+            {profile?.hiking_styles && profile.hiking_styles.length > 0 && (
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+                {profile.hiking_styles.map((id) => {
+                  const style = HIKING_STYLES.find((s) => s.id === id);
+                  return style ? (
+                    <span key={id} className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-primary">
+                      {style.emoji} {style.label}
+                    </span>
+                  ) : null;
+                })}
+              </div>
+            )}
+            {featuredBadge && (
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
+                <span className="text-base">{featuredBadge.icon}</span>
+                <span className="text-xs font-medium text-primary">{featuredBadge.name}</span>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -159,14 +315,25 @@ const ProfilePage = () => {
         )}
       </div>
 
-      <Link
-        to="/achievements"
-        className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-secondary/50"
-      >
-        <Trophy className="h-4 w-4 text-primary" />
-        전체 업적 보기
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </Link>
+      {/* Actions */}
+      <div className="space-y-2">
+        <Link
+          to="/achievements"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-secondary/50"
+        >
+          <Trophy className="h-4 w-4 text-primary" />
+          전체 업적 보기
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
+
+        <button
+          onClick={signOut}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10"
+        >
+          <LogOut className="h-4 w-4" />
+          로그아웃
+        </button>
+      </div>
     </div>
   );
 };

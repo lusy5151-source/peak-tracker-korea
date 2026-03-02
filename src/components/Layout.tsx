@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, MapPinned, BookOpen, Shirt, Users, Home, Trophy, User } from "lucide-react";
+import { Mountain, MapPinned, BookOpen, Shirt, Users, Home, Trophy, User, LogIn } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
@@ -11,6 +12,7 @@ const navItems = [
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,12 +30,21 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             >
               <Trophy className="h-4 w-4" />
             </Link>
-            <Link
-              to="/profile"
-              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-primary"
-            >
-              <User className="h-4 w-4" />
-            </Link>
+            {user ? (
+              <Link
+                to="/profile"
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-primary"
+              >
+                <User className="h-4 w-4" />
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <LogIn className="h-3 w-3" /> 로그인
+              </Link>
+            )}
             <Link
               to="/mountains"
               className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
