@@ -1,7 +1,9 @@
 import { useStore } from "@/context/StoreContext";
 import { mountains } from "@/data/mountains";
-import { getMockWeather, getOutfitRecommendations } from "@/data/mockWeather";
-import { mockFriends } from "@/data/mockFriends";
+import { getOutfitRecommendations } from "@/data/mockWeather";
+import { useFriends } from "@/hooks/useFriends";
+import { useWeather } from "@/hooks/useWeather";
+import { useAuth } from "@/contexts/AuthContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
 import AchievementModal from "@/components/AchievementModal";
@@ -12,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useRef } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
