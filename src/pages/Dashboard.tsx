@@ -30,7 +30,7 @@ const Dashboard = () => {
     useAchievementStore(records, gearItems);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { friends, loading: friendsLoading } = useFriends();
+  const { friends, loading: friendsLoading, error: friendsError } = useFriends();
   const completionPercent = Math.round((completedCount / mountains.length) * 100);
 
   const featuredMountain = useMemo(() => {
@@ -66,6 +66,7 @@ const Dashboard = () => {
   }, [search]);
 
   return (
+    <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
     <div className="space-y-6 pb-24">
       {/* Achievement unlock modal */}
       <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />
@@ -351,6 +352,11 @@ const Dashboard = () => {
               <div key={i} className="h-14 rounded-xl border border-border bg-card animate-pulse" />
             ))}
           </div>
+        ) : friendsError ? (
+          <div className="rounded-xl border border-border bg-card p-6 text-center">
+            <Users className="h-6 w-6 text-destructive mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">{friendsError}</p>
+          </div>
         ) : friends.length === 0 ? (
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
@@ -379,6 +385,7 @@ const Dashboard = () => {
         )}
       </section>
     </div>
+    </ErrorBoundary>
   );
 };
 
