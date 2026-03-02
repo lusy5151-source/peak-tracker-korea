@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { mountains, regions } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { Search, CheckCircle2, Circle, Mountain, ChevronRight } from "lucide-react";
+import { Search, CheckCircle2, Circle, Mountain, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const MountainList = () => {
