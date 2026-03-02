@@ -16,6 +16,9 @@ import SocialPage from "@/pages/SocialPage";
 import AchievementsPage from "@/pages/AchievementsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import AuthPage from "@/pages/AuthPage";
+import PlansPage from "@/pages/PlansPage";
+import CreatePlanPage from "@/pages/CreatePlanPage";
+import PlanDetailPage from "@/pages/PlanDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +43,9 @@ const AppRoutes = () => {
       <Route path="/records" element={<Records />} />
       <Route path="/gear" element={<GearPage />} />
       <Route path="/social" element={<SocialPage />} />
+      <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
+      <Route path="/plans/create" element={<ProtectedRoute><CreatePlanPage /></ProtectedRoute>} />
+      <Route path="/plans/:id" element={<ProtectedRoute><PlanDetailPage /></ProtectedRoute>} />
       <Route path="/achievements" element={<AchievementsPage />} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
