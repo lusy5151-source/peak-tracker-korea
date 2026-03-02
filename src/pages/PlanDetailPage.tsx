@@ -1,17 +1,19 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import { getMockWeather } from "@/data/mockWeather";
-import { useHikingPlans, type PlanParticipant, type HikingPlan } from "@/hooks/useHikingPlans";
+import { useHikingPlans, type PlanParticipant, type HikingPlan, type PlanEditHistory } from "@/hooks/useHikingPlans";
 import { useFriends } from "@/hooks/useFriends";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  ArrowLeft, Calendar, Clock, MapPin, Mountain, Users, Copy, Check,
+  ArrowLeft, Calendar, Clock, Mountain, Users, Copy, Check,
   Cloud, Sun, CloudRain, CloudSnow, CloudSun, Wind, Droplets, UserPlus,
-  MessageSquare, Share2,
+  Share2, Edit3, History, CheckCircle2, XCircle, Save, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -23,25 +25,43 @@ const conditionIcons: Record<string, any> = {
 };
 
 const rsvpLabels: Record<string, { label: string; color: string }> = {
-  going: { label: "참석", color: "bg-success/20 text-success" },
+  going: { label: "참석", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   interested: { label: "관심", color: "bg-primary/20 text-primary" },
   declined: { label: "불참", color: "bg-destructive/20 text-destructive" },
   pending: { label: "대기", color: "bg-secondary text-muted-foreground" },
+};
+
+const fieldLabels: Record<string, string> = {
+  notes: "메모",
+  start_time: "출발 시간",
+  trail_name: "등산 코스",
 };
 
 const PlanDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { plans, fetchParticipants, inviteFriend, joinPlan, updateRsvp, deletePlan } = useHikingPlans();
+  const {
+    plans, fetchParticipants, inviteFriend, joinPlan, updateRsvp,
+    deletePlan, updatePlanWithHistory, fetchEditHistory,
+    acceptInvitation, declineInvitation,
+  } = useHikingPlans();
   const { friends } = useFriends();
   const { toast } = useToast();
 
   const [plan, setPlan] = useState<HikingPlan | null>(null);
   const [participants, setParticipants] = useState<PlanParticipant[]>([]);
+  const [editHistory, setEditHistory] = useState<PlanEditHistory[]>([]);
   const [showInvite, setShowInvite] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [copied, setCopied] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<{ nickname: string | null; avatar_url: string | null } | null>(null);
+
+  // Editing state
+  const [editing, setEditing] = useState(false);
+  const [editNotes, setEditNotes] = useState("");
+  const [editStartTime, setEditStartTime] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const found = plans.find((p) => p.id === id);
@@ -51,6 +71,7 @@ const PlanDetailPage = () => {
   useEffect(() => {
     if (!id) return;
     fetchParticipants(id).then(setParticipants);
+    fetchEditHistory(id).then(setEditHistory);
   }, [id]);
 
   useEffect(() => {
@@ -60,9 +81,7 @@ const PlanDetailPage = () => {
       .select("nickname, avatar_url")
       .eq("user_id", plan.creator_id)
       .single()
-      .then(({ data }) => {
-        if (data) setCreatorProfile(data);
-      });
+      .then(({ data }) => { if (data) setCreatorProfile(data); });
   }, [plan?.creator_id]);
 
   const mountain = useMemo(
@@ -76,6 +95,8 @@ const PlanDetailPage = () => {
 
   const isCreator = user?.id === plan?.creator_id;
   const myParticipation = participants.find((p) => p.user_id === user?.id);
+  const canEdit = isCreator || myParticipation?.rsvp_status === "going";
+  const isInvited = !myParticipation && !isCreator;
 
   const uninvitedFriends = friends.filter(
     (f) => !participants.some((p) => p.user_id === f.friendProfile.user_id)
@@ -101,6 +122,24 @@ const PlanDetailPage = () => {
     }
   };
 
+  const handleAccept = async () => {
+    if (!id) return;
+    const { error } = await acceptInvitation(id);
+    if (!error) {
+      toast({ title: "초대를 수락했습니다! 🎉" });
+      fetchParticipants(id).then(setParticipants);
+    }
+  };
+
+  const handleDecline = async () => {
+    if (!id) return;
+    const { error } = await declineInvitation(id);
+    if (!error) {
+      toast({ title: "초대를 거절했습니다" });
+      fetchParticipants(id).then(setParticipants);
+    }
+  };
+
   const handleCopyCode = () => {
     if (!plan) return;
     navigator.clipboard.writeText(plan.invite_code);
@@ -114,6 +153,41 @@ const PlanDetailPage = () => {
     await deletePlan(id);
     toast({ title: "계획이 삭제되었습니다" });
     navigate("/plans");
+  };
+
+  const startEditing = () => {
+    if (!plan) return;
+    setEditNotes(plan.notes || "");
+    setEditStartTime(plan.start_time?.slice(0, 5) || "");
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+  };
+
+  const saveEdits = async () => {
+    if (!plan || !id) return;
+    setSaving(true);
+    const updates: Partial<HikingPlan> = {};
+    if (editNotes !== (plan.notes || "")) updates.notes = editNotes || null;
+    if (editStartTime !== (plan.start_time?.slice(0, 5) || "")) updates.start_time = editStartTime || null;
+
+    if (Object.keys(updates).length === 0) {
+      setEditing(false);
+      setSaving(false);
+      return;
+    }
+
+    const { error } = await updatePlanWithHistory(id, updates, plan, fieldLabels);
+    setSaving(false);
+    if (error) {
+      toast({ title: "수정 실패", variant: "destructive" });
+    } else {
+      toast({ title: "계획이 수정되었습니다" });
+      setEditing(false);
+      fetchEditHistory(id).then(setEditHistory);
+    }
   };
 
   if (!plan || !mountain) {
@@ -133,12 +207,37 @@ const PlanDetailPage = () => {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="text-xl font-bold text-foreground flex-1">{mountain.nameKo}</h1>
-        {isCreator && (
-          <Button variant="ghost" size="sm" className="text-destructive" onClick={handleDelete}>
-            삭제
-          </Button>
-        )}
+        <div className="flex gap-1">
+          {canEdit && !editing && (
+            <Button variant="ghost" size="sm" onClick={startEditing}>
+              <Edit3 className="h-4 w-4" />
+            </Button>
+          )}
+          {isCreator && (
+            <Button variant="ghost" size="sm" className="text-destructive" onClick={handleDelete}>
+              삭제
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Invitation Actions for non-participants */}
+      {isInvited && user && (
+        <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 space-y-4">
+          <div className="text-center">
+            <p className="text-sm font-semibold text-foreground">등산 계획에 초대되었습니다</p>
+            <p className="text-xs text-muted-foreground mt-1">아래 정보를 확인하고 응답해주세요</p>
+          </div>
+          <div className="flex gap-3">
+            <Button className="flex-1 gap-2" onClick={handleAccept}>
+              <CheckCircle2 className="h-4 w-4" /> 수락
+            </Button>
+            <Button variant="outline" className="flex-1 gap-2" onClick={handleDecline}>
+              <XCircle className="h-4 w-4" /> 거절
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Mountain & Route Card */}
       <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
@@ -164,12 +263,22 @@ const PlanDetailPage = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-foreground">{format(new Date(plan.planned_date), "PPP", { locale: ko })}</span>
           </div>
-          {plan.start_time && (
+          {editing ? (
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="time"
+                value={editStartTime}
+                onChange={(e) => setEditStartTime(e.target.value)}
+                className="h-8 text-sm border-primary/30"
+              />
+            </div>
+          ) : plan.start_time ? (
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="text-foreground">{plan.start_time.slice(0, 5)}</span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -191,13 +300,32 @@ const PlanDetailPage = () => {
         </div>
       )}
 
-      {/* Notes */}
-      {plan.notes && (
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <p className="text-xs font-medium text-muted-foreground mb-1">📝 메모</p>
-          <p className="text-sm text-foreground whitespace-pre-wrap">{plan.notes}</p>
-        </div>
-      )}
+      {/* Notes - editable */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <p className="text-xs font-medium text-muted-foreground mb-1">📝 메모</p>
+        {editing ? (
+          <div className="space-y-2">
+            <Textarea
+              value={editNotes}
+              onChange={(e) => setEditNotes(e.target.value)}
+              placeholder="모임 장소, 준비물, 주의사항 등..."
+              className="min-h-[80px] border-primary/30"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" size="sm" onClick={cancelEditing} disabled={saving}>
+                <X className="h-3 w-3 mr-1" /> 취소
+              </Button>
+              <Button size="sm" onClick={saveEdits} disabled={saving}>
+                <Save className="h-3 w-3 mr-1" /> {saving ? "저장 중..." : "저장"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-foreground whitespace-pre-wrap">
+            {plan.notes || "메모가 없습니다"}
+          </p>
+        )}
+      </div>
 
       {/* Invite Code */}
       <div className="rounded-2xl border border-border bg-card p-4">
@@ -286,27 +414,7 @@ const PlanDetailPage = () => {
         )}
       </div>
 
-      {/* RSVP buttons for participants */}
-      {/* Join button for non-participants */}
-      {!myParticipation && !isCreator && user && (
-        <Button
-          className="w-full"
-          onClick={async () => {
-            if (!id) return;
-            const { error } = await joinPlan(id);
-            if (error) {
-              toast({ title: "참여 실패", description: error.message, variant: "destructive" });
-            } else {
-              toast({ title: "계획에 참여했습니다!" });
-              fetchParticipants(id).then(setParticipants);
-            }
-          }}
-        >
-          참여하기
-        </Button>
-      )}
-
-      {/* RSVP for participants */}
+      {/* RSVP for existing participants (not invitation flow) */}
       {myParticipation && !isCreator && (
         <div className="rounded-2xl border border-border bg-card p-4">
           <p className="text-xs font-medium text-muted-foreground mb-3">내 응답</p>
@@ -328,6 +436,43 @@ const PlanDetailPage = () => {
           </div>
         </div>
       )}
+
+      {/* Edit History */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="flex w-full items-center justify-between"
+        >
+          <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+            <History className="h-3 w-3" /> 수정 기록
+          </p>
+          <span className="text-xs text-muted-foreground">{editHistory.length}건</span>
+        </button>
+
+        {showHistory && (
+          <div className="mt-3 space-y-2 border-t border-border pt-3">
+            {editHistory.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-2">수정 기록이 없습니다</p>
+            ) : (
+              editHistory.map((h) => (
+                <div key={h.id} className="text-xs space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium text-foreground">{h.profile?.nickname || "사용자"}</span>
+                    <span className="text-muted-foreground">님이</span>
+                    <span className="font-medium text-primary">{h.field_name}</span>
+                    <span className="text-muted-foreground">수정</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground pl-1">
+                    {format(new Date(h.created_at), "M/d HH:mm", { locale: ko })}
+                    {h.old_value && <span className="ml-2 line-through">{h.old_value.slice(0, 30)}</span>}
+                    {h.new_value && <span className="ml-1">→ {h.new_value.slice(0, 30)}</span>}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
