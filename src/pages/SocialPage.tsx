@@ -12,6 +12,7 @@ import type { Tables } from "@/integrations/supabase/types";
 type Profile = Tables<"profiles">;
 
 const SocialPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { completedCount } = useStore();
   const {
