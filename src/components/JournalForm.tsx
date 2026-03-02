@@ -347,11 +347,12 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
               <label className="text-xs font-medium text-foreground mb-1.5 block">함께한 친구 태그</label>
               <div className="flex flex-wrap gap-1.5">
                 {acceptedFriends.map((f) => {
-                  const isTagged = taggedFriends.includes(f.friendId);
+                  const fId = f.friendProfile.user_id;
+                  const isTagged = taggedFriends.includes(fId);
                   return (
                     <button
-                      key={f.friendId}
-                      onClick={() => toggleFriend(f.friendId)}
+                      key={fId}
+                      onClick={() => toggleFriend(fId)}
                       className={cn(
                         "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
                         isTagged
@@ -360,10 +361,10 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
                       )}
                     >
                       <Avatar className="h-4 w-4">
-                        <AvatarImage src={f.profile?.avatar_url || ""} />
-                        <AvatarFallback className="text-[7px]">{f.profile?.nickname?.[0] || "?"}</AvatarFallback>
+                        <AvatarImage src={f.friendProfile.avatar_url || ""} />
+                        <AvatarFallback className="text-[7px]">{f.friendProfile.nickname?.[0] || "?"}</AvatarFallback>
                       </Avatar>
-                      {f.profile?.nickname || "친구"}
+                      {f.friendProfile.nickname || "친구"}
                     </button>
                   );
                 })}
