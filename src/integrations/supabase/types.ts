@@ -41,6 +41,121 @@ export type Database = {
         }
         Relationships: []
       }
+      hiking_plans: {
+        Row: {
+          created_at: string
+          creator_id: string
+          id: string
+          invite_code: string
+          mountain_id: number
+          notes: string | null
+          planned_date: string
+          start_time: string | null
+          status: string
+          trail_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          id?: string
+          invite_code?: string
+          mountain_id: number
+          notes?: string | null
+          planned_date: string
+          start_time?: string | null
+          status?: string
+          trail_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          id?: string
+          invite_code?: string
+          mountain_id?: number
+          notes?: string | null
+          planned_date?: string
+          start_time?: string | null
+          status?: string
+          trail_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      plan_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          plan_id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          plan_id: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          plan_id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_notifications_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_participants: {
+        Row: {
+          id: string
+          invited_at: string
+          plan_id: string
+          responded_at: string | null
+          rsvp_status: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_at?: string
+          plan_id: string
+          responded_at?: string | null
+          rsvp_status?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_at?: string
+          plan_id?: string
+          responded_at?: string | null
+          rsvp_status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_participants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       privacy_settings: {
         Row: {
           allow_friend_requests: boolean
