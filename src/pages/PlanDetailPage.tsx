@@ -23,9 +23,9 @@ const conditionIcons: Record<string, any> = {
 };
 
 const rsvpLabels: Record<string, { label: string; color: string }> = {
-  going: { label: "참석", color: "bg-green-100 text-green-700" },
-  interested: { label: "관심", color: "bg-yellow-100 text-yellow-700" },
-  declined: { label: "불참", color: "bg-red-100 text-red-700" },
+  going: { label: "참석", color: "bg-success/20 text-success" },
+  interested: { label: "관심", color: "bg-primary/20 text-primary" },
+  declined: { label: "불참", color: "bg-destructive/20 text-destructive" },
   pending: { label: "대기", color: "bg-secondary text-muted-foreground" },
 };
 
