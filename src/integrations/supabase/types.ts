@@ -284,6 +284,7 @@ export type Database = {
           plan_id: string
           responded_at: string | null
           rsvp_status: string
+          status: string | null
           user_id: string
         }
         Insert: {
@@ -292,6 +293,7 @@ export type Database = {
           plan_id: string
           responded_at?: string | null
           rsvp_status?: string
+          status?: string | null
           user_id: string
         }
         Update: {
@@ -300,6 +302,7 @@ export type Database = {
           plan_id?: string
           responded_at?: string | null
           rsvp_status?: string
+          status?: string | null
           user_id?: string
         }
         Relationships: [
