@@ -5,7 +5,7 @@ import { useStore } from "@/context/StoreContext";
 import {
   Users, Mountain, Search, UserPlus, Check, X, ChevronRight, Bell, Trash2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 

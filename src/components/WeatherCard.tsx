@@ -1,6 +1,9 @@
-import { getMockWeather, getOutfitRecommendations } from "@/data/mockWeather";
-import { Sun, Cloud, CloudRain, CloudSnow, Wind, Droplets, Thermometer, CloudSun } from "lucide-react";
-import type { GearItem } from "@/hooks/useGearStore";
+import { useWeather, useForecast } from "@/hooks/useWeather";
+import { getOutfitRecommendations } from "@/data/mockWeather";
+import { mountains } from "@/data/mountains";
+import { Sun, Cloud, CloudRain, CloudSnow, Wind, Droplets, Thermometer, CloudSun, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 const conditionIcons: Record<string, any> = {
   "맑음": Sun,
@@ -11,7 +14,12 @@ const conditionIcons: Record<string, any> = {
 };
 
 export function WeatherCard({ mountainId }: { mountainId: number }) {
-  const weather = getMockWeather(mountainId);
+  const mountain = mountains.find((m) => m.id === mountainId);
+  const lat = mountain?.lat ?? 37.5;
+  const lng = mountain?.lng ?? 127.0;
+
+  const { weather, loading, isReal } = useWeather(mountainId, lat, lng);
+  const { forecast, loading: forecastLoading } = useForecast(lat, lng);
   const recommendations = getOutfitRecommendations(weather);
   const CondIcon = conditionIcons[weather.condition] || Cloud;
 
@@ -19,10 +27,13 @@ export function WeatherCard({ mountainId }: { mountainId: number }) {
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
       <div className="flex items-center gap-2">
         <div className="h-8 w-1 rounded-full bg-primary" />
-        <div>
+        <div className="flex-1">
           <h2 className="text-lg font-semibold text-foreground">현재 날씨</h2>
-          <p className="text-xs text-muted-foreground">목업 데이터 · 실제 날씨와 다를 수 있습니다</p>
+          <p className="text-xs text-muted-foreground">
+            {isReal ? "실시간 데이터" : "예상 데이터 · 실제 날씨와 다를 수 있습니다"}
+          </p>
         </div>
+        {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
       </div>
 
       {/* Weather overview */}
@@ -40,6 +51,28 @@ export function WeatherCard({ mountainId }: { mountainId: number }) {
           <WeatherStat icon={Thermometer} label="습도" value={`${weather.humidity}%`} />
         </div>
       </div>
+
+      {/* 7-day forecast */}
+      {forecast.length > 0 && (
+        <div>
+          <h3 className="mb-2 text-sm font-semibold text-foreground">📅 주간 예보</h3>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {forecast.map((day) => {
+              const DayIcon = conditionIcons[day.condition] || Cloud;
+              return (
+                <div key={day.date} className="flex flex-col items-center gap-1 rounded-lg bg-secondary/40 px-3 py-2 min-w-[60px]">
+                  <p className="text-[10px] text-muted-foreground">
+                    {format(new Date(day.date), "E", { locale: ko })}
+                  </p>
+                  <DayIcon className="h-5 w-5 text-primary/70" />
+                  <p className="text-xs font-semibold text-foreground">{day.temp}°</p>
+                  <p className="text-[9px] text-muted-foreground">{day.tempMin}°/{day.tempMax}°</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Outfit recommendations */}
       <div>
