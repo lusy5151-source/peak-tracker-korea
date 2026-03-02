@@ -62,6 +62,21 @@ const MountainList = () => {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap gap-2">
+          {["전체", "쉬움", "보통", "어려움"].map((d) => (
+            <button
+              key={d}
+              onClick={() => setDifficultyFilter(d)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                difficultyFilter === d
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
         <div className="flex gap-2">
           {([["all", "전체"], ["done", "완등"], ["todo", "미등"]] as const).map(([val, label]) => (
             <button
