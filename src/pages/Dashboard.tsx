@@ -10,7 +10,7 @@ import AchievementModal from "@/components/AchievementModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   Mountain, Plus, Calendar, MapPin, Wind, Droplets,
-  ChevronRight, Shirt, Users, Route, Sun, Cloud, CloudRain, CloudSnow, CloudSun,
+  ChevronRight, Shirt, Users, Sun, Cloud, CloudRain, CloudSnow, CloudSun,
   ArrowRight, Thermometer, Search, Trophy,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -51,9 +51,12 @@ const Dashboard = () => {
       .filter((r) => r.mountain);
   }, [records]);
 
-  const recommendedRoutes = useMemo(() => {
-    return mountains.filter((m) => m.trails && m.trails.length > 0).slice(0, 4);
-  }, []);
+  // Mountain summary - show mix of completed and not completed
+  const summaryMountains = useMemo(() => {
+    const completed = mountains.filter((m) => isCompleted(m.id)).slice(0, 3);
+    const remaining = mountains.filter((m) => !isCompleted(m.id)).slice(0, 6 - completed.length);
+    return [...completed, ...remaining].slice(0, 6);
+  }, [isCompleted]);
 
   // Search
   const [search, setSearch] = useState("");
@@ -68,7 +71,6 @@ const Dashboard = () => {
   return (
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
     <div className="space-y-6 pb-24">
-      {/* Achievement unlock modal */}
       <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />
 
       {/* ── Progress & Achievements ── */}
@@ -132,52 +134,52 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* ── Hero: Map (left) + Search & Today's Mountain (right) ── */}
-      <section className="grid gap-4 lg:grid-cols-5">
-        {/* Map */}
-        <div className="lg:col-span-3 rounded-2xl border border-border overflow-hidden shadow-sm bg-card min-h-[320px] lg:min-h-[400px]">
-          <MiniMap isCompleted={isCompleted} onMarkerClick={(id) => navigate(`/mountains/${id}`)} />
+      {/* ── Search + Map (compact) + Today's Mountain ── */}
+      <section className="space-y-4">
+        {/* Search */}
+        <div className="relative">
+          <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="산 이름, 지역으로 검색..."
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+            />
+          </div>
+          {searchResults.length > 0 && (
+            <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+              {searchResults.map((m) => (
+                <Link
+                  key={m.id}
+                  to={`/mountains/${m.id}`}
+                  onClick={() => setSearch("")}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/60 transition-colors"
+                >
+                  <Mountain className="h-4 w-4 text-primary" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground">{m.nameKo}</p>
+                    <p className="text-[10px] text-muted-foreground">{m.region} · {m.height}m · {m.difficulty}</p>
+                  </div>
+                  {isCompleted(m.id) && (
+                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">완등</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Right column */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          {/* Search */}
-          <div className="relative">
-            <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="산 이름, 지역으로 검색..."
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-              />
-            </div>
-            {searchResults.length > 0 && (
-              <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-                {searchResults.map((m) => (
-                  <Link
-                    key={m.id}
-                    to={`/mountains/${m.id}`}
-                    onClick={() => setSearch("")}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/60 transition-colors"
-                  >
-                    <Mountain className="h-4 w-4 text-primary" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground">{m.nameKo}</p>
-                      <p className="text-[10px] text-muted-foreground">{m.region} · {m.height}m · {m.difficulty}</p>
-                    </div>
-                    {isCompleted(m.id) && (
-                      <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">완등</span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            )}
+        {/* Map (compact) + Today's Mountain side by side */}
+        <div className="grid gap-4 lg:grid-cols-5">
+          {/* Map - smaller */}
+          <div className="lg:col-span-2 rounded-2xl border border-border overflow-hidden shadow-sm bg-card min-h-[200px] lg:min-h-[260px]">
+            <MiniMap isCompleted={isCompleted} onMarkerClick={(id) => navigate(`/mountains/${id}`)} />
           </div>
 
           {/* Today's Mountain & Weather */}
-          <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col">
+          <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col">
             <div className="flex items-center gap-2">
               <p className="text-[10px] font-medium uppercase tracking-wider text-primary">오늘의 산</p>
               {!isRealWeather && <span className="text-[8px] bg-secondary text-muted-foreground rounded px-1">예상</span>}
@@ -198,7 +200,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Outfit rec */}
             <div className="mt-4 rounded-xl bg-accent/40 p-3">
               <p className="text-[10px] font-medium text-accent-foreground/70 mb-1">🧥 복장 추천</p>
               <p className="text-xs text-foreground leading-relaxed">
@@ -216,7 +217,7 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* 2. Add Hiking Record CTA */}
+      {/* Add Hiking Record CTA */}
       <Link
         to="/mountains"
         className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-sky-500 px-6 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
@@ -225,7 +226,65 @@ const Dashboard = () => {
         등산 기록 추가하기
       </Link>
 
-      {/* 3. Recent Hiking Records */}
+      {/* ── Mountain Summary Widget ── */}
+      <section>
+        <SectionHeader title="명산 요약" linkTo="/mountains" linkLabel="전체 보기" />
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-xl bg-secondary/50 p-3">
+              <p className="text-xl font-bold text-foreground">{mountains.length}</p>
+              <p className="text-[10px] text-muted-foreground">전체 산</p>
+            </div>
+            <div className="rounded-xl bg-primary/10 p-3">
+              <p className="text-xl font-bold text-primary">{completedCount}</p>
+              <p className="text-[10px] text-muted-foreground">완등</p>
+            </div>
+            <div className="rounded-xl bg-secondary/50 p-3">
+              <p className="text-xl font-bold text-foreground">{completionPercent}%</p>
+              <p className="text-[10px] text-muted-foreground">달성률</p>
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            {summaryMountains.map((m) => {
+              const completed = isCompleted(m.id);
+              return (
+                <Link
+                  key={m.id}
+                  to={`/mountains/${m.id}`}
+                  className={`flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-secondary/60 ${
+                    completed ? "bg-primary/5" : "bg-secondary/30"
+                  }`}
+                >
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${
+                    completed ? "bg-primary/10" : "bg-secondary"
+                  }`}>
+                    <Mountain className={`h-4 w-4 ${completed ? "text-primary" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{m.nameKo}</p>
+                    <p className="text-[10px] text-muted-foreground">{m.region} · {m.height}m</p>
+                  </div>
+                  {completed ? (
+                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary shrink-0">완등</span>
+                  ) : (
+                    <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground shrink-0">미등</span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          <Link
+            to="/mountains"
+            className="flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+          >
+            전체 산 목록 보기 <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Recent Hiking Records */}
       <section>
         <SectionHeader title="최근 기록" linkTo="/records" linkLabel="모두 보기" />
         {recentRecords.length === 0 ? (
@@ -269,37 +328,7 @@ const Dashboard = () => {
         )}
       </section>
 
-      {/* 5. Recommended Hiking Routes */}
-      <section>
-        <SectionHeader title="추천 등산 코스" linkTo="/mountains" linkLabel="더 보기" />
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {recommendedRoutes.map((m) => (
-            <Link
-              key={m.id}
-              to={`/mountains/${m.id}`}
-              className="rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-secondary/50"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Route className="h-4 w-4 text-sky-500" />
-                <p className="font-medium text-foreground text-sm">{m.nameKo}</p>
-                <DifficultyBadge difficulty={m.difficulty} />
-              </div>
-              {m.trails && m.trails[0] && (
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  <p>🥾 {m.trails[0].name}</p>
-                  <div className="flex items-center gap-3">
-                    <span>{m.trails[0].distance}</span>
-                    <span>⏱ {m.trails[0].duration}</span>
-                  </div>
-                  <p className="text-[10px]">📍 {m.trails[0].startingPoint}</p>
-                </div>
-              )}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. Gear & Outfit */}
+      {/* Gear & Outfit */}
       <section>
         <SectionHeader title="내 장비" linkTo="/gear" linkLabel="관리하기" />
         {gearItems.length === 0 ? (
@@ -337,7 +366,7 @@ const Dashboard = () => {
         )}
       </section>
 
-      {/* 7. Friends & Social */}
+      {/* Friends & Social */}
       <section>
         <SectionHeader title="친구 활동" linkTo="/social" linkLabel="전체 보기" />
         {!user ? (
@@ -389,7 +418,12 @@ const Dashboard = () => {
   );
 };
 
-/* ─── Mini Map ─── */
+/* ─── Mini Map (Korea-restricted) ─── */
+
+const KOREA_BOUNDS: L.LatLngBoundsExpression = [
+  [33.0, 124.5],  // SW
+  [38.8, 130.0],  // NE
+];
 
 function MiniMap({ isCompleted, onMarkerClick }: { isCompleted: (id: number) => boolean; onMarkerClick: (id: number) => void }) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -401,6 +435,10 @@ function MiniMap({ isCompleted, onMarkerClick }: { isCompleted: (id: number) => 
     const map = L.map(mapRef.current, {
       center: [36.0, 127.8],
       zoom: 7,
+      minZoom: 6,
+      maxZoom: 13,
+      maxBounds: KOREA_BOUNDS,
+      maxBoundsViscosity: 1.0,
       zoomControl: false,
       attributionControl: false,
     });
@@ -445,7 +483,7 @@ function MiniMap({ isCompleted, onMarkerClick }: { isCompleted: (id: number) => 
     };
   }, [isCompleted, onMarkerClick]);
 
-  return <div ref={mapRef} className="h-full w-full min-h-[320px]" />;
+  return <div ref={mapRef} className="h-full w-full min-h-[200px]" />;
 }
 
 /* ─── Helpers ─── */
@@ -466,19 +504,6 @@ function EmptyState({ icon: Icon, message, linkTo, linkLabel }: { icon: any; mes
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
       <Link to={linkTo} className="mt-1 inline-block text-xs text-primary hover:underline">{linkLabel}</Link>
     </div>
-  );
-}
-
-function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const colors: Record<string, string> = {
-    "쉬움": "bg-success/10 text-success",
-    "보통": "bg-accent text-accent-foreground",
-    "어려움": "bg-destructive/10 text-destructive",
-  };
-  return (
-    <span className={`ml-auto rounded-md px-1.5 py-0.5 text-[10px] font-medium ${colors[difficulty] || "bg-secondary text-secondary-foreground"}`}>
-      {difficulty}
-    </span>
   );
 }
 

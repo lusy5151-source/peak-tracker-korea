@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, MapPinned, BookOpen, Shirt, Users, Home, Trophy, User, LogIn, CalendarDays } from "lucide-react";
+import { Mountain, BookOpen, Shirt, Users, Home, Trophy, User, LogIn, CalendarDays } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
-  { to: "/map", label: "지도", icon: MapPinned },
+  { to: "/mountains", label: "명산", icon: Mountain },
   { to: "/records", label: "기록", icon: BookOpen },
   { to: "/gear", label: "장비", icon: Shirt },
   { to: "/plans", label: "계획", icon: CalendarDays },
@@ -17,7 +17,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top header - minimal */}
+      {/* Top header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2">
@@ -46,12 +46,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <LogIn className="h-3 w-3" /> 로그인
               </Link>
             )}
-            <Link
-              to="/mountains"
-              className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-            >
-              산 목록
-            </Link>
           </div>
         </div>
       </header>
@@ -62,7 +56,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md">
         <div className="container mx-auto flex items-center justify-around px-2 py-1.5">
           {navItems.map(({ to, label, icon: Icon }) => {
-            const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+            const active = to === "/"
+              ? pathname === "/"
+              : pathname.startsWith(to) && !(to === "/mountains" && pathname === "/");
             return (
               <Link
                 key={to}
