@@ -97,7 +97,7 @@ const MountainDetail = () => {
       </div>
 
       {/* Trail info */}
-      <TrailInfoSection trails={mountain.trails || []} />
+      <TrailInfoSection mountainId={mountain.id} fallbackTrails={mountain.trails} />
 
       {/* Weather & outfit */}
       <WeatherCard mountainId={mountain.id} />
