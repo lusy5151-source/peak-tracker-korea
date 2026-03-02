@@ -222,6 +222,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trails: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty: string
+          distance_km: number
+          duration_minutes: number
+          elevation_gain_m: number | null
+          id: string
+          is_popular: boolean
+          mountain_id: number
+          name: string
+          starting_point: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          distance_km: number
+          duration_minutes: number
+          elevation_gain_m?: number | null
+          id?: string
+          is_popular?: boolean
+          mountain_id: number
+          name: string
+          starting_point: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          distance_km?: number
+          duration_minutes?: number
+          elevation_gain_m?: number | null
+          id?: string
+          is_popular?: boolean
+          mountain_id?: number
+          name?: string
+          starting_point?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
