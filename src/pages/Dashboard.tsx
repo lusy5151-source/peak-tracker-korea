@@ -1,7 +1,9 @@
 import { useStore } from "@/context/StoreContext";
 import { mountains } from "@/data/mountains";
-import { getMockWeather, getOutfitRecommendations } from "@/data/mockWeather";
-import { mockFriends } from "@/data/mockFriends";
+import { getOutfitRecommendations } from "@/data/mockWeather";
+import { useFriends } from "@/hooks/useFriends";
+import { useWeather } from "@/hooks/useWeather";
+import { useAuth } from "@/contexts/AuthContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
 import AchievementModal from "@/components/AchievementModal";
@@ -12,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useRef } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -25,6 +28,8 @@ const Dashboard = () => {
   const { earnedCount, totalBadges, nextMilestone, newlyEarned, dismissNewBadge, featuredBadge } =
     useAchievementStore(records, gearItems);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { friends, loading: friendsLoading } = useFriends();
   const completionPercent = Math.round((completedCount / mountains.length) * 100);
 
   const featuredMountain = useMemo(() => {
@@ -33,7 +38,7 @@ const Dashboard = () => {
       || mountains[0];
   }, [isCompleted]);
 
-  const weather = getMockWeather(featuredMountain.id);
+  const { weather, isReal: isRealWeather } = useWeather(featuredMountain.id, featuredMountain.lat, featuredMountain.lng);
   const outfitRecs = getOutfitRecommendations(weather);
   const CondIcon = conditionIcons[weather.condition] || Cloud;
 
@@ -171,7 +176,10 @@ const Dashboard = () => {
 
           {/* Today's Mountain & Weather */}
           <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-sky-500">오늘의 산</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-primary">오늘의 산</p>
+              {!isRealWeather && <span className="text-[8px] bg-secondary text-muted-foreground rounded px-1">예상</span>}
+            </div>
             <h2 className="mt-1 text-xl font-bold text-foreground">{featuredMountain.nameKo}</h2>
             <p className="text-xs text-muted-foreground">{featuredMountain.region} · {featuredMountain.height}m · {featuredMountain.difficulty}</p>
 
@@ -330,34 +338,44 @@ const Dashboard = () => {
       {/* 7. Friends & Social */}
       <section>
         <SectionHeader title="친구 활동" linkTo="/social" linkLabel="전체 보기" />
-        <div className="space-y-2.5">
-          {mockFriends.slice(0, 3).map((friend) => {
-            const recent = friend.recentMountainIds
-              .map((id) => mountains.find((m) => m.id === id))
-              .filter(Boolean)
-              .slice(0, 2);
-            return (
-              <div key={friend.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-base">
-                  {friend.avatar}
-                </div>
+        {!user ? (
+          <div className="rounded-xl border border-border bg-card p-6 text-center">
+            <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">로그인하면 친구를 볼 수 있습니다</p>
+            <Link to="/auth" className="mt-2 inline-block text-xs text-primary font-medium">로그인하기</Link>
+          </div>
+        ) : friendsLoading ? (
+          <div className="space-y-2.5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-14 rounded-xl border border-border bg-card animate-pulse" />
+            ))}
+          </div>
+        ) : friends.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-6 text-center">
+            <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">아직 친구가 없습니다</p>
+            <Link to="/social" className="mt-2 inline-block text-xs text-primary font-medium">친구 찾기</Link>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {friends.slice(0, 3).map((f) => (
+              <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm">
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={f.friendProfile.avatar_url || ""} />
+                  <AvatarFallback className="text-xs">{f.friendProfile.nickname?.[0] || "?"}</AvatarFallback>
+                </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{friend.name}</p>
+                  <p className="text-sm font-medium text-foreground">{f.friendProfile.nickname || "사용자"}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Mountain className="h-3 w-3" />
-                    {friend.completedCount}개 완등
-                    {recent.length > 0 && (
-                      <span className="truncate">· 최근 {recent.map((m) => m!.nameKo).join(", ")}</span>
-                    )}
+                    <Users className="h-3 w-3" />
+                    <span>친구</span>
+                    {f.friendProfile.location && <span>· {f.friendProfile.location}</span>}
                   </div>
                 </div>
-                <div className="w-14 h-1.5 rounded-full bg-secondary shrink-0">
-                  <div className="h-1.5 rounded-full bg-primary" style={{ width: `${friend.completedCount}%` }} />
-                </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
