@@ -16,49 +16,57 @@ export function useFriends() {
   const [pendingReceived, setPendingReceived] = useState<FriendWithProfile[]>([]);
   const [pendingSent, setPendingSent] = useState<FriendWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchFriendships = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
 
-    const { data: friendships } = await supabase
-      .from("friendships")
-      .select("*")
-      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+    try {
+      setError(null);
+      const { data: friendships, error: fetchError } = await supabase
+        .from("friendships")
+        .select("*")
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-    if (!friendships) return;
+      if (fetchError) throw fetchError;
+      if (!friendships) { setLoading(false); return; }
 
-    // Get all unique user IDs that aren't the current user
-    const userIds = [
-      ...new Set(
-        friendships.map((f) =>
-          f.requester_id === user.id ? f.addressee_id : f.requester_id
-        )
-      ),
-    ];
+      // Get all unique user IDs that aren't the current user
+      const userIds = [
+        ...new Set(
+          friendships.map((f) =>
+            f.requester_id === user.id ? f.addressee_id : f.requester_id
+          )
+        ),
+      ];
 
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("*")
-      .in("user_id", userIds);
+      const { data: profiles } = userIds.length > 0
+        ? await supabase.from("profiles").select("*").in("user_id", userIds)
+        : { data: [] };
 
-    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
-    const withProfiles = friendships
-      .map((f) => {
-        const friendId = f.requester_id === user.id ? f.addressee_id : f.requester_id;
-        const friendProfile = profileMap.get(friendId);
-        return friendProfile ? { ...f, friendProfile } : null;
-      })
-      .filter(Boolean) as FriendWithProfile[];
+      const withProfiles = friendships
+        .map((f) => {
+          const friendId = f.requester_id === user.id ? f.addressee_id : f.requester_id;
+          const friendProfile = profileMap.get(friendId);
+          return friendProfile ? { ...f, friendProfile } : null;
+        })
+        .filter(Boolean) as FriendWithProfile[];
 
-    setFriends(withProfiles.filter((f) => f.status === "accepted"));
-    setPendingReceived(
-      withProfiles.filter((f) => f.status === "pending" && f.addressee_id === user.id)
-    );
-    setPendingSent(
-      withProfiles.filter((f) => f.status === "pending" && f.requester_id === user.id)
-    );
-    setLoading(false);
+      setFriends(withProfiles.filter((f) => f.status === "accepted"));
+      setPendingReceived(
+        withProfiles.filter((f) => f.status === "pending" && f.addressee_id === user.id)
+      );
+      setPendingSent(
+        withProfiles.filter((f) => f.status === "pending" && f.requester_id === user.id)
+      );
+    } catch (err) {
+      console.error("Failed to fetch friendships:", err);
+      setError("친구 목록을 불러올 수 없습니다");
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -118,6 +126,7 @@ export function useFriends() {
     pendingReceived,
     pendingSent,
     loading,
+    error,
     sendRequest,
     acceptRequest,
     declineRequest,
