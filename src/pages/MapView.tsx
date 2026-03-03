@@ -14,10 +14,18 @@ const MapView = () => {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
+    const koreaBounds = L.latLngBounds(
+      L.latLng(33.0, 124.5),
+      L.latLng(38.7, 131.9)
+    );
+
     const map = L.map(mapRef.current, {
       center: [36.0, 127.8],
       zoom: 7,
       zoomControl: false,
+      maxBounds: koreaBounds,
+      maxBoundsViscosity: 1.0,
+      minZoom: 6,
     });
 
     L.control.zoom({ position: "bottomright" }).addTo(map);

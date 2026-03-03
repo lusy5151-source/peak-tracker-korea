@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          badge_id: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          goal_type: string
+          goal_value: number
+          id: string
+          start_date: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          badge_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          goal_type?: string
+          goal_value?: number
+          id?: string
+          start_date?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          badge_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          goal_type?: string
+          goal_value?: number
+          id?: string
+          start_date?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friendships: {
         Row: {
           addressee_id: string
@@ -425,6 +496,44 @@ export type Database = {
           starting_point?: string
         }
         Relationships: []
+      }
+      user_challenges: {
+        Row: {
+          challenge_id: string
+          completed: boolean
+          completed_at: string | null
+          id: string
+          joined_at: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          joined_at?: string
+          progress?: number
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          joined_at?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
