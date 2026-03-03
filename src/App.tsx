@@ -21,6 +21,7 @@ import CreatePlanPage from "@/pages/CreatePlanPage";
 import PlanDetailPage from "@/pages/PlanDetailPage";
 import FeedPage from "@/pages/FeedPage";
 import FriendProfilePage from "@/pages/FriendProfilePage";
+import ChallengePage from "@/pages/ChallengePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
