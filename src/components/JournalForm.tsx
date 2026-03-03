@@ -132,8 +132,8 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const acceptedFriends = friends.filter((f) => f.status === "accepted");
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center">
-      <div className="w-full max-w-lg max-h-[90vh] bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-xl overflow-y-auto">
+    <div className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center">
+      <div className="w-full max-w-lg max-h-[90vh] bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-xl overflow-y-auto pb-24 sm:pb-0">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
           <h2 className="text-base font-bold text-foreground">
@@ -374,7 +374,7 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
         </div>
 
         {/* Submit */}
-        <div className="sticky bottom-0 bg-card border-t border-border p-4 flex gap-2">
+        <div className="sticky bottom-0 z-[61] bg-card border-t border-border p-4 pb-6 sm:pb-4 flex gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1">취소</Button>
           <Button onClick={handleSubmit} disabled={saving || !mountainId} className="flex-1">
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
