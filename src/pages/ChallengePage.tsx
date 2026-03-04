@@ -24,8 +24,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import ChallengeCompletionModal from "@/components/ChallengeCompletionModal";
 
-// Category definitions with goal_type mappings
 const CATEGORIES = [
   {
     id: "growth",
@@ -74,7 +74,7 @@ const CATEGORIES = [
     title: "시즌",
     description: "계절별 특별 챌린지",
     icon: Leaf,
-    goalTypes: [], // matched by challenge type instead
+    goalTypes: [],
   },
 ];
 
@@ -93,11 +93,28 @@ const ChallengePage = () => {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(["growth", "region", "habit"]));
+  const [completedChallenge, setCompletedChallenge] = useState<Challenge | null>(null);
+  const [prevCompletedIds, setPrevCompletedIds] = useState<Set<string>>(new Set());
 
   const load = async () => {
     setLoading(true);
     const [all, mine] = await Promise.all([fetchAllChallenges(), fetchUserChallenges()]);
     setAllChallenges(all);
+
+    // Detect newly completed challenges
+    const newCompletedIds = new Set(mine.filter((uc) => uc.completed).map((uc) => uc.challenge_id));
+    if (prevCompletedIds.size > 0) {
+      for (const id of newCompletedIds) {
+        if (!prevCompletedIds.has(id)) {
+          const ch = all.find((c) => c.id === id);
+          if (ch) {
+            setCompletedChallenge(ch);
+            break;
+          }
+        }
+      }
+    }
+    setPrevCompletedIds(newCompletedIds);
     setUserChallenges(mine);
     setLoading(false);
   };
@@ -169,6 +186,11 @@ const ChallengePage = () => {
 
   return (
     <div className="space-y-5 pb-24">
+      <ChallengeCompletionModal
+        challenge={completedChallenge}
+        onDismiss={() => setCompletedChallenge(null)}
+      />
+
       {/* Header */}
       <div className="rounded-2xl border border-border bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 p-6 text-center">
         <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
@@ -303,7 +325,6 @@ function ChallengeItem({
     );
   }
 
-  // Locked
   return (
     <div className="rounded-xl border border-dashed border-border bg-card/50 p-3">
       <div className="flex items-center justify-between">
