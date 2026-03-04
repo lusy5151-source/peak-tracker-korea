@@ -44,7 +44,7 @@ export const badges: BadgeDefinition[] = [
   { id: "hike-20", name: "산악 모험가", icon: "🗻", description: "20개의 산을 완등하세요", category: "milestone", condition: { type: "completedCount", value: 20 } },
   { id: "hike-30", name: "산악 전문가", icon: "🏅", description: "30개의 산을 완등하세요", category: "milestone", condition: { type: "completedCount", value: 30 } },
   { id: "hike-50", name: "산의 달인", icon: "👑", description: "50개의 산을 완등하세요", category: "milestone", condition: { type: "completedCount", value: 50 } },
-  { id: "hike-100", name: "백대명산 마스터", icon: "🎖️", description: "100개의 산을 모두 완등하세요", category: "milestone", condition: { type: "completedCount", value: 100 } },
+  { id: "hike-100", name: "완등 마스터", icon: "🎖️", description: "100개의 산을 모두 완등하세요", category: "milestone", condition: { type: "completedCount", value: 100 } },
 
   // Special mountains
   { id: "hallasan", name: "한라산 정복", icon: "🌋", description: "대한민국 최고봉 한라산을 완등하세요", category: "special", condition: { type: "specificMountain", mountainId: 1 } },

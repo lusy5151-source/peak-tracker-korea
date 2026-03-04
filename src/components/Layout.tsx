@@ -23,7 +23,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2">
             <Mountain className="h-5 w-5 text-primary" />
-            <span className="text-base font-bold text-foreground">백대명산</span>
+            <span className="text-base font-bold text-foreground">완등</span>
           </Link>
           <div className="flex items-center gap-2">
             {user && <NotificationCenter />}

@@ -26,6 +26,14 @@ export interface UserChallenge {
   challenge?: Challenge;
 }
 
+// Map challenge IDs to their target regions for region_specific challenges
+const REGION_MAP: Record<string, string[]> = {
+  "c1000001-0000-0000-0000-000000000017": ["서울·경기"], // 서울
+  "c1000001-0000-0000-0000-000000000018": ["서울·경기"], // 수도권
+  "c1000001-0000-0000-0000-000000000019": ["제주"],
+  "c1000001-0000-0000-0000-000000000020": ["경북", "경남"], // 영남
+};
+
 export function useChallenges() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -75,25 +83,24 @@ export function useChallenges() {
       .eq("id", ucId);
   }, [user]);
 
-  // Called after saving a hiking journal to update all active challenges
   const recalculateProgress = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Fetch user's journals
       const { data: journals } = await supabase
         .from("hiking_journals")
         .select("*")
         .eq("user_id", user.id);
       if (!journals) return;
 
-      // Fetch user's active challenges
       const { data: userChallenges } = await supabase
         .from("user_challenges")
         .select("*, challenges(*)")
         .eq("user_id", user.id)
         .eq("completed", false);
       if (!userChallenges || userChallenges.length === 0) return;
+
+      const { mountains } = await import("@/data/mountains");
 
       const now = new Date();
       const currentMonth = now.getMonth();
@@ -106,7 +113,6 @@ export function useChallenges() {
 
         switch (ch.goal_type) {
           case "count": {
-            // Count journals in current month
             progress = journals.filter((j: any) => {
               const d = new Date(j.hiked_at);
               return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
@@ -114,7 +120,6 @@ export function useChallenges() {
             break;
           }
           case "distance": {
-            // Sum estimated distances from duration (rough estimate: 1hr ≈ 4km)
             progress = journals.reduce((sum: number, j: any) => {
               if (!j.duration) return sum;
               const match = j.duration.match(/(\d+)/);
@@ -124,38 +129,96 @@ export function useChallenges() {
             break;
           }
           case "mountain": {
-            // Count distinct mountains
             const uniqueMountains = new Set(journals.map((j: any) => j.mountain_id));
             progress = uniqueMountains.size;
             break;
           }
           case "elevation": {
-            // Check if any journal's mountain has elevation >= goal
-            const { mountains } = await import("@/data/mountains");
-            const hikedMountainIds = new Set(journals.map((j: any) => j.mountain_id));
-            const hasHighMountain = mountains.some(
-              (m) => hikedMountainIds.has(m.id) && m.height >= ch.goal_value
+            const hikedIds = new Set(journals.map((j: any) => j.mountain_id));
+            const hasHigh = mountains.some(
+              (m) => hikedIds.has(m.id) && m.height >= ch.goal_value
             );
-            progress = hasHighMountain ? ch.goal_value : 0;
+            progress = hasHigh ? ch.goal_value : 0;
+            break;
+          }
+          case "elevation_total": {
+            // Sum elevation of all hiked mountains
+            const hikedMountainIds = journals.map((j: any) => j.mountain_id);
+            progress = hikedMountainIds.reduce((sum: number, mid: number) => {
+              const m = mountains.find((mt) => mt.id === mid);
+              return sum + (m ? m.height : 0);
+            }, 0);
+            break;
+          }
+          case "sunrise": {
+            // Check if any journal has a start time before 6AM (using duration field as proxy)
+            // For now, check if notes mention 새벽 or 일출
+            const hasSunrise = journals.some(
+              (j: any) => j.notes && (j.notes.includes("새벽") || j.notes.includes("일출"))
+            );
+            progress = hasSunrise ? 1 : 0;
+            break;
+          }
+          case "region_count": {
+            const hikedRegions = new Set(
+              journals.map((j: any) => {
+                const m = mountains.find((mt) => mt.id === j.mountain_id);
+                return m?.region;
+              }).filter(Boolean)
+            );
+            progress = hikedRegions.size;
+            break;
+          }
+          case "region_specific": {
+            const targetRegions = REGION_MAP[ch.id] || [];
+            const regionMountains = new Set(
+              journals
+                .map((j: any) => {
+                  const m = mountains.find((mt) => mt.id === j.mountain_id);
+                  if (m && targetRegions.includes(m.region)) return m.id;
+                  return null;
+                })
+                .filter(Boolean)
+            );
+            progress = regionMountains.size;
+            break;
+          }
+          case "journal_count": {
+            progress = journals.filter(
+              (j: any) => j.notes && j.notes.trim().length > 0
+            ).length;
             break;
           }
           case "group_count": {
-            // Count journals with tagged friends
             progress = journals.filter(
               (j: any) => j.tagged_friends && j.tagged_friends.length > 0
             ).length;
             break;
           }
           case "group_size": {
-            // Check if any journal has >= goal_value tagged friends
             const hasLargeGroup = journals.some(
               (j: any) => j.tagged_friends && j.tagged_friends.length >= ch.goal_value
             );
             progress = hasLargeGroup ? ch.goal_value : 0;
             break;
           }
+          case "new_friend": {
+            // Check if any tagged friend appears in only one journal
+            const friendJournalMap = new Map<string, number>();
+            journals.forEach((j: any) => {
+              (j.tagged_friends || []).forEach((fid: string) => {
+                friendJournalMap.set(fid, (friendJournalMap.get(fid) || 0) + 1);
+              });
+            });
+            const hasNewFriendHike = journals.some(
+              (j: any) =>
+                j.tagged_friends &&
+                j.tagged_friends.some((fid: string) => friendJournalMap.get(fid) === 1)
+            );
+            progress = hasNewFriendHike ? 1 : 0;
+            break;
+          }
           case "streak": {
-            // Calculate max consecutive days
             const dates = journals
               .map((j: any) => new Date(j.hiked_at).toDateString())
               .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
@@ -172,8 +235,6 @@ export function useChallenges() {
             break;
           }
           case "early_start": {
-            // Check journals with start_time before 6am (use duration as proxy)
-            // For now count summer journals
             const summerJournals = journals.filter((j: any) => {
               const d = new Date(j.hiked_at);
               return d.getMonth() >= 5 && d.getMonth() <= 7;
@@ -182,7 +243,6 @@ export function useChallenges() {
             break;
           }
           case "family_tag": {
-            // Check if any journal has notes mentioning 가족
             const hasFamilyTag = journals.some(
               (j: any) => j.notes && j.notes.includes("가족")
             );
