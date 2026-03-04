@@ -457,6 +457,7 @@ export type Database = {
       }
       trails: {
         Row: {
+          course_type: string
           created_at: string
           description: string | null
           difficulty: string
@@ -470,6 +471,7 @@ export type Database = {
           starting_point: string
         }
         Insert: {
+          course_type?: string
           created_at?: string
           description?: string | null
           difficulty?: string
@@ -483,6 +485,7 @@ export type Database = {
           starting_point: string
         }
         Update: {
+          course_type?: string
           created_at?: string
           description?: string | null
           difficulty?: string
