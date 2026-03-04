@@ -12,6 +12,7 @@ export interface Trail {
   elevation_gain_m: number | null;
   description: string | null;
   is_popular: boolean;
+  course_type: string;
 }
 
 export function useTrails(mountainId: number) {
