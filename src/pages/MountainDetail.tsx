@@ -10,6 +10,7 @@ import { useState, useEffect, useRef } from "react";
 import type { WeatherCondition, CompletionRecord } from "@/hooks/useMountainStore";
 import { WeatherCard } from "@/components/WeatherCard";
 import { TrailInfoSection } from "@/components/TrailInfo";
+import { NearbyPlaces } from "@/components/NearbyPlaces";
 import { useFriends } from "@/hooks/useFriends";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHikingJournals } from "@/hooks/useHikingJournals";
@@ -122,6 +123,9 @@ const MountainDetail = () => {
 
       {/* Weather & outfit */}
       <WeatherCard mountainId={mountain.id} />
+
+      {/* Nearby places */}
+      <NearbyPlaces lat={mountain.lat} lng={mountain.lng} mountainName={mountain.nameKo} />
 
       {/* Hiking Journal */}
       {completed && record && (
