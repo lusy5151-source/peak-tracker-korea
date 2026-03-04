@@ -70,7 +70,7 @@ const AuthPage = () => {
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             <Mountain className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">백대명산</h1>
+          <h1 className="text-xl font-bold text-foreground">완등</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isLogin ? "로그인하여 등산 여정을 시작하세요" : "새 계정을 만들어보세요"}
           </p>
