@@ -152,6 +152,42 @@ const Dashboard = () => {
         )}
       </section>
 
+      {/* ── Quick Actions: 오늘의 산 + 등산기록 추가 ── */}
+      <section className="grid grid-cols-2 gap-3">
+        {/* 오늘의 산 */}
+        {(() => {
+          const todayIndex = new Date().getDate() % mountains.length;
+          const todayMountain = mountains[todayIndex];
+          return (
+            <Link
+              to={`/mountains/${todayMountain.id}`}
+              className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:bg-accent/30 transition-colors"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-xs font-semibold text-foreground">오늘의 산</p>
+              </div>
+              <p className="text-sm font-bold text-foreground truncate">{todayMountain.nameKo}</p>
+              <p className="text-[10px] text-muted-foreground">{todayMountain.region} · {todayMountain.height}m</p>
+            </Link>
+          );
+        })()}
+
+        {/* 등산기록 추가 */}
+        <Link
+          to="/records"
+          className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 shadow-sm hover:bg-primary/10 transition-colors flex flex-col justify-center items-center gap-2"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <PenLine className="h-5 w-5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">등산기록 추가</p>
+          <p className="text-[10px] text-muted-foreground">오늘의 산행을 기록하세요</p>
+        </Link>
+      </section>
+
       {/* ── 2. Completion Progress + Active Challenges ── */}
       <section className="grid gap-3 sm:grid-cols-2">
         {/* Completion Progress */}
