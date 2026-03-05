@@ -16,6 +16,7 @@ import {
   Sun, Cloud, CloudRain, CloudSnow, CloudSun,
   ArrowRight, Target, Trophy, BookOpen, Heart,
   MessageCircle, Newspaper, Clock, Settings2,
+  Sparkles, PenLine,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
