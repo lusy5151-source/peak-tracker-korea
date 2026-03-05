@@ -1,47 +1,39 @@
 import { useState, useMemo } from "react";
 import { mountains, regions } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { Search, CheckCircle2, Circle, ChevronRight, ArrowUpDown, SlidersHorizontal, Mountain, Star, Smile, MapPin } from "lucide-react";
+import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain, Star, Smile, MapPin, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type SortKey = "name" | "height" | "popularity";
-type CategoryFilter = "all" | "baekdu" | "popular" | "beginner" | "general";
+type ViewMode = "all" | "baekdu" | "region" | "oreum" | "full";
 
 const MountainList = () => {
   const { isCompleted, toggleComplete, completedCount } = useStore();
   const [search, setSearch] = useState("");
-  const [regionFilter, setRegionFilter] = useState<string>("전체");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("전체");
   const [showCompleted, setShowCompleted] = useState<"all" | "done" | "todo">("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortAsc, setSortAsc] = useState(true);
-  const [category, setCategory] = useState<CategoryFilter>("all");
-  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
+  const [openRegions, setOpenRegions] = useState<Set<string>>(new Set());
 
   const totalBaekdu = mountains.filter((m) => m.is_baekdu).length;
   const completedBaekdu = mountains.filter((m) => m.is_baekdu && isCompleted(m.id)).length;
 
-  const filtered = useMemo(() => {
-    let list = mountains.filter((m) => {
-      const matchSearch = m.nameKo.includes(search) || m.name.toLowerCase().includes(search.toLowerCase());
-      const matchRegion = regionFilter === "전체" || m.region === regionFilter;
+  const filterAndSort = (list: typeof mountains) => {
+    let filtered = list.filter((m) => {
+      const matchSearch = !search.trim() || m.nameKo.includes(search) || m.name.toLowerCase().includes(search.toLowerCase());
       const matchDifficulty = difficultyFilter === "전체" || m.difficulty === difficultyFilter;
       const matchStatus =
         showCompleted === "all" ||
         (showCompleted === "done" && isCompleted(m.id)) ||
         (showCompleted === "todo" && !isCompleted(m.id));
-
-      let matchCategory = true;
-      if (category === "baekdu") matchCategory = m.is_baekdu;
-      else if (category === "popular") matchCategory = (m.popularity || 0) >= 4;
-      else if (category === "beginner") matchCategory = m.difficulty === "쉬움";
-      else if (category === "general") matchCategory = !m.is_baekdu;
-
-      return matchSearch && matchRegion && matchDifficulty && matchStatus && matchCategory;
+      return matchSearch && matchDifficulty && matchStatus;
     });
 
-    list.sort((a, b) => {
+    filtered.sort((a, b) => {
       let cmp = 0;
       if (sortKey === "name") cmp = a.nameKo.localeCompare(b.nameKo, "ko");
       else if (sortKey === "height") cmp = a.height - b.height;
@@ -49,26 +41,51 @@ const MountainList = () => {
       return sortAsc ? cmp : -cmp;
     });
 
-    return list;
-  }, [search, regionFilter, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, category]);
+    return filtered;
+  };
+
+  const allFiltered = useMemo(() => filterAndSort(mountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+
+  const regionGroups = useMemo(() => {
+    return regions.map((r) => ({
+      region: r,
+      mountains: filterAndSort(mountains.filter((m) => m.region === r)),
+    })).filter((g) => g.mountains.length > 0);
+  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
     else { setSortKey(key); setSortAsc(key === "name"); }
   };
 
-  const categories: { key: CategoryFilter; label: string; icon: any }[] = [
+  const toggleRegion = (region: string) => {
+    setOpenRegions((prev) => {
+      const next = new Set(prev);
+      if (next.has(region)) next.delete(region);
+      else next.add(region);
+      return next;
+    });
+  };
+
+  const viewModes: { key: ViewMode; label: string; icon: any }[] = [
     { key: "all", label: "전체", icon: Mountain },
     { key: "baekdu", label: "백대명산", icon: Star },
-    { key: "popular", label: "인기 산", icon: Star },
-    { key: "beginner", label: "초보자용", icon: Smile },
-    { key: "general", label: "일반 산", icon: MapPin },
+    { key: "region", label: "지역별", icon: MapPin },
+    { key: "oreum", label: "제주 오름", icon: Flame },
   ];
 
+  const getCurrentList = () => {
+    if (viewMode === "baekdu") return baekduFiltered;
+    if (viewMode === "oreum") return oreumFiltered;
+    return allFiltered;
+  };
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-24">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">산 목록</h1>
+        <h1 className="text-2xl font-bold text-foreground">산 탐색</h1>
         <p className="mt-1 text-muted-foreground text-sm">
           전체 {mountains.length}개 · 완등 {completedCount}개 · 백대명산 {completedBaekdu}/{totalBaekdu}
         </p>
@@ -86,14 +103,14 @@ const MountainList = () => {
         />
       </div>
 
-      {/* Category tabs */}
+      {/* View mode tabs */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
-        {categories.map(({ key, label, icon: Icon }) => (
+        {viewModes.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
-            onClick={() => setCategory(key)}
+            onClick={() => setViewMode(key)}
             className={`flex items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-              category === key
+              viewMode === key
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
@@ -104,54 +121,10 @@ const MountainList = () => {
         ))}
       </div>
 
-      {/* Filter toggle + Sort */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <SlidersHorizontal className="h-3.5 w-3.5" />
-          필터 {showFilters ? "접기" : "펼치기"}
-        </button>
-        <div className="flex gap-1">
-          {([["name", "이름"], ["height", "높이"], ["popularity", "인기"]] as const).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => toggleSort(key)}
-              className={`flex items-center gap-0.5 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
-                sortKey === key
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {label}
-              {sortKey === key && (
-                <ArrowUpDown className="h-3 w-3" />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Filters (collapsible) */}
-      {showFilters && (
-        <div className="space-y-3 animate-fade-in">
-          <div className="flex flex-wrap gap-1.5">
-            {["전체", ...regions].map((r) => (
-              <button
-                key={r}
-                onClick={() => setRegionFilter(r)}
-                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  regionFilter === r
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
+      {/* Filters + Sort */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1.5 overflow-x-auto">
             {["전체", "쉬움", "보통", "어려움"].map((d) => (
               <button
                 key={d}
@@ -166,87 +139,117 @@ const MountainList = () => {
               </button>
             ))}
           </div>
-          <div className="flex gap-1.5">
-            {([["all", "전체"], ["done", "완등"], ["todo", "미등"]] as const).map(([val, label]) => (
+          <div className="flex gap-1">
+            {([["name", "이름"], ["height", "높이"], ["popularity", "인기"]] as const).map(([key, label]) => (
               <button
-                key={val}
-                onClick={() => setShowCompleted(val)}
-                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  showCompleted === val
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                key={key}
+                onClick={() => toggleSort(key)}
+                className={`flex items-center gap-0.5 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
+                  sortKey === key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {label}
+                {sortKey === key && <ArrowUpDown className="h-3 w-3" />}
               </button>
             ))}
           </div>
         </div>
-      )}
-
-      {/* Result count */}
-      <p className="text-xs text-muted-foreground">{filtered.length}개 결과</p>
-
-      {/* List */}
-      <div className="space-y-2">
-        {filtered.length === 0 ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">검색 결과가 없습니다</p>
-        ) : (
-          filtered.map((m) => {
-            const completed = isCompleted(m.id);
-            const diffColor =
-              m.difficulty === "쉬움" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-              : m.difficulty === "보통" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
-
-            return (
-              <div
-                key={m.id}
-                className={`flex items-center gap-3 rounded-xl border bg-card p-3.5 shadow-sm transition-colors ${
-                  completed ? "border-primary/20 bg-primary/5" : "border-border"
-                }`}
-              >
-                <button
-                  onClick={() => toggleComplete(m.id)}
-                  className="shrink-0 text-primary"
-                  aria-label={completed ? "완등 취소" : "완등 표시"}
-                >
-                  {completed ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground/40" />
-                  )}
-                </button>
-                <Link to={`/mountains/${m.id}`} className="flex flex-1 items-center justify-between min-w-0">
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <p className={`font-medium truncate ${completed ? "text-primary" : "text-foreground"}`}>
-                        {m.nameKo}
-                      </p>
-                      {m.is_baekdu && (
-                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400">
-                          백대
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <span>{m.region}</span>
-                      <span>·</span>
-                      <span>{m.height}m</span>
-                      <span className={`rounded px-1 py-0.5 text-[10px] font-medium ${diffColor}`}>
-                        {m.difficulty}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-                </Link>
-              </div>
-            );
-          })
-        )}
+        <div className="flex gap-1.5">
+          {([["all", "전체"], ["done", "완등"], ["todo", "미등"]] as const).map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => setShowCompleted(val)}
+              className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                showCompleted === val ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* Content */}
+      {viewMode === "region" ? (
+        <div className="space-y-2">
+          {regionGroups.map(({ region, mountains: rMountains }) => (
+            <Collapsible key={region} open={openRegions.has(region)} onOpenChange={() => toggleRegion(region)}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3.5 hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm text-foreground">{region}</span>
+                    <span className="text-xs text-muted-foreground">{rMountains.length}개</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${openRegions.has(region) ? "rotate-180" : ""}`} />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-2 mt-2 pl-2">
+                  {rMountains.map((m) => (
+                    <MountainCard key={m.id} m={m} isCompleted={isCompleted(m.id)} toggleComplete={toggleComplete} />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">{getCurrentList().length}개 결과</p>
+          <div className="space-y-2">
+            {getCurrentList().length === 0 ? (
+              <p className="py-12 text-center text-sm text-muted-foreground">검색 결과가 없습니다</p>
+            ) : (
+              getCurrentList().map((m) => (
+                <MountainCard key={m.id} m={m} isCompleted={isCompleted(m.id)} toggleComplete={toggleComplete} />
+              ))
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
+
+function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof mountains[0]; isCompleted: boolean; toggleComplete: (id: number) => void }) {
+  const diffColor =
+    m.difficulty === "쉬움" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+    : m.difficulty === "보통" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+
+  return (
+    <div className={`flex items-center gap-3 rounded-xl border bg-card p-3.5 shadow-sm transition-colors ${
+      completed ? "border-primary/20 bg-primary/5" : "border-border"
+    }`}>
+      <button
+        onClick={() => toggleComplete(m.id)}
+        className="shrink-0 text-primary"
+        aria-label={completed ? "완등 취소" : "완등 표시"}
+      >
+        {completed ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5 text-muted-foreground/40" />}
+      </button>
+      <Link to={`/mountains/${m.id}`} className="flex flex-1 items-center justify-between min-w-0">
+        <div className="min-w-0 space-y-0.5">
+          <div className="flex items-center gap-1.5">
+            <p className={`font-medium truncate ${completed ? "text-primary" : "text-foreground"}`}>{m.nameKo}</p>
+            {m.is_baekdu && (
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400">
+                백대
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span>{m.region}</span>
+            <span>·</span>
+            <span>{m.height}m</span>
+            <span className={`rounded px-1 py-0.5 text-[10px] font-medium ${diffColor}`}>{m.difficulty}</span>
+          </div>
+        </div>
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+      </Link>
+    </div>
+  );
+}
 
 export default MountainList;

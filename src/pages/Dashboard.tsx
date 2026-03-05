@@ -1,498 +1,350 @@
 import { useStore } from "@/context/StoreContext";
-import { mountains } from "@/data/mountains";
-import { getOutfitRecommendations } from "@/data/mockWeather";
-import { useFriends } from "@/hooks/useFriends";
+import { mountains, baekduMountains } from "@/data/mountains";
+import { badges } from "@/data/badges";
 import { useWeather } from "@/hooks/useWeather";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
+import { useHikingPlans } from "@/hooks/useHikingPlans";
+import { useHikingJournals, HikingJournal } from "@/hooks/useHikingJournals";
+import { useChallenges, Challenge, UserChallenge } from "@/hooks/useChallenges";
 import AchievementModal from "@/components/AchievementModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Progress } from "@/components/ui/progress";
 import {
-  Mountain, Plus, Calendar, MapPin, Wind, Droplets,
-  ChevronRight, Shirt, Users, Sun, Cloud, CloudRain, CloudSnow, CloudSun,
-  ArrowRight, Thermometer, Search, Trophy,
+  Mountain, Plus, Calendar, MapPin, ChevronRight,
+  Sun, Cloud, CloudRain, CloudSnow, CloudSun,
+  ArrowRight, Target, Trophy, BookOpen, Heart,
+  MessageCircle, Newspaper, Clock, Settings2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMemo, useState, useEffect, useRef } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useMemo, useState, useEffect } from "react";
 
 const conditionIcons: Record<string, any> = {
   "맑음": Sun, "구름": CloudSun, "흐림": Cloud, "비": CloudRain, "눈": CloudSnow,
 };
 
+const GOAL_KEY = "wandeng-user-goal";
+
 const Dashboard = () => {
   const { records, completedCount, isCompleted } = useStore();
   const { items: gearItems } = useGearStore();
-  const { earnedCount, totalBadges, nextMilestone, newlyEarned, dismissNewBadge, featuredBadge } =
+  const { earnedBadges, isEarned, newlyEarned, dismissNewBadge, earnedCount, totalBadges } =
     useAchievementStore(records, gearItems);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { friends, loading: friendsLoading, error: friendsError } = useFriends();
-  const completionPercent = Math.round((completedCount / mountains.length) * 100);
+  const { plans } = useHikingPlans();
+  const { fetchFeed } = useHikingJournals();
+  const { fetchAllChallenges, fetchUserChallenges } = useChallenges();
 
-  const featuredMountain = useMemo(() => {
-    return mountains.find((m) => m.trails?.length && !isCompleted(m.id))
-      || mountains.find((m) => m.trails?.length)
-      || mountains[0];
-  }, [isCompleted]);
+  const [recentJournals, setRecentJournals] = useState<HikingJournal[]>([]);
+  const [activeChallenges, setActiveChallenges] = useState<(UserChallenge & { ch: Challenge })[]>([]);
+  const [allChallengesList, setAllChallengesList] = useState<Challenge[]>([]);
+  const [userGoal, setUserGoal] = useState<number>(() => {
+    const saved = localStorage.getItem(GOAL_KEY);
+    return saved ? parseInt(saved) : 100;
+  });
+  const [showGoalEdit, setShowGoalEdit] = useState(false);
 
-  const { weather, isReal: isRealWeather } = useWeather(featuredMountain.id, featuredMountain.lat, featuredMountain.lng);
-  const outfitRecs = getOutfitRecommendations(weather);
+  const baekduCount = baekduMountains.length;
+  const baekduCompleted = baekduMountains.filter((m) => isCompleted(m.id)).length;
+  const goalPercent = Math.min(Math.round((completedCount / userGoal) * 100), 100);
+
+  // Upcoming hike
+  const upcomingPlan = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return plans
+      .filter((p) => new Date(p.planned_date) >= today && p.status !== "cancelled")
+      .sort((a, b) => new Date(a.planned_date).getTime() - new Date(b.planned_date).getTime())[0] || null;
+  }, [plans]);
+
+  const upcomingMountain = upcomingPlan ? mountains.find((m) => m.id === upcomingPlan.mountain_id) : null;
+  const { weather } = useWeather(
+    upcomingMountain?.id || mountains[0].id,
+    upcomingMountain?.lat || mountains[0].lat,
+    upcomingMountain?.lng || mountains[0].lng
+  );
+
+  const dDay = useMemo(() => {
+    if (!upcomingPlan) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const planDate = new Date(upcomingPlan.planned_date);
+    planDate.setHours(0, 0, 0, 0);
+    const diff = Math.round((planDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return "D-Day";
+    return `D-${diff}`;
+  }, [upcomingPlan]);
+
+  // Load journals & challenges
+  useEffect(() => {
+    if (user) {
+      fetchFeed().then((journals) => setRecentJournals(journals.slice(0, 3)));
+      Promise.all([fetchAllChallenges(), fetchUserChallenges()]).then(([all, mine]) => {
+        setAllChallengesList(all);
+        const active = mine
+          .filter((uc) => !uc.completed)
+          .slice(0, 3)
+          .map((uc) => ({ ...uc, ch: all.find((c) => c.id === uc.challenge_id)! }))
+          .filter((uc) => uc.ch);
+        setActiveChallenges(active);
+      });
+    }
+  }, [user]);
+
+  const handleGoalSave = (val: number) => {
+    const clamped = Math.max(1, Math.min(val, 200));
+    setUserGoal(clamped);
+    localStorage.setItem(GOAL_KEY, String(clamped));
+    setShowGoalEdit(false);
+  };
+
   const CondIcon = conditionIcons[weather.condition] || Cloud;
 
-  const recentRecords = useMemo(() => {
-    return [...records]
-      .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
-      .slice(0, 4)
-      .map((r) => ({ ...r, mountain: mountains.find((m) => m.id === r.mountainId)! }))
-      .filter((r) => r.mountain);
-  }, [records]);
-
-  // Mountain summary - show mix of completed and not completed
-  const summaryMountains = useMemo(() => {
-    const completed = mountains.filter((m) => isCompleted(m.id)).slice(0, 3);
-    const remaining = mountains.filter((m) => !isCompleted(m.id)).slice(0, 6 - completed.length);
-    return [...completed, ...remaining].slice(0, 6);
-  }, [isCompleted]);
-
-  // Search
-  const [search, setSearch] = useState("");
-  const searchResults = useMemo(() => {
-    if (!search.trim()) return [];
-    const q = search.trim().toLowerCase();
-    return mountains.filter((m) =>
-      m.nameKo.includes(q) || m.name.toLowerCase().includes(q) || m.region.includes(q)
-    ).slice(0, 6);
-  }, [search]);
+  // News items (static for now)
+  const newsItems = [
+    { id: 1, title: "봄철 등산 안전 수칙 안내", date: "2026-03-05", summary: "해빙기 산행 시 주의사항을 확인하세요." },
+    { id: 2, title: "국립공원 예약제 일부 변경", date: "2026-03-03", summary: "3월부터 일부 코스 예약제가 변경됩니다." },
+    { id: 3, title: "설악산 탐방로 개방 안내", date: "2026-03-01", summary: "겨울 통제 해제, 탐방로가 순차 개방됩니다." },
+  ];
 
   return (
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
-    <div className="space-y-6 pb-24">
+    <div className="space-y-5 pb-24">
       <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />
 
-      {/* ── Progress & Achievements ── */}
-      <section className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="relative h-16 w-16 shrink-0">
-              <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--secondary))" strokeWidth="5" />
-                <circle
-                  cx="32" cy="32" r="28" fill="none"
-                  stroke="hsl(var(--primary))" strokeWidth="5"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 28}`}
-                  strokeDashoffset={`${2 * Math.PI * 28 * (1 - completionPercent / 100)}`}
-                  className="transition-all duration-700 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold text-foreground">{completionPercent}%</span>
+      {/* ── 1. Upcoming Hike ── */}
+      <section>
+        <SectionHeader title="다가오는 등산" linkTo="/plans" linkLabel="계획 보기" />
+        {upcomingPlan && upcomingMountain ? (
+          <Link to={`/plans/${upcomingPlan.id}`} className="block rounded-2xl border border-border bg-card p-5 shadow-sm hover:bg-accent/30 transition-colors">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-lg bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground">{dDay}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(upcomingPlan.planned_date).toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
+                    {upcomingPlan.start_time && ` · ${upcomingPlan.start_time.slice(0, 5)}`}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-foreground">{upcomingMountain.nameKo}</h3>
+                <p className="text-xs text-muted-foreground">{upcomingMountain.region} · {upcomingMountain.height}m</p>
+              </div>
+              <div className="flex items-center gap-1.5 rounded-lg bg-secondary px-2.5 py-1.5">
+                <CondIcon className="h-4 w-4 text-sky-500" />
+                <span className="text-sm font-medium text-foreground">{weather.temp}°</span>
               </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">완등 진행률</p>
-              <p className="text-xs text-muted-foreground">{completedCount} / {mountains.length} 산</p>
-              {nextMilestone && (
-                <p className="mt-1 text-[10px] text-primary">
-                  다음 목표: {nextMilestone.icon} {nextMilestone.name}
-                </p>
-              )}
-            </div>
-          </div>
-          <Link
-            to="/profile"
-            className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-          >
-            지역별 상세 보기 <ChevronRight className="h-3 w-3" />
           </Link>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 shrink-0">
-              <Trophy className="h-6 w-6 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">업적</p>
-              <p className="text-xs text-muted-foreground">{earnedCount} / {totalBadges} 달성</p>
-              {featuredBadge && (
-                <p className="mt-0.5 text-[10px] text-primary">
-                  ⭐ {featuredBadge.icon} {featuredBadge.name}
-                </p>
-              )}
-            </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+            <Calendar className="mx-auto h-8 w-8 text-muted-foreground/30" />
+            <p className="mt-2 text-sm text-muted-foreground">예정된 등산 일정이 없습니다</p>
+            <Link
+              to="/plans/create"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-3.5 w-3.5" /> 계획 만들기
+            </Link>
           </div>
-          <Link
-            to="/achievements"
-            className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-          >
-            업적 보기 <ChevronRight className="h-3 w-3" />
-          </Link>
-        </div>
+        )}
       </section>
 
-      {/* ── Search + Map (compact) + Today's Mountain ── */}
-      <section className="space-y-4">
-        {/* Search */}
-        <div className="relative">
-          <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="산 이름, 지역으로 검색..."
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-            />
+      {/* ── 2. Completion Progress + Active Challenges ── */}
+      <section className="grid gap-3 sm:grid-cols-2">
+        {/* Completion Progress */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-foreground">완등 진행률</p>
+            <button onClick={() => setShowGoalEdit(!showGoalEdit)} className="text-muted-foreground hover:text-primary">
+              <Settings2 className="h-3.5 w-3.5" />
+            </button>
           </div>
-          {searchResults.length > 0 && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-              {searchResults.map((m) => (
-                <Link
-                  key={m.id}
-                  to={`/mountains/${m.id}`}
-                  onClick={() => setSearch("")}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/60 transition-colors"
+          {showGoalEdit && (
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">목표:</span>
+              {[30, 50, 100].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => handleGoalSave(v)}
+                  className={`rounded-md px-2 py-1 text-[10px] font-medium transition-colors ${userGoal === v ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
                 >
-                  <Mountain className="h-4 w-4 text-primary" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground">{m.nameKo}</p>
-                    <p className="text-[10px] text-muted-foreground">{m.region} · {m.height}m · {m.difficulty}</p>
-                  </div>
-                  {isCompleted(m.id) && (
-                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">완등</span>
-                  )}
-                </Link>
+                  {v}
+                </button>
               ))}
             </div>
           )}
+          <div className="flex items-center gap-4">
+            <div className="relative h-24 w-24 shrink-0">
+              <svg className="h-24 w-24 -rotate-90" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="40" fill="none" stroke="hsl(var(--secondary))" strokeWidth="7" />
+                <circle
+                  cx="48" cy="48" r="40" fill="none"
+                  stroke="hsl(var(--primary))" strokeWidth="7"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 40}`}
+                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - goalPercent / 100)}`}
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-bold text-foreground">{goalPercent}%</span>
+              </div>
+            </div>
+            <div className="flex-1 space-y-1.5">
+              <p className="text-2xl font-bold text-foreground">{completedCount}<span className="text-sm font-normal text-muted-foreground"> / {userGoal}</span></p>
+              <p className="text-xs text-muted-foreground">목표 {userGoal}개 산 완등</p>
+              <p className="text-[10px] text-primary">백대명산 {baekduCompleted}/{baekduCount}</p>
+            </div>
+          </div>
+          <Link
+            to="/mountains"
+            className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+          >
+            산 목록 보기 <ChevronRight className="h-3 w-3" />
+          </Link>
         </div>
 
-        {/* Map (compact) + Today's Mountain side by side */}
-        <div className="grid gap-4 lg:grid-cols-5">
-          {/* Map - smaller */}
-          <div className="lg:col-span-2 rounded-2xl border border-border overflow-hidden shadow-sm bg-card min-h-[200px] lg:min-h-[260px]">
-            <MiniMap isCompleted={isCompleted} onMarkerClick={(id) => navigate(`/mountains/${id}`)} />
+        {/* Active Challenges */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-foreground">진행 중인 챌린지</p>
+            <Link to="/challenges" className="text-xs text-primary hover:underline">전체</Link>
           </div>
-
-          {/* Today's Mountain & Weather */}
-          <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col">
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-primary">오늘의 산</p>
-              {!isRealWeather && <span className="text-[8px] bg-secondary text-muted-foreground rounded px-1">예상</span>}
+          {!user ? (
+            <div className="text-center py-4">
+              <Target className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">로그인하면 챌린지에 참여할 수 있어요</p>
             </div>
-            <h2 className="mt-1 text-xl font-bold text-foreground">{featuredMountain.nameKo}</h2>
-            <p className="text-xs text-muted-foreground">{featuredMountain.region} · {featuredMountain.height}m · {featuredMountain.difficulty}</p>
-
-            <div className="mt-4 flex items-center gap-3">
-              <CondIcon className="h-9 w-9 text-sky-500" />
-              <div>
-                <p className="text-2xl font-bold text-foreground">{weather.temp}°</p>
-                <p className="text-[10px] text-muted-foreground">체감 {weather.feelsLike}°C</p>
-              </div>
-              <div className="ml-auto grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Wind className="h-3 w-3" /> {weather.windSpeed}km/h</span>
-                <span className="flex items-center gap-1"><Droplets className="h-3 w-3" /> {weather.precipChance}%</span>
-                <span className="flex items-center gap-1"><Thermometer className="h-3 w-3" /> 습도 {weather.humidity}%</span>
-              </div>
+          ) : activeChallenges.length > 0 ? (
+            <div className="space-y-3">
+              {activeChallenges.map((ac) => {
+                const pct = Math.min(Math.round((ac.progress / ac.ch.goal_value) * 100), 100);
+                return (
+                  <div key={ac.id} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {ac.ch.badge && <span className="text-sm shrink-0">{ac.ch.badge.image_url}</span>}
+                        <p className="text-xs font-medium text-foreground truncate">{ac.ch.title}</p>
+                      </div>
+                      <span className="text-[10px] font-medium text-primary shrink-0">{pct}%</span>
+                    </div>
+                    <Progress value={pct} className="h-1.5 bg-secondary [&>div]:bg-primary" />
+                    <p className="text-[10px] text-muted-foreground">{ac.progress} / {ac.ch.goal_value}</p>
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="mt-4 rounded-xl bg-accent/40 p-3">
-              <p className="text-[10px] font-medium text-accent-foreground/70 mb-1">🧥 복장 추천</p>
-              <p className="text-xs text-foreground leading-relaxed">
-                {outfitRecs.slice(0, 3).map((r) => r.item).join(" · ")}
-              </p>
+          ) : (
+            <div className="text-center py-4">
+              <Target className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">참여 중인 챌린지가 없습니다</p>
+              <Link to="/challenges" className="mt-2 inline-block text-xs text-primary font-medium">챌린지 둘러보기</Link>
             </div>
-
-            <Link
-              to={`/mountains/${featuredMountain.id}`}
-              className="mt-auto pt-3 flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              상세 보기 <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Add Hiking Record CTA */}
-      <Link
-        to="/mountains"
-        className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-sky-500 px-6 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
-      >
-        <Plus className="h-5 w-5" />
-        등산 기록 추가하기
-      </Link>
-
-      {/* ── Mountain Summary Widget ── */}
+      {/* ── 3. Recent Hiking Journals ── */}
       <section>
-        <SectionHeader title="명산 요약" linkTo="/mountains" linkLabel="전체 보기" />
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-xl bg-secondary/50 p-3">
-              <p className="text-xl font-bold text-foreground">{mountains.length}</p>
-              <p className="text-[10px] text-muted-foreground">전체 산</p>
-            </div>
-            <div className="rounded-xl bg-primary/10 p-3">
-              <p className="text-xl font-bold text-primary">{completedCount}</p>
-              <p className="text-[10px] text-muted-foreground">완등</p>
-            </div>
-            <div className="rounded-xl bg-secondary/50 p-3">
-              <p className="text-xl font-bold text-foreground">{completionPercent}%</p>
-              <p className="text-[10px] text-muted-foreground">달성률</p>
-            </div>
-          </div>
-
-          <div className="grid gap-2 sm:grid-cols-2">
-            {summaryMountains.map((m) => {
-              const completed = isCompleted(m.id);
+        <SectionHeader title="최근 등산 일지" linkTo="/feed" linkLabel="전체 보기" />
+        {!user ? (
+          <EmptyState icon={BookOpen} message="로그인하면 등산 일지를 볼 수 있습니다" linkTo="/auth" linkLabel="로그인" />
+        ) : recentJournals.length === 0 ? (
+          <EmptyState icon={BookOpen} message="아직 등산 일지가 없습니다" linkTo="/records" linkLabel="기록 남기기" />
+        ) : (
+          <div className="space-y-2.5">
+            {recentJournals.map((j) => {
+              const mt = mountains.find((m) => m.id === j.mountain_id);
               return (
-                <Link
-                  key={m.id}
-                  to={`/mountains/${m.id}`}
-                  className={`flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-secondary/60 ${
-                    completed ? "bg-primary/5" : "bg-secondary/30"
-                  }`}
-                >
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${
-                    completed ? "bg-primary/10" : "bg-secondary"
-                  }`}>
-                    <Mountain className={`h-4 w-4 ${completed ? "text-primary" : "text-muted-foreground"}`} />
+                <div key={j.id} className="rounded-xl border border-border bg-card p-3.5 shadow-sm">
+                  <div className="flex gap-3">
+                    {j.photos && j.photos.length > 0 ? (
+                      <img src={j.photos[0]} alt="" className="h-16 w-16 rounded-lg object-cover shrink-0" />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                        <Mountain className="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm text-foreground truncate">{mt?.nameKo || "산"}</p>
+                        {j.profile?.nickname && (
+                          <span className="text-[10px] text-muted-foreground">by {j.profile.nickname}</span>
+                        )}
+                      </div>
+                      {j.notes && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{j.notes}</p>}
+                      <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                        <span className="flex items-center gap-0.5"><Heart className="h-3 w-3" /> {j.like_count || 0}</span>
+                        <span className="flex items-center gap-0.5"><MessageCircle className="h-3 w-3" /> {j.comment_count || 0}</span>
+                        <span>{new Date(j.hiked_at).toLocaleDateString("ko-KR")}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{m.nameKo}</p>
-                    <p className="text-[10px] text-muted-foreground">{m.region} · {m.height}m</p>
-                  </div>
-                  {completed ? (
-                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary shrink-0">완등</span>
-                  ) : (
-                    <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground shrink-0">미등</span>
-                  )}
-                </Link>
+                </div>
               );
             })}
           </div>
+        )}
+      </section>
 
-          <Link
-            to="/mountains"
-            className="flex items-center justify-center gap-1 rounded-lg bg-secondary px-3 py-2.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-          >
-            전체 산 목록 보기 <ArrowRight className="h-3 w-3" />
-          </Link>
+      {/* ── 4. Badge Gallery ── */}
+      <section>
+        <SectionHeader title="배지 갤러리" linkTo="/achievements" linkLabel="전체 보기" />
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+            {badges.map((b) => {
+              const earned = isEarned(b.id);
+              return (
+                <div key={b.id} className="flex flex-col items-center gap-1.5 shrink-0 w-16">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all ${
+                    earned
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-muted grayscale opacity-40"
+                  }`}>
+                    <span className="text-xl">{b.icon}</span>
+                  </div>
+                  <p className={`text-[9px] font-medium text-center leading-tight ${earned ? "text-foreground" : "text-muted-foreground"}`}>
+                    {b.name}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">{earnedCount} / {totalBadges} 달성</p>
         </div>
       </section>
 
-      {/* Recent Hiking Records */}
+      {/* ── 5. Mountain News ── */}
       <section>
-        <SectionHeader title="최근 기록" linkTo="/records" linkLabel="모두 보기" />
-        {recentRecords.length === 0 ? (
-          <EmptyState icon={Mountain} message="아직 등산 기록이 없습니다" linkTo="/mountains" linkLabel="산 목록에서 시작하세요" />
-        ) : (
-          <div className="space-y-2.5">
-            {recentRecords.map((r) => (
-              <Link
-                key={r.mountainId}
-                to={`/mountains/${r.mountainId}`}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm transition-colors hover:bg-secondary/50"
-              >
-                {r.photos && r.photos.length > 0 ? (
-                  <img src={r.photos[0]} alt="" className="h-12 w-12 rounded-lg object-cover" />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Mountain className="h-5 w-5 text-primary" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground truncate">{r.mountain.nameKo}</p>
-                    {r.weather && <span className="text-xs text-muted-foreground">{r.weather}</span>}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(r.completedAt).toLocaleDateString("ko-KR")}
-                    {(r as any).taggedFriends && (r as any).taggedFriends.length > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <Users className="h-3 w-3" />
-                        {(r as any).taggedFriends.length}명
-                      </span>
-                    )}
-                  </div>
-                  {r.notes && <p className="mt-0.5 text-xs text-muted-foreground/70 truncate">{r.notes}</p>}
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Gear & Outfit */}
-      <section>
-        <SectionHeader title="내 장비" linkTo="/gear" linkLabel="관리하기" />
-        {gearItems.length === 0 ? (
-          <EmptyState icon={Shirt} message="등록된 장비가 없습니다" linkTo="/gear" linkLabel="장비를 추가하세요" />
-        ) : (
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Shirt className="h-4 w-4 text-primary" />
-              <p className="text-sm font-medium text-foreground">{gearItems.length}개 장비 등록됨</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {gearItems.slice(0, 6).map((g) => (
-                <div key={g.id} className="flex items-center gap-2 rounded-lg bg-secondary/60 px-2.5 py-1.5">
-                  {g.photo ? (
-                    <img src={g.photo} alt="" className="h-6 w-6 rounded object-cover" />
-                  ) : (
-                    <span className="text-sm">👕</span>
-                  )}
-                  <span className="text-xs font-medium text-foreground">{g.name}</span>
-                </div>
-              ))}
-              {gearItems.length > 6 && (
-                <Link to="/gear" className="flex items-center rounded-lg bg-secondary/60 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-primary">
-                  +{gearItems.length - 6}개 더
-                </Link>
-              )}
-            </div>
-            <div className="mt-3 rounded-lg bg-accent/30 p-3">
-              <p className="text-[10px] font-medium text-primary mb-1">오늘 날씨에 맞는 장비</p>
-              <p className="text-xs text-foreground">
-                {outfitRecs.slice(0, 2).map((r) => r.item).join(", ")}
-              </p>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* Friends & Social */}
-      <section>
-        <SectionHeader title="친구 활동" linkTo="/social" linkLabel="전체 보기" />
-        {!user ? (
-          <div className="rounded-xl border border-border bg-card p-6 text-center">
-            <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">로그인하면 친구를 볼 수 있습니다</p>
-            <Link to="/auth" className="mt-2 inline-block text-xs text-primary font-medium">로그인하기</Link>
-          </div>
-        ) : friendsLoading ? (
-          <div className="space-y-2.5">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-14 rounded-xl border border-border bg-card animate-pulse" />
-            ))}
-          </div>
-        ) : friendsError ? (
-          <div className="rounded-xl border border-border bg-card p-6 text-center">
-            <Users className="h-6 w-6 text-destructive mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">{friendsError}</p>
-          </div>
-        ) : friends.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-6 text-center">
-            <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">아직 친구가 없습니다</p>
-            <Link to="/social" className="mt-2 inline-block text-xs text-primary font-medium">친구 찾기</Link>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
-            {friends.slice(0, 3).map((f) => (
-              <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={f.friendProfile.avatar_url || ""} />
-                  <AvatarFallback className="text-xs">{f.friendProfile.nickname?.[0] || "?"}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{f.friendProfile.nickname || "사용자"}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Users className="h-3 w-3" />
-                    <span>친구</span>
-                    {f.friendProfile.location && <span>· {f.friendProfile.location}</span>}
-                  </div>
-                </div>
+        <SectionHeader title="산 뉴스" linkTo="#" linkLabel="" />
+        <div className="space-y-2">
+          {newsItems.map((n) => (
+            <div key={n.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary shrink-0">
+                <Newspaper className="h-4 w-4 text-muted-foreground" />
               </div>
-            ))}
-          </div>
-        )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
+                <p className="text-[10px] text-muted-foreground">{n.date}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+            </div>
+          ))}
+        </div>
       </section>
     </div>
     </ErrorBoundary>
   );
 };
 
-/* ─── Mini Map (Korea-restricted) ─── */
-
-const KOREA_BOUNDS: L.LatLngBoundsExpression = [
-  [33.0, 124.5],  // SW
-  [38.8, 130.0],  // NE
-];
-
-function MiniMap({ isCompleted, onMarkerClick }: { isCompleted: (id: number) => boolean; onMarkerClick: (id: number) => void }) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-
-  useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-
-    const map = L.map(mapRef.current, {
-      center: [36.0, 127.8],
-      zoom: 7,
-      minZoom: 6,
-      maxZoom: 13,
-      maxBounds: KOREA_BOUNDS,
-      maxBoundsViscosity: 1.0,
-      zoomControl: false,
-      attributionControl: false,
-    });
-
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenStreetMap',
-      maxZoom: 18,
-    }).addTo(map);
-
-    mountains.forEach((m) => {
-      const completed = isCompleted(m.id);
-      const color = completed ? "hsl(160, 40%, 40%)" : "hsl(200, 30%, 70%)";
-
-      const icon = L.divIcon({
-        className: "custom-marker",
-        html: `<div style="
-          width: 10px; height: 10px;
-          background: ${color};
-          border: 2px solid white;
-          border-radius: 50%;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        "></div>`,
-        iconSize: [10, 10],
-        iconAnchor: [5, 5],
-      });
-
-      const marker = L.marker([m.lat, m.lng], { icon }).addTo(map);
-      marker.bindTooltip(
-        `<strong>${m.nameKo}</strong><br/>${m.height}m${completed ? " ✓" : ""}`,
-        { direction: "top", offset: [0, -6] }
-      );
-      marker.on("click", () => onMarkerClick(m.id));
-    });
-
-    mapInstanceRef.current = map;
-
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-    };
-  }, [isCompleted, onMarkerClick]);
-
-  return <div ref={mapRef} className="h-full w-full min-h-[200px]" />;
-}
-
 /* ─── Helpers ─── */
-
 function SectionHeader({ title, linkTo, linkLabel }: { title: string; linkTo: string; linkLabel: string }) {
   return (
     <div className="mb-3 flex items-center justify-between">
       <h2 className="text-base font-semibold text-foreground">{title}</h2>
-      <Link to={linkTo} className="text-xs text-primary hover:underline">{linkLabel}</Link>
+      {linkLabel && <Link to={linkTo} className="text-xs text-primary hover:underline">{linkLabel}</Link>}
     </div>
   );
 }
