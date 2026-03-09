@@ -12,6 +12,8 @@ export interface Challenge {
   start_date: string | null;
   end_date: string | null;
   badge_id: string | null;
+  level: number;
+  category: string;
   badge?: { name: string; image_url: string | null; description: string | null };
 }
 
@@ -26,12 +28,26 @@ export interface UserChallenge {
   challenge?: Challenge;
 }
 
-// Map challenge IDs to their target regions for region_specific challenges
+const TIER_ORDER = ["bronze", "silver", "gold", "platinum"] as const;
+export type BadgeTier = (typeof TIER_ORDER)[number];
+
+export function getTierForLevel(level: number): BadgeTier {
+  return TIER_ORDER[Math.min(level - 1, 3)] || "bronze";
+}
+
+export const TIER_COLORS: Record<BadgeTier, { bg: string; ring: string; text: string }> = {
+  bronze: { bg: "bg-amber-100 dark:bg-amber-900/30", ring: "stroke-amber-400", text: "text-amber-600 dark:text-amber-400" },
+  silver: { bg: "bg-slate-200 dark:bg-slate-700/40", ring: "stroke-slate-400", text: "text-slate-500 dark:text-slate-400" },
+  gold: { bg: "bg-yellow-100 dark:bg-yellow-900/30", ring: "stroke-yellow-500", text: "text-yellow-600 dark:text-yellow-400" },
+  platinum: { bg: "bg-violet-100 dark:bg-violet-900/30", ring: "stroke-violet-500", text: "text-violet-600 dark:text-violet-400" },
+};
+
+// Region map for region_specific challenges
 const REGION_MAP: Record<string, string[]> = {
-  "c1000001-0000-0000-0000-000000000017": ["서울·경기"], // 서울
-  "c1000001-0000-0000-0000-000000000018": ["서울·경기"], // 수도권
-  "c1000001-0000-0000-0000-000000000019": ["제주"],
-  "c1000001-0000-0000-0000-000000000020": ["경북", "경남"], // 영남
+  "c2000001-0004-0000-0000-000000000001": ["서울·경기"],
+  "c2000001-0004-0000-0000-000000000002": ["서울·경기"],
+  "c2000001-0004-0000-0000-000000000003": ["경북", "경남"],
+  "c2000001-0004-0000-0000-000000000004": ["제주"],
 };
 
 export function useChallenges() {
@@ -42,7 +58,8 @@ export function useChallenges() {
     const { data } = await supabase
       .from("challenges")
       .select("*, badges(name, image_url, description)")
-      .order("type");
+      .order("category")
+      .order("level");
     return (data || []).map((c: any) => ({
       ...c,
       badge: c.badges || null,
@@ -68,6 +85,43 @@ export function useChallenges() {
     await supabase
       .from("user_challenges")
       .insert({ user_id: user.id, challenge_id: challengeId } as any);
+  }, [user]);
+
+  const joinCategoryLevel1 = useCallback(async (category: string, allChallenges: Challenge[]) => {
+    if (!user) return;
+    const lv1 = allChallenges.find((c) => c.category === category && c.level === 1);
+    if (!lv1) return;
+    // Check if already joined
+    const { data: existing } = await supabase
+      .from("user_challenges")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("challenge_id", lv1.id)
+      .maybeSingle();
+    if (!existing) {
+      await supabase
+        .from("user_challenges")
+        .insert({ user_id: user.id, challenge_id: lv1.id } as any);
+    }
+  }, [user]);
+
+  const autoUnlockNextLevel = useCallback(async (completedChallenge: Challenge, allChallenges: Challenge[]) => {
+    if (!user) return;
+    const nextLevel = allChallenges.find(
+      (c) => c.category === completedChallenge.category && c.level === completedChallenge.level + 1
+    );
+    if (!nextLevel) return;
+    const { data: existing } = await supabase
+      .from("user_challenges")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("challenge_id", nextLevel.id)
+      .maybeSingle();
+    if (!existing) {
+      await supabase
+        .from("user_challenges")
+        .insert({ user_id: user.id, challenge_id: nextLevel.id } as any);
+    }
   }, [user]);
 
   const updateProgress = useCallback(async (ucId: string, progress: number, goalValue: number) => {
@@ -101,7 +155,6 @@ export function useChallenges() {
       if (!userChallenges || userChallenges.length === 0) return;
 
       const { mountains } = await import("@/data/mountains");
-
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
@@ -133,40 +186,12 @@ export function useChallenges() {
             progress = uniqueMountains.size;
             break;
           }
-          case "elevation": {
-            const hikedIds = new Set(journals.map((j: any) => j.mountain_id));
-            const hasHigh = mountains.some(
-              (m) => hikedIds.has(m.id) && m.height >= ch.goal_value
-            );
-            progress = hasHigh ? ch.goal_value : 0;
-            break;
-          }
           case "elevation_total": {
-            // Sum elevation of all hiked mountains
             const hikedMountainIds = journals.map((j: any) => j.mountain_id);
             progress = hikedMountainIds.reduce((sum: number, mid: number) => {
               const m = mountains.find((mt) => mt.id === mid);
               return sum + (m ? m.height : 0);
             }, 0);
-            break;
-          }
-          case "sunrise": {
-            // Check if any journal has a start time before 6AM (using duration field as proxy)
-            // For now, check if notes mention 새벽 or 일출
-            const hasSunrise = journals.some(
-              (j: any) => j.notes && (j.notes.includes("새벽") || j.notes.includes("일출"))
-            );
-            progress = hasSunrise ? 1 : 0;
-            break;
-          }
-          case "region_count": {
-            const hikedRegions = new Set(
-              journals.map((j: any) => {
-                const m = mountains.find((mt) => mt.id === j.mountain_id);
-                return m?.region;
-              }).filter(Boolean)
-            );
-            progress = hikedRegions.size;
             break;
           }
           case "region_specific": {
@@ -183,70 +208,94 @@ export function useChallenges() {
             progress = regionMountains.size;
             break;
           }
-          case "journal_count": {
-            progress = journals.filter(
-              (j: any) => j.notes && j.notes.trim().length > 0
-            ).length;
-            break;
-          }
-          case "group_count": {
-            progress = journals.filter(
-              (j: any) => j.tagged_friends && j.tagged_friends.length > 0
-            ).length;
-            break;
-          }
-          case "group_size": {
-            const hasLargeGroup = journals.some(
-              (j: any) => j.tagged_friends && j.tagged_friends.length >= ch.goal_value
-            );
-            progress = hasLargeGroup ? ch.goal_value : 0;
-            break;
-          }
-          case "new_friend": {
-            // Check if any tagged friend appears in only one journal
-            const friendJournalMap = new Map<string, number>();
-            journals.forEach((j: any) => {
-              (j.tagged_friends || []).forEach((fid: string) => {
-                friendJournalMap.set(fid, (friendJournalMap.get(fid) || 0) + 1);
-              });
-            });
-            const hasNewFriendHike = journals.some(
-              (j: any) =>
-                j.tagged_friends &&
-                j.tagged_friends.some((fid: string) => friendJournalMap.get(fid) === 1)
-            );
-            progress = hasNewFriendHike ? 1 : 0;
-            break;
-          }
           case "streak": {
-            const dates = journals
-              .map((j: any) => new Date(j.hiked_at).toDateString())
-              .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
-              .map((d: string) => new Date(d).getTime())
-              .sort((a: number, b: number) => a - b);
-            let maxStreak = dates.length > 0 ? 1 : 0;
-            let streak = 1;
-            for (let i = 1; i < dates.length; i++) {
-              const diff = (dates[i] - dates[i - 1]) / (1000 * 60 * 60 * 24);
-              if (diff === 1) { streak++; maxStreak = Math.max(maxStreak, streak); }
-              else { streak = 1; }
-            }
-            progress = maxStreak;
-            break;
-          }
-          case "early_start": {
-            const summerJournals = journals.filter((j: any) => {
-              const d = new Date(j.hiked_at);
-              return d.getMonth() >= 5 && d.getMonth() <= 7;
-            });
-            progress = summerJournals.length > 0 ? 1 : 0;
-            break;
-          }
-          case "family_tag": {
-            const hasFamilyTag = journals.some(
-              (j: any) => j.notes && j.notes.includes("가족")
+            const months = new Set(
+              journals.map((j: any) => {
+                const d = new Date(j.hiked_at);
+                return `${d.getFullYear()}-${d.getMonth()}`;
+              })
             );
-            progress = hasFamilyTag ? 1 : 0;
+            // Count consecutive months ending at current
+            let streak = 0;
+            for (let i = 0; i < 12; i++) {
+              const d = new Date(currentYear, currentMonth - i);
+              if (months.has(`${d.getFullYear()}-${d.getMonth()}`)) streak++;
+              else break;
+            }
+            progress = streak;
+            break;
+          }
+          case "sunrise": {
+            const hasSunrise = journals.some(
+              (j: any) => j.notes && (j.notes.includes("새벽") || j.notes.includes("일출"))
+            );
+            progress = hasSunrise ? 1 : 0;
+            break;
+          }
+          case "sunset": {
+            const hasSunset = journals.some(
+              (j: any) => j.notes && (j.notes.includes("석양") || j.notes.includes("일몰"))
+            );
+            progress = hasSunset ? 1 : 0;
+            break;
+          }
+          case "night_hike": {
+            const hasNight = journals.some(
+              (j: any) => j.notes && (j.notes.includes("야간") || j.notes.includes("밤"))
+            );
+            progress = hasNight ? 1 : 0;
+            break;
+          }
+          case "weather_rain": {
+            progress = journals.some((j: any) => j.weather === "비") ? 1 : 0;
+            break;
+          }
+          case "weather_snow": {
+            progress = journals.some((j: any) => j.weather === "눈") ? 1 : 0;
+            break;
+          }
+          case "weather_wind": {
+            progress = journals.some((j: any) => j.weather === "바람") ? 1 : 0;
+            break;
+          }
+          case "difficulty_count": {
+            const difficultMountains = new Set(
+              journals
+                .map((j: any) => {
+                  const m = mountains.find((mt) => mt.id === j.mountain_id);
+                  return m?.difficulty === "어려움" ? m.id : null;
+                })
+                .filter(Boolean)
+            );
+            progress = difficultMountains.size;
+            break;
+          }
+          case "seasonal_spring": {
+            progress = journals.some((j: any) => {
+              const m = new Date(j.hiked_at).getMonth();
+              return m >= 2 && m <= 4;
+            }) ? 1 : 0;
+            break;
+          }
+          case "seasonal_summer": {
+            progress = journals.some((j: any) => {
+              const m = new Date(j.hiked_at).getMonth();
+              return m >= 5 && m <= 7;
+            }) ? 1 : 0;
+            break;
+          }
+          case "seasonal_autumn": {
+            progress = journals.some((j: any) => {
+              const m = new Date(j.hiked_at).getMonth();
+              return m >= 8 && m <= 10;
+            }) ? 1 : 0;
+            break;
+          }
+          case "seasonal_winter": {
+            progress = journals.some((j: any) => {
+              const m = new Date(j.hiked_at).getMonth();
+              return m === 11 || m <= 1;
+            }) ? 1 : 0;
             break;
           }
         }
@@ -260,16 +309,24 @@ export function useChallenges() {
             completed_at: completed ? new Date().toISOString() : null,
           } as any)
           .eq("id", uc.id);
+
+        // Auto-unlock next level on completion
+        if (completed) {
+          const allCh = await fetchAllChallenges();
+          await autoUnlockNextLevel(ch, allCh);
+        }
       }
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, autoUnlockNextLevel, fetchAllChallenges]);
 
   return {
     fetchAllChallenges,
     fetchUserChallenges,
     joinChallenge,
+    joinCategoryLevel1,
+    autoUnlockNextLevel,
     updateProgress,
     recalculateProgress,
     loading,
