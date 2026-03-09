@@ -12,6 +12,9 @@ export interface HikingPlan {
   notes: string | null;
   invite_code: string;
   status: string;
+  group_id: string | null;
+  is_public: boolean;
+  meeting_location: string | null;
   created_at: string;
   updated_at: string;
 }
