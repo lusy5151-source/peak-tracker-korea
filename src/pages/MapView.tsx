@@ -20,15 +20,17 @@ const MapView = () => {
 
   useEffect(() => {
     if (user) {
-      fetchSharedCompletions().then((scs) => {
-        const ids = new Set(scs.map((sc) => sc.mountain_id));
-        setSharedMountains(ids);
-        const map = new Map<number, SharedCompletion>();
-        scs.forEach((sc) => {
-          if (!map.has(sc.mountain_id)) map.set(sc.mountain_id, sc);
-        });
-        setSharedCompletionMap(map);
-      });
+      fetchSharedCompletions()
+        .then((scs) => {
+          const ids = new Set(scs.map((sc) => sc.mountain_id));
+          setSharedMountains(ids);
+          const map = new Map<number, SharedCompletion>();
+          scs.forEach((sc) => {
+            if (!map.has(sc.mountain_id)) map.set(sc.mountain_id, sc);
+          });
+          setSharedCompletionMap(map);
+        })
+        .catch((e) => console.error("Failed to fetch shared completions for map:", e));
     }
   }, [user]);
 

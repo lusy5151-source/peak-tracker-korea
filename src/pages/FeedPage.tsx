@@ -34,6 +34,9 @@ const FeedPage = () => {
       setJournals(journalData);
       setSharedCompletions(scData);
       setLoading(false);
+    }).catch((e) => {
+      console.error("Failed to fetch feed data:", e);
+      setLoading(false);
     });
   }, [user]);
 

@@ -27,50 +27,60 @@ export function useSharedCompletions() {
   const [loading, setLoading] = useState(false);
 
   const fetchSharedCompletions = useCallback(async (mountainId?: number): Promise<SharedCompletion[]> => {
-    let query = supabase.from("shared_completions").select("*").order("completed_at", { ascending: false });
-    if (mountainId) query = query.eq("mountain_id", mountainId);
-    const { data } = await query;
-    if (!data || data.length === 0) return [];
+    try {
+      let query = supabase.from("shared_completions").select("*").order("completed_at", { ascending: false });
+      if (mountainId) query = query.eq("mountain_id", mountainId);
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) return [];
 
-    const ids = (data as any[]).map((d) => d.id);
-    const { data: participants } = await supabase
-      .from("shared_completion_participants")
-      .select("*")
-      .in("shared_completion_id", ids);
+      const ids = (data as any[]).map((d) => d.id);
+      const { data: participants } = await supabase
+        .from("shared_completion_participants")
+        .select("*")
+        .in("shared_completion_id", ids);
 
-    const userIds = [...new Set((participants || []).map((p: any) => p.user_id))];
-    const { data: profiles } = userIds.length > 0
-      ? await supabase.from("profiles").select("user_id, nickname, avatar_url").in("user_id", userIds)
-      : { data: [] };
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+      const userIds = [...new Set((participants || []).map((p: any) => p.user_id))];
+      const { data: profiles } = userIds.length > 0
+        ? await supabase.from("profiles").select("user_id, nickname, avatar_url").in("user_id", userIds)
+        : { data: [] };
+      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
 
-    const partMap = new Map<string, SharedCompletionParticipant[]>();
-    (participants || []).forEach((p: any) => {
-      const list = partMap.get(p.shared_completion_id) || [];
-      list.push({ ...p, profile: profileMap.get(p.user_id) || null });
-      partMap.set(p.shared_completion_id, list);
-    });
+      const partMap = new Map<string, SharedCompletionParticipant[]>();
+      (participants || []).forEach((p: any) => {
+        const list = partMap.get(p.shared_completion_id) || [];
+        list.push({ ...p, profile: profileMap.get(p.user_id) || null });
+        partMap.set(p.shared_completion_id, list);
+      });
 
-    return (data as any[]).map((d) => ({
-      ...d,
-      participants: partMap.get(d.id) || [],
-    }));
+      return (data as any[]).map((d) => ({
+        ...d,
+        participants: partMap.get(d.id) || [],
+      }));
+    } catch (e) {
+      console.error("Failed to fetch shared completions:", e);
+      return [];
+    }
   }, []);
 
   const fetchMySharedCompletions = useCallback(async (): Promise<SharedCompletion[]> => {
-    if (!user) return [];
-    const { data: myParts } = await supabase
-      .from("shared_completion_participants")
-      .select("shared_completion_id")
-      .eq("user_id", user.id);
-    if (!myParts || myParts.length === 0) return [];
-    const scIds = (myParts as any[]).map((p) => p.shared_completion_id);
-    const { data } = await supabase
-      .from("shared_completions")
-      .select("*")
-      .in("id", scIds)
-      .order("completed_at", { ascending: false });
-    return (data as any[]) || [];
+    try {
+      if (!user) return [];
+      const { data: myParts } = await supabase
+        .from("shared_completion_participants")
+        .select("shared_completion_id")
+        .eq("user_id", user.id);
+      if (!myParts || myParts.length === 0) return [];
+      const scIds = (myParts as any[]).map((p) => p.shared_completion_id);
+      const { data } = await supabase
+        .from("shared_completions")
+        .select("*")
+        .in("id", scIds)
+        .order("completed_at", { ascending: false });
+      return (data as any[]) || [];
+    } catch (e) {
+      console.error("Failed to fetch my shared completions:", e);
+      return [];
+    }
   }, [user]);
 
   const createSharedCompletion = async (params: {
@@ -79,92 +89,111 @@ export function useSharedCompletions() {
     participant_user_ids: string[];
     group_id?: string;
   }) => {
-    if (!user) return { error: { message: "Not authenticated" } };
+    try {
+      if (!user) return { error: { message: "Not authenticated" } };
 
-    const { data: sc, error } = await supabase
-      .from("shared_completions")
-      .insert({
-        plan_id: params.plan_id || null,
-        mountain_id: params.mountain_id,
-        group_id: params.group_id || null,
-        created_by: user.id,
-      } as any)
-      .select()
-      .single();
+      const { data: sc, error } = await supabase
+        .from("shared_completions")
+        .insert({
+          plan_id: params.plan_id || null,
+          mountain_id: params.mountain_id,
+          group_id: params.group_id || null,
+          created_by: user.id,
+        } as any)
+        .select()
+        .single();
 
-    if (error || !sc) return { error };
+      if (error || !sc) return { error: error || { message: "Failed to create" } };
 
-    const allUserIds = [...new Set([user.id, ...params.participant_user_ids])];
-    const participantRows = allUserIds.map((uid) => ({
-      shared_completion_id: (sc as any).id,
-      user_id: uid,
-      verified: uid === user.id,
-      verified_at: uid === user.id ? new Date().toISOString() : null,
-    }));
+      const allUserIds = [...new Set([user.id, ...params.participant_user_ids])];
+      const participantRows = allUserIds.map((uid) => ({
+        shared_completion_id: (sc as any).id,
+        user_id: uid,
+        verified: uid === user.id,
+        verified_at: uid === user.id ? new Date().toISOString() : null,
+      }));
 
-    await supabase.from("shared_completion_participants").insert(participantRows as any);
+      await supabase.from("shared_completion_participants").insert(participantRows as any);
 
-    // Create activity feed entry
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("nickname")
-      .eq("user_id", user.id)
-      .single();
-    const name = (profile as any)?.nickname || "누군가";
+      // Create activity feed entry (non-blocking)
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("nickname")
+          .eq("user_id", user.id)
+          .single();
+        const name = (profile as any)?.nickname || "누군가";
 
-    const { mountains } = await import("@/data/mountains");
-    const mt = mountains.find((m) => m.id === params.mountain_id);
+        const { mountains } = await import("@/data/mountains");
+        const mt = mountains.find((m) => m.id === params.mountain_id);
 
-    await supabase.from("activity_feed").insert({
-      user_id: user.id,
-      type: "shared_completion",
-      mountain_id: params.mountain_id,
-      shared_completion_id: (sc as any).id,
-      message: `${name}님이 친구들과 함께 ${mt?.nameKo || "산"}을 완등했습니다.`,
-      participant_ids: allUserIds,
-    } as any);
-
-    // Notify other participants
-    const others = allUserIds.filter((uid) => uid !== user.id);
-    if (others.length > 0) {
-      await supabase.from("plan_notifications").insert(
-        others.map((uid) => ({
-          user_id: uid,
-          plan_id: params.plan_id || "00000000-0000-0000-0000-000000000000",
+        await supabase.from("activity_feed").insert({
+          user_id: user.id,
           type: "shared_completion",
-          message: `${name}님이 ${mt?.nameKo || "산"} 공동 완등을 기록했습니다. 완등을 확인해주세요! 👥`,
-        })) as any
-      );
-    }
+          mountain_id: params.mountain_id,
+          shared_completion_id: (sc as any).id,
+          message: `${name}님이 친구들과 함께 ${mt?.nameKo || "산"}을 완등했습니다.`,
+          participant_ids: allUserIds,
+        } as any);
 
-    return { data: sc as SharedCompletion, error: null };
+        // Notify other participants
+        const others = allUserIds.filter((uid) => uid !== user.id);
+        if (others.length > 0) {
+          await supabase.from("plan_notifications").insert(
+            others.map((uid) => ({
+              user_id: uid,
+              plan_id: params.plan_id || "00000000-0000-0000-0000-000000000000",
+              type: "shared_completion",
+              message: `${name}님이 ${mt?.nameKo || "산"} 공동 완등을 기록했습니다. 완등을 확인해주세요! 👥`,
+            })) as any
+          );
+        }
+      } catch (feedErr) {
+        console.error("Activity feed creation failed:", feedErr);
+      }
+
+      return { data: sc as SharedCompletion, error: null };
+    } catch (e) {
+      console.error("Failed to create shared completion:", e);
+      return { error: { message: "공동 완등 기록에 실패했습니다" } };
+    }
   };
 
   const verifyCompletion = async (sharedCompletionId: string) => {
-    if (!user) return { error: { message: "Not authenticated" } };
-    const { error } = await supabase
-      .from("shared_completion_participants")
-      .update({ verified: true, verified_at: new Date().toISOString() } as any)
-      .eq("shared_completion_id", sharedCompletionId)
-      .eq("user_id", user.id);
-    return { error };
+    try {
+      if (!user) return { error: { message: "Not authenticated" } };
+      const { error } = await supabase
+        .from("shared_completion_participants")
+        .update({ verified: true, verified_at: new Date().toISOString() } as any)
+        .eq("shared_completion_id", sharedCompletionId)
+        .eq("user_id", user.id);
+      return { error };
+    } catch (e) {
+      console.error("Failed to verify completion:", e);
+      return { error: { message: "확인에 실패했습니다" } };
+    }
   };
 
   const isSharedCompleted = useCallback(async (mountainId: number): Promise<boolean> => {
-    if (!user) return false;
-    const { data: myParts } = await supabase
-      .from("shared_completion_participants")
-      .select("shared_completion_id")
-      .eq("user_id", user.id);
-    if (!myParts || myParts.length === 0) return false;
-    const scIds = (myParts as any[]).map((p) => p.shared_completion_id);
-    const { data } = await supabase
-      .from("shared_completions")
-      .select("id")
-      .in("id", scIds)
-      .eq("mountain_id", mountainId)
-      .limit(1);
-    return (data && data.length > 0) || false;
+    try {
+      if (!user) return false;
+      const { data: myParts } = await supabase
+        .from("shared_completion_participants")
+        .select("shared_completion_id")
+        .eq("user_id", user.id);
+      if (!myParts || myParts.length === 0) return false;
+      const scIds = (myParts as any[]).map((p) => p.shared_completion_id);
+      const { data } = await supabase
+        .from("shared_completions")
+        .select("id")
+        .in("id", scIds)
+        .eq("mountain_id", mountainId)
+        .limit(1);
+      return (data && data.length > 0) || false;
+    } catch (e) {
+      console.error("Failed to check shared completion:", e);
+      return false;
+    }
   }, [user]);
 
   return {
