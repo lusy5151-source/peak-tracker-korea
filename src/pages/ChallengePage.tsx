@@ -1,98 +1,65 @@
 import { useEffect, useState, useMemo } from "react";
-import { useChallenges, Challenge, UserChallenge } from "@/hooks/useChallenges";
+import { useChallenges, Challenge, UserChallenge, getTierForLevel, TIER_COLORS, BadgeTier } from "@/hooks/useChallenges";
 import { useAuth } from "@/contexts/AuthContext";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Trophy,
   Target,
   CheckCircle2,
-  Plus,
-  ChevronDown,
+  Lock,
+  ChevronRight,
   TrendingUp,
   MapPin,
   CalendarCheck,
-  Sunrise,
-  BookOpen,
-  Users,
+  CloudRain,
+  Clock,
+  Mountain,
   Leaf,
+  Swords,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import ChallengeCompletionModal from "@/components/ChallengeCompletionModal";
 
 const CATEGORIES = [
-  {
-    id: "growth",
-    title: "성장",
-    description: "거리와 고도를 정복해보세요",
-    icon: TrendingUp,
-    goalTypes: ["distance", "elevation_total", "elevation"],
-  },
-  {
-    id: "region",
-    title: "지역 정복",
-    description: "다양한 지역의 산을 탐험하세요",
-    icon: MapPin,
-    goalTypes: ["mountain", "region_specific", "region_count"],
-  },
-  {
-    id: "habit",
-    title: "습관 & 꾸준함",
-    description: "등산을 습관으로 만들어보세요",
-    icon: CalendarCheck,
-    goalTypes: ["count", "streak"],
-  },
-  {
-    id: "special",
-    title: "특별 조건",
-    description: "특별한 등산 경험에 도전하세요",
-    icon: Sunrise,
-    goalTypes: ["sunrise", "early_start"],
-  },
-  {
-    id: "journal",
-    title: "기록 & 콘텐츠",
-    description: "등산 기록을 남겨보세요",
-    icon: BookOpen,
-    goalTypes: ["journal_count"],
-  },
-  {
-    id: "social",
-    title: "소셜",
-    description: "함께하는 등산의 즐거움",
-    icon: Users,
-    goalTypes: ["group_count", "group_size", "family_tag", "new_friend"],
-  },
-  {
-    id: "season",
-    title: "시즌",
-    description: "계절별 특별 챌린지",
-    icon: Leaf,
-    goalTypes: [],
-  },
-];
+  { id: "distance", title: "거리 챌린지", description: "총 등산 거리를 정복하세요", icon: TrendingUp, color: "coral" },
+  { id: "elevation", title: "고도 챌린지", description: "누적 고도를 정복하세요", icon: Mountain, color: "amber" },
+  { id: "mountain_count", title: "봉우리 챌린지", description: "다양한 산을 등정하세요", icon: Target, color: "emerald" },
+  { id: "region", title: "지역 탐험", description: "다양한 지역의 산을 탐험하세요", icon: MapPin, color: "sky" },
+  { id: "habit", title: "등산 습관", description: "등산을 습관으로 만들어보세요", icon: CalendarCheck, color: "violet" },
+  { id: "weather", title: "날씨 도전", description: "특별한 날씨 속 등산", icon: CloudRain, color: "blue" },
+  { id: "time", title: "시간 도전", description: "특별한 시간대 등산", icon: Clock, color: "orange" },
+  { id: "difficulty", title: "난이도 도전", description: "어려운 산에 도전하세요", icon: Swords, color: "red" },
+  { id: "season", title: "시즌 챌린지", description: "계절별 특별 챌린지", icon: Leaf, color: "green" },
+] as const;
 
-interface ChallengeWithStatus {
+const CATEGORY_STYLES: Record<string, { bg: string; iconBg: string; iconColor: string; progressBar: string }> = {
+  distance: { bg: "from-coral/5 to-peach/10", iconBg: "bg-coral/15", iconColor: "text-coral", progressBar: "[&>div]:bg-coral" },
+  elevation: { bg: "from-amber-50 to-yellow-50 dark:from-amber-950/10 dark:to-yellow-950/10", iconBg: "bg-amber-100 dark:bg-amber-900/30", iconColor: "text-amber-600 dark:text-amber-400", progressBar: "[&>div]:bg-amber-500" },
+  mountain_count: { bg: "from-emerald-50 to-green-50 dark:from-emerald-950/10 dark:to-green-950/10", iconBg: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-600 dark:text-emerald-400", progressBar: "[&>div]:bg-emerald-500" },
+  region: { bg: "from-sky-50 to-blue-50 dark:from-sky-950/10 dark:to-blue-950/10", iconBg: "bg-sky-100 dark:bg-sky-900/30", iconColor: "text-sky-600 dark:text-sky-400", progressBar: "[&>div]:bg-sky-500" },
+  habit: { bg: "from-violet-50 to-purple-50 dark:from-violet-950/10 dark:to-purple-950/10", iconBg: "bg-violet-100 dark:bg-violet-900/30", iconColor: "text-violet-600 dark:text-violet-400", progressBar: "[&>div]:bg-violet-500" },
+  weather: { bg: "from-blue-50 to-indigo-50 dark:from-blue-950/10 dark:to-indigo-950/10", iconBg: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-600 dark:text-blue-400", progressBar: "[&>div]:bg-blue-500" },
+  time: { bg: "from-orange-50 to-amber-50 dark:from-orange-950/10 dark:to-amber-950/10", iconBg: "bg-orange-100 dark:bg-orange-900/30", iconColor: "text-orange-600 dark:text-orange-400", progressBar: "[&>div]:bg-orange-500" },
+  difficulty: { bg: "from-red-50 to-rose-50 dark:from-red-950/10 dark:to-rose-950/10", iconBg: "bg-red-100 dark:bg-red-900/30", iconColor: "text-red-600 dark:text-red-400", progressBar: "[&>div]:bg-red-500" },
+  season: { bg: "from-green-50 to-lime-50 dark:from-green-950/10 dark:to-lime-950/10", iconBg: "bg-green-100 dark:bg-green-900/30", iconColor: "text-green-600 dark:text-green-400", progressBar: "[&>div]:bg-green-500" },
+};
+
+interface LevelItem {
   challenge: Challenge;
   userChallenge?: UserChallenge;
-  status: "ongoing" | "completed" | "locked";
+  status: "active" | "completed" | "locked";
+  tier: BadgeTier;
 }
 
 const ChallengePage = () => {
   const { user } = useAuth();
-  const { fetchAllChallenges, fetchUserChallenges, joinChallenge, recalculateProgress } = useChallenges();
+  const { fetchAllChallenges, fetchUserChallenges, joinCategoryLevel1, recalculateProgress } = useChallenges();
   const { toast } = useToast();
   const [allChallenges, setAllChallenges] = useState<Challenge[]>([]);
   const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
-  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(["growth", "region", "habit"]));
   const [completedChallenge, setCompletedChallenge] = useState<Challenge | null>(null);
   const [prevCompletedIds, setPrevCompletedIds] = useState<Set<string>>(new Set());
 
@@ -101,16 +68,12 @@ const ChallengePage = () => {
     const [all, mine] = await Promise.all([fetchAllChallenges(), fetchUserChallenges()]);
     setAllChallenges(all);
 
-    // Detect newly completed challenges
     const newCompletedIds = new Set(mine.filter((uc) => uc.completed).map((uc) => uc.challenge_id));
     if (prevCompletedIds.size > 0) {
       for (const id of newCompletedIds) {
         if (!prevCompletedIds.has(id)) {
           const ch = all.find((c) => c.id === id);
-          if (ch) {
-            setCompletedChallenge(ch);
-            break;
-          }
+          if (ch) { setCompletedChallenge(ch); break; }
         }
       }
     }
@@ -129,48 +92,48 @@ const ChallengePage = () => {
 
   const categorized = useMemo(() => {
     return CATEGORIES.map((cat) => {
-      const items: ChallengeWithStatus[] = allChallenges
-        .filter((ch) => {
-          if (cat.id === "season") return ch.type === "season";
-          return cat.goalTypes.includes(ch.goal_type) && ch.type !== "season";
-        })
-        .map((ch) => {
-          const uc = ucMap.get(ch.id);
-          let status: "ongoing" | "completed" | "locked" = "locked";
-          if (uc) status = uc.completed ? "completed" : "ongoing";
-          return { challenge: ch, userChallenge: uc, status };
-        })
-        .sort((a, b) => {
-          const order = { ongoing: 0, locked: 1, completed: 2 };
-          return order[a.status] - order[b.status];
-        });
+      const challenges = allChallenges
+        .filter((ch) => ch.category === cat.id)
+        .sort((a, b) => a.level - b.level);
 
-      const ongoingCount = items.filter((i) => i.status === "ongoing").length;
-      const completedCount = items.filter((i) => i.status === "completed").length;
+      const levels: LevelItem[] = challenges.map((ch, idx) => {
+        const uc = ucMap.get(ch.id);
+        const tier = getTierForLevel(ch.level);
+        let status: "active" | "completed" | "locked" = "locked";
 
-      return { ...cat, items, ongoingCount, completedCount };
-    }).filter((cat) => cat.items.length > 0);
+        if (uc) {
+          status = uc.completed ? "completed" : "active";
+        } else if (idx === 0) {
+          // LV1 is always joinable
+          status = "locked";
+        } else {
+          // Check if previous level is completed
+          const prevCh = challenges[idx - 1];
+          const prevUc = ucMap.get(prevCh.id);
+          if (prevUc?.completed) status = "locked"; // unlocked but not joined yet - still show as locked visually until auto-joined
+        }
+
+        return { challenge: ch, userChallenge: uc, status, tier };
+      });
+
+      const activeLevel = levels.find((l) => l.status === "active");
+      const completedCount = levels.filter((l) => l.status === "completed").length;
+
+      return { ...cat, levels, activeLevel, completedCount, style: CATEGORY_STYLES[cat.id] };
+    }).filter((cat) => cat.levels.length > 0);
   }, [allChallenges, ucMap]);
 
-  const totalOngoing = userChallenges.filter((uc) => !uc.completed).length;
   const totalCompleted = userChallenges.filter((uc) => uc.completed).length;
+  const totalChallenges = allChallenges.length;
+  const overallPct = totalChallenges > 0 ? Math.round((totalCompleted / totalChallenges) * 100) : 0;
 
-  const toggleCategory = (id: string) => {
-    setOpenCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const handleJoin = async (challengeId: string) => {
+  const handleJoinCategory = async (categoryId: string) => {
     if (!user) return;
-    setJoining(challengeId);
-    await joinChallenge(challengeId);
+    setJoining(categoryId);
+    await joinCategoryLevel1(categoryId, allChallenges);
     await recalculateProgress();
     await load();
-    toast({ title: "챌린지 참여 완료!", description: "진행 상황이 자동으로 업데이트됩니다." });
+    toast({ title: "챌린지 참여 완료!", description: "LV1부터 시작합니다. 완료하면 다음 레벨이 자동 해금됩니다." });
     setJoining(null);
   };
 
@@ -192,68 +155,81 @@ const ChallengePage = () => {
       />
 
       {/* Header */}
-      <div className="rounded-2xl border border-border bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 p-6 text-center">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-          <Target className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+      <div className="rounded-3xl bg-gradient-to-br from-primary/10 to-emerald-100/50 dark:from-primary/5 dark:to-emerald-900/20 p-6 text-center border border-border">
+        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
+          <Trophy className="h-8 w-8 text-primary" />
         </div>
         <h1 className="text-xl font-bold text-foreground">챌린지</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          진행 중 {totalOngoing}개 · 완료 {totalCompleted}개
+          {totalCompleted} / {totalChallenges} 달성
         </p>
+        {/* Overall progress */}
+        <div className="mt-4 mx-auto max-w-xs">
+          <div className="h-3 w-full rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+              style={{ width: `${overallPct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">{overallPct}%</p>
+        </div>
       </div>
 
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-32 rounded-3xl bg-muted animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {categorized.map((cat) => {
             const Icon = cat.icon;
-            const isOpen = openCategories.has(cat.id);
+            const style = cat.style;
+            const hasJoined = cat.levels.some((l) => l.userChallenge);
+
             return (
-              <Collapsible key={cat.id} open={isOpen} onOpenChange={() => toggleCategory(cat.id)}>
-                <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-                        <Icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                      <div className="text-left">
-                        <h2 className="font-semibold text-sm text-foreground">{cat.title}</h2>
-                        <p className="text-xs text-muted-foreground">{cat.description}</p>
-                      </div>
+              <div
+                key={cat.id}
+                className={`rounded-3xl border border-border bg-gradient-to-br ${style.bg} p-5 shadow-sm`}
+              >
+                {/* Category header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${style.iconBg}`}>
+                      <Icon className={`h-5 w-5 ${style.iconColor}`} />
                     </div>
-                    <div className="flex items-center gap-2">
-                      {cat.ongoingCount > 0 && (
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          {cat.ongoingCount} 진행
-                        </span>
-                      )}
-                      {cat.completedCount > 0 && (
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                          {cat.completedCount} 완료
-                        </span>
-                      )}
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    <div>
+                      <h2 className="font-bold text-sm text-foreground">{cat.title}</h2>
+                      <p className="text-[11px] text-muted-foreground">{cat.description}</p>
                     </div>
                   </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="space-y-2 mt-2 pl-2">
-                    {cat.items.map((item) => (
-                      <ChallengeItem
-                        key={item.challenge.id}
-                        item={item}
-                        joining={joining}
-                        onJoin={handleJoin}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                  {cat.completedCount > 0 && (
+                    <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                      {cat.completedCount}/{cat.levels.length}
+                    </span>
+                  )}
+                </div>
+
+                {/* Level cards */}
+                <div className="space-y-2.5">
+                  {cat.levels.map((item) => (
+                    <LevelCard key={item.challenge.id} item={item} categoryStyle={style} />
+                  ))}
+                </div>
+
+                {/* Join button if not started */}
+                {!hasJoined && (
+                  <Button
+                    className="w-full mt-4 rounded-2xl gap-2"
+                    onClick={() => handleJoinCategory(cat.id)}
+                    disabled={joining === cat.id}
+                  >
+                    <Target className="h-4 w-4" />
+                    {joining === cat.id ? "참여 중..." : "챌린지 시작하기"}
+                  </Button>
+                )}
+              </div>
             );
           })}
         </div>
@@ -262,32 +238,56 @@ const ChallengePage = () => {
   );
 };
 
-function ChallengeItem({
-  item,
-  joining,
-  onJoin,
-}: {
-  item: ChallengeWithStatus;
-  joining: string | null;
-  onJoin: (id: string) => void;
-}) {
-  const { challenge: ch, userChallenge: uc, status } = item;
+function LevelCard({ item, categoryStyle }: { item: LevelItem; categoryStyle: typeof CATEGORY_STYLES[string] }) {
+  const { challenge: ch, userChallenge: uc, status, tier } = item;
+  const tierColor = TIER_COLORS[tier];
+
+  if (status === "locked" && !uc) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-card/40 p-3.5 opacity-50">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                LV{ch.level}
+              </span>
+              <h3 className="font-semibold text-sm text-muted-foreground truncate">{ch.title}</h3>
+            </div>
+            <p className="text-[11px] text-muted-foreground/60 mt-0.5 truncate">{ch.description}</p>
+          </div>
+          {ch.badge && (
+            <div className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+              <span className="text-lg grayscale opacity-40">{ch.badge.image_url}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (status === "completed" && uc) {
     return (
-      <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 p-3">
+      <div className={`rounded-2xl border-2 border-primary/30 bg-card p-3.5 shadow-sm`}>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${tierColor.bg} shadow-sm`}>
             {ch.badge ? (
-              <span className="text-lg">{ch.badge.image_url}</span>
+              <span className="text-xl">{ch.badge.image_url}</span>
             ) : (
-              <Trophy className="h-5 w-5 text-emerald-600" />
+              <Trophy className={`h-5 w-5 ${tierColor.text}`} />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm text-foreground truncate">{ch.title}</h3>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tierColor.bg} ${tierColor.text}`}>
+                LV{ch.level} · {tier.charAt(0).toUpperCase() + tier.slice(1)}
+              </span>
+              <h3 className="font-semibold text-sm text-foreground truncate">{ch.title}</h3>
+            </div>
             {ch.badge && (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">🏅 {ch.badge.name}</p>
+              <p className={`text-[11px] font-medium mt-0.5 ${tierColor.text}`}>🏅 {ch.badge.name}</p>
             )}
             {uc.completed_at && (
               <p className="text-[10px] text-muted-foreground">
@@ -295,56 +295,54 @@ function ChallengeItem({
               </p>
             )}
           </div>
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
         </div>
       </div>
     );
   }
 
-  if (status === "ongoing" && uc) {
+  // Active / ongoing
+  if (uc) {
     const pct = Math.min(Math.round((uc.progress / ch.goal_value) * 100), 100);
     return (
-      <div className="rounded-xl border border-border bg-card p-3 space-y-2">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm text-foreground truncate">{ch.title}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ch.description}</p>
+      <div className="rounded-2xl border border-border bg-card p-3.5 shadow-sm space-y-2.5">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${tierColor.bg}`}>
+            {ch.badge ? (
+              <span className="text-xl">{ch.badge.image_url}</span>
+            ) : (
+              <Target className={`h-5 w-5 ${tierColor.text}`} />
+            )}
           </div>
-          {ch.badge && <span className="text-xl shrink-0 ml-2">{ch.badge.image_url}</span>}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tierColor.bg} ${tierColor.text}`}>
+                LV{ch.level}
+              </span>
+              <h3 className="font-semibold text-sm text-foreground truncate">{ch.title}</h3>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{ch.description}</p>
+          </div>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">진행률</span>
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">
+            <span className={`font-semibold ${tierColor.text}`}>
               {uc.progress} / {ch.goal_value} ({pct}%)
             </span>
           </div>
-          <Progress value={pct} className="h-2 bg-emerald-100 dark:bg-emerald-900/30 [&>div]:bg-emerald-500" />
+          <div className="h-2.5 w-full rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="rounded-xl border border-dashed border-border bg-card/50 p-3">
-      <div className="flex items-center justify-between">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm text-foreground truncate">{ch.title}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ch.description}</p>
-        </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="shrink-0 ml-2 border-emerald-300 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-          onClick={() => onJoin(ch.id)}
-          disabled={joining === ch.id}
-        >
-          <Plus className="h-3.5 w-3.5 mr-1" />
-          {joining === ch.id ? "참여 중..." : "참여"}
-        </Button>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 export default ChallengePage;
