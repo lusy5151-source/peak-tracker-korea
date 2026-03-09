@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Plus, Mountain, Calendar, Clock, Users, Bell, ChevronRight, Link2, UserCheck, UserX, Mail,
+  Plus, Mountain, Calendar, Clock, Users, Bell, ChevronRight, Link2, UserCheck, UserX, Mail, Globe, MapPin,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -154,6 +154,9 @@ const PlansPage = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-foreground">등산 계획</h1>
         <div className="flex gap-2">
+          <Link to="/groups" className="inline-flex items-center gap-1 rounded-lg border border-input bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary/60 transition-colors">
+            <Users className="h-4 w-4" /> 모임
+          </Link>
           <Button variant="outline" size="sm" onClick={() => setShowJoin(!showJoin)}>
             <Link2 className="h-4 w-4 mr-1" /> 코드 참여
           </Button>
@@ -317,8 +320,16 @@ const PlansPage = () => {
                     {plan.trail_name && (
                       <p className="text-[10px] text-muted-foreground/70 mt-0.5">🥾 {plan.trail_name}</p>
                     )}
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                    {(plan as any).meeting_location && (
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-0.5">
+                        <MapPin className="h-2.5 w-2.5" /> {(plan as any).meeting_location}
+                      </p>
+                    )}
+                    {(plan as any).is_public && (
+                      <span className="inline-flex items-center gap-0.5 text-[9px] text-primary mt-0.5">
+                        <Globe className="h-2.5 w-2.5" /> 공개
+                      </span>
+                    )}
                 </Link>
               );
             })}
