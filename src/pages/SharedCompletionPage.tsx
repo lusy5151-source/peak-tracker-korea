@@ -219,21 +219,25 @@ const SharedCompletionPage = () => {
                 <p className="text-xs text-muted-foreground">아직 친구가 없습니다</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {friends.map((f) => (
+                  {friends.map((f) => {
+                    const friendId = f.friendProfile?.user_id || f.id;
+                    const friendName = f.friendProfile?.nickname || "이름 없음";
+                    return (
                     <button
-                      key={f.id}
-                      onClick={() => toggleFriend(f.id)}
+                      key={friendId}
+                      onClick={() => toggleFriend(friendId)}
                       className={`w-full flex items-center gap-3 rounded-xl p-3 text-left transition-colors ${
-                        selectedFriends.includes(f.id) ? "bg-primary/10 border border-primary/30" : "bg-secondary/50 border border-transparent"
+                        selectedFriends.includes(friendId) ? "bg-primary/10 border border-primary/30" : "bg-secondary/50 border border-transparent"
                       }`}
                     >
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-light text-xs font-semibold text-primary">
-                        {(f.nickname || "?")[0]}
+                        {(friendName)[0]}
                       </div>
-                      <span className="text-sm font-medium text-foreground">{f.nickname || "이름 없음"}</span>
-                      {selectedFriends.includes(f.id) && <CheckCircle2 className="ml-auto h-4 w-4 text-primary" />}
+                      <span className="text-sm font-medium text-foreground">{friendName}</span>
+                      {selectedFriends.includes(friendId) && <CheckCircle2 className="ml-auto h-4 w-4 text-primary" />}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
