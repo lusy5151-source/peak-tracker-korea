@@ -74,7 +74,9 @@ const CreatePlanPage = () => {
       planned_date: format(date, "yyyy-MM-dd"),
       start_time: startTime || undefined,
       notes: notes || undefined,
-    });
+      meeting_location: meetingLocation || undefined,
+      is_public: isPublic,
+    } as any);
     setSubmitting(false);
 
     if (error) {
