@@ -296,15 +296,34 @@ const Dashboard = () => {
           </section>
 
           {/* ── Add Hiking Record ── */}
-          <section>
+          <section className="grid grid-cols-2 gap-3">
             <Link
               to="/records"
-              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-orange-accent bg-orange-accent-light px-5 py-4 transition-colors hover:bg-orange-accent/10"
+              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-orange-accent bg-orange-accent-light px-4 py-4 transition-colors hover:bg-orange-accent/10"
             >
               <Plus className="h-5 w-5 text-orange-accent" />
-              <span className="text-sm font-bold text-orange-accent">등산 기록 추가하기</span>
+              <span className="text-xs font-bold text-orange-accent">등산 기록 추가</span>
+            </Link>
+            <Link
+              to="/shared-completions"
+              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-sky-hero px-4 py-4 transition-colors hover:bg-primary/10"
+            >
+              <Users className="h-5 w-5 text-primary" />
+              <span className="text-xs font-bold text-primary">공동 완등 기록</span>
             </Link>
           </section>
+
+          {/* ── Recent Shared Completions ── */}
+          {user && recentSharedCompletions.length > 0 && (
+            <section>
+              <SectionHeader title="최근 공동 완등" linkTo="/shared-completions" linkLabel="전체 보기" />
+              <div className="space-y-3">
+                {recentSharedCompletions.map((sc) => (
+                  <SharedCompletionCard key={sc.id} completion={sc} />
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* ── Recent Hiking Journals ── */}
           <section>
