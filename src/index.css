@@ -64,6 +64,18 @@
     --progress-fill: 160 40% 40%;
     --success: 152 50% 42%;
     --success-foreground: 152 50% 98%;
+
+    /* Pastel accent palette */
+    --coral: 12 80% 68%;
+    --coral-light: 12 80% 92%;
+    --peach: 25 85% 75%;
+    --lavender: 270 50% 75%;
+    --lavender-light: 270 50% 94%;
+    --mint: 160 45% 80%;
+    --mint-light: 160 45% 95%;
+    --sky-hero: 205 60% 88%;
+    --orange-accent: 25 90% 58%;
+    --orange-light: 25 90% 94%;
   }
 
   .dark {
