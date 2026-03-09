@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_feed: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          mountain_id: number | null
+          participant_ids: string[] | null
+          plan_id: string | null
+          shared_completion_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          mountain_id?: number | null
+          participant_ids?: string[] | null
+          plan_id?: string | null
+          shared_completion_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          mountain_id?: number | null
+          participant_ids?: string[] | null
+          plan_id?: string | null
+          shared_completion_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_feed_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_feed_shared_completion_id_fkey"
+            columns: ["shared_completion_id"]
+            isOneToOne: false
+            referencedRelation: "shared_completions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badges: {
         Row: {
           created_at: string
@@ -118,6 +169,71 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hiking_groups: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hiking_journals: {
         Row: {
           course_name: string | null
@@ -179,8 +295,11 @@ export type Database = {
         Row: {
           created_at: string
           creator_id: string
+          group_id: string | null
           id: string
           invite_code: string
+          is_public: boolean
+          meeting_location: string | null
           mountain_id: number
           notes: string | null
           planned_date: string
@@ -192,8 +311,11 @@ export type Database = {
         Insert: {
           created_at?: string
           creator_id: string
+          group_id?: string | null
           id?: string
           invite_code?: string
+          is_public?: boolean
+          meeting_location?: string | null
           mountain_id: number
           notes?: string | null
           planned_date: string
@@ -205,8 +327,11 @@ export type Database = {
         Update: {
           created_at?: string
           creator_id?: string
+          group_id?: string | null
           id?: string
           invite_code?: string
+          is_public?: boolean
+          meeting_location?: string | null
           mountain_id?: number
           notes?: string | null
           planned_date?: string
@@ -215,7 +340,15 @@ export type Database = {
           trail_name?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hiking_plans_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       journal_comments: {
         Row: {
@@ -460,6 +593,83 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      shared_completion_participants: {
+        Row: {
+          id: string
+          shared_completion_id: string
+          user_id: string
+          verified: boolean
+          verified_at: string | null
+        }
+        Insert: {
+          id?: string
+          shared_completion_id: string
+          user_id: string
+          verified?: boolean
+          verified_at?: string | null
+        }
+        Update: {
+          id?: string
+          shared_completion_id?: string
+          user_id?: string
+          verified?: boolean
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_completion_participants_shared_completion_id_fkey"
+            columns: ["shared_completion_id"]
+            isOneToOne: false
+            referencedRelation: "shared_completions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_completions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          created_by: string
+          group_id: string | null
+          id: string
+          mountain_id: number
+          plan_id: string | null
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          created_by: string
+          group_id?: string | null
+          id?: string
+          mountain_id: number
+          plan_id?: string | null
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          created_by?: string
+          group_id?: string | null
+          id?: string
+          mountain_id?: number
+          plan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_completions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_completions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trails: {
         Row: {

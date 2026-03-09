@@ -1,21 +1,38 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useActivityFeed, type ActivityFeedItem } from "@/hooks/useActivityFeed";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
+import { useSharedCompletions, type SharedCompletion } from "@/hooks/useSharedCompletions";
 import { JournalCard } from "@/components/JournalCard";
-import { Mountain, Compass } from "lucide-react";
+import { SharedCompletionCard } from "@/components/SharedCompletionCard";
+import { StackedAvatars } from "@/components/StackedAvatars";
+import { mountains } from "@/data/mountains";
+import { Mountain, Compass, Users, Newspaper, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const FeedPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { fetchFeed } = useHikingJournals();
+  const { items: activityItems, loading: activityLoading, fetchFeed: fetchActivity } = useActivityFeed();
+  const { fetchSharedCompletions } = useSharedCompletions();
+
   const [journals, setJournals] = useState<HikingJournal[]>([]);
+  const [sharedCompletions, setSharedCompletions] = useState<SharedCompletion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    fetchFeed().then((data) => {
-      setJournals(data);
+    Promise.all([
+      fetchFeed(),
+      fetchActivity(),
+      fetchSharedCompletions(),
+    ]).then(([journalData, _, scData]) => {
+      setJournals(journalData);
+      setSharedCompletions(scData);
       setLoading(false);
     });
   }, [user]);
@@ -34,23 +51,151 @@ const FeedPage = () => {
     <div className="space-y-5 pb-24 max-w-lg mx-auto">
       <h1 className="text-xl font-bold text-foreground">피드</h1>
 
-      {loading ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">불러오는 중...</div>
-      ) : journals.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-          <Mountain className="mx-auto h-10 w-10 text-muted-foreground/30" />
-          <p className="mt-3 text-sm text-muted-foreground">아직 공유된 일지가 없습니다</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">친구를 추가하고 등산 일지를 공유해보세요</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {journals.map((j) => (
-            <JournalCard key={j.id} journal={j} showAuthor onRefresh={() => fetchFeed().then(setJournals)} />
-          ))}
-        </div>
-      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full bg-secondary/50 rounded-xl">
+          <TabsTrigger value="all" className="flex-1 rounded-lg text-xs">전체</TabsTrigger>
+          <TabsTrigger value="journals" className="flex-1 rounded-lg text-xs">등산 기록</TabsTrigger>
+          <TabsTrigger value="shared" className="flex-1 rounded-lg text-xs">
+            <Users className="h-3 w-3 mr-1" /> 공동 완등
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex-1 rounded-lg text-xs">활동</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-4 mt-4">
+          {loading ? (
+            <LoadingState />
+          ) : (
+            <>
+              {/* Shared completions highlight */}
+              {sharedCompletions.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                    <Users className="h-4 w-4 text-primary" /> 최근 공동 완등
+                  </h3>
+                  {sharedCompletions.slice(0, 3).map((sc) => (
+                    <SharedCompletionCard key={sc.id} completion={sc} />
+                  ))}
+                </div>
+              )}
+
+              {/* Activity feed */}
+              {activityItems.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">활동 피드</h3>
+                  {activityItems.slice(0, 5).map((item) => (
+                    <ActivityCard key={item.id} item={item} />
+                  ))}
+                </div>
+              )}
+
+              {/* Journal feed */}
+              {journals.length > 0 ? (
+                <div className="space-y-4">
+                  {journals.map((j) => (
+                    <JournalCard key={j.id} journal={j} showAuthor onRefresh={() => fetchFeed().then(setJournals)} />
+                  ))}
+                </div>
+              ) : sharedCompletions.length === 0 && activityItems.length === 0 ? (
+                <EmptyFeed />
+              ) : null}
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="journals" className="space-y-4 mt-4">
+          {loading ? (
+            <LoadingState />
+          ) : journals.length === 0 ? (
+            <EmptyFeed />
+          ) : (
+            journals.map((j) => (
+              <JournalCard key={j.id} journal={j} showAuthor onRefresh={() => fetchFeed().then(setJournals)} />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="shared" className="space-y-3 mt-4">
+          {loading ? (
+            <LoadingState />
+          ) : sharedCompletions.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+              <Users className="mx-auto h-10 w-10 text-muted-foreground/30" />
+              <p className="mt-3 text-sm text-muted-foreground">아직 공동 완등이 없습니다</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">등산 계획에 친구를 초대하고 함께 완등해보세요</p>
+            </div>
+          ) : (
+            sharedCompletions.map((sc) => (
+              <SharedCompletionCard key={sc.id} completion={sc} />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="activity" className="space-y-2 mt-4">
+          {activityLoading ? (
+            <LoadingState />
+          ) : activityItems.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+              <Newspaper className="mx-auto h-10 w-10 text-muted-foreground/30" />
+              <p className="mt-3 text-sm text-muted-foreground">아직 활동이 없습니다</p>
+            </div>
+          ) : (
+            activityItems.map((item) => (
+              <ActivityCard key={item.id} item={item} />
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
+
+function ActivityCard({ item }: { item: ActivityFeedItem }) {
+  const mt = item.mountain_id ? mountains.find((m) => m.id === item.mountain_id) : null;
+  const profiles = item.participant_profiles || [];
+
+  return (
+    <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
+          item.type === "shared_completion" ? "bg-sky-hero" : "bg-mint-light"
+        }`}>
+          {item.type === "shared_completion" ? (
+            <Users className="h-5 w-5 text-primary" />
+          ) : (
+            <Mountain className="h-5 w-5 text-primary" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-foreground">{item.message}</p>
+          <div className="flex items-center justify-between mt-2">
+            {profiles.length > 0 && (
+              <StackedAvatars
+                profiles={profiles as { nickname: string | null; avatar_url: string | null }[]}
+                max={4}
+              />
+            )}
+            <span className="text-[10px] text-muted-foreground">
+              {new Date(item.created_at).toLocaleDateString("ko-KR")}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoadingState() {
+  return <div className="text-center py-12 text-muted-foreground text-sm">불러오는 중...</div>;
+}
+
+function EmptyFeed() {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+      <Mountain className="mx-auto h-10 w-10 text-muted-foreground/30" />
+      <p className="mt-3 text-sm text-muted-foreground">아직 공유된 일지가 없습니다</p>
+      <p className="text-xs text-muted-foreground/70 mt-1">친구를 추가하고 등산 일지를 공유해보세요</p>
+    </div>
+  );
+}
 
 export default FeedPage;

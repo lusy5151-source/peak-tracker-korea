@@ -22,6 +22,8 @@ import PlanDetailPage from "@/pages/PlanDetailPage";
 import FeedPage from "@/pages/FeedPage";
 import FriendProfilePage from "@/pages/FriendProfilePage";
 import ChallengePage from "@/pages/ChallengePage";
+import SharedCompletionPage from "@/pages/SharedCompletionPage";
+import GroupsPage from "@/pages/GroupsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +54,8 @@ const AppRoutes = () => {
       <Route path="/challenges" element={<ProtectedRoute><ChallengePage /></ProtectedRoute>} />
       <Route path="/achievements" element={<AchievementsPage />} />
       <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+      <Route path="/shared-completions" element={<ProtectedRoute><SharedCompletionPage /></ProtectedRoute>} />
+      <Route path="/groups" element={<ProtectedRoute><GroupsPage /></ProtectedRoute>} />
       <Route path="/profile/:userId" element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />

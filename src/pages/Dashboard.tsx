@@ -8,8 +8,11 @@ import { useAchievementStore } from "@/hooks/useAchievementStore";
 import { useHikingPlans } from "@/hooks/useHikingPlans";
 import { useHikingJournals, HikingJournal } from "@/hooks/useHikingJournals";
 import { useChallenges, Challenge, UserChallenge } from "@/hooks/useChallenges";
+import { useSharedCompletions, type SharedCompletion } from "@/hooks/useSharedCompletions";
+import { SharedCompletionCard } from "@/components/SharedCompletionCard";
 import AchievementModal from "@/components/AchievementModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { StackedAvatars } from "@/components/StackedAvatars";
 import { Progress } from "@/components/ui/progress";
 import {
   Mountain, Plus, Calendar, ChevronRight,
@@ -37,6 +40,7 @@ const Dashboard = () => {
   const { plans } = useHikingPlans();
   const { fetchFeed } = useHikingJournals();
   const { fetchAllChallenges, fetchUserChallenges } = useChallenges();
+  const { fetchSharedCompletions } = useSharedCompletions();
 
   const [recentJournals, setRecentJournals] = useState<HikingJournal[]>([]);
   const [activeChallenges, setActiveChallenges] = useState<(UserChallenge & { ch: Challenge })[]>([]);
