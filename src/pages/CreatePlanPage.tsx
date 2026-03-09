@@ -267,15 +267,41 @@ const CreatePlanPage = () => {
         </div>
       )}
 
+      {/* Meeting Location */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">모임 장소 (선택)</label>
+        <div className="flex items-center gap-2 rounded-xl border border-input bg-card px-3 py-2">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
+          <Input
+            value={meetingLocation}
+            onChange={(e) => setMeetingLocation(e.target.value)}
+            placeholder="예: 북한산 국립공원 정문"
+            className="border-0 p-0 h-auto shadow-none focus-visible:ring-0"
+          />
+        </div>
+      </div>
+
       {/* Notes */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">메모 (선택)</label>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="모임 장소, 준비물, 주의사항 등..."
+          placeholder="준비물, 주의사항 등..."
           className="min-h-[80px]"
         />
+      </div>
+
+      {/* Public toggle */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-2">
+          <Globe className="h-4 w-4 text-muted-foreground" />
+          <div>
+            <Label className="text-sm font-medium">공개 일정</Label>
+            <p className="text-[10px] text-muted-foreground">다른 사용자도 참여할 수 있습니다</p>
+          </div>
+        </div>
+        <Switch checked={isPublic} onCheckedChange={setIsPublic} />
       </div>
 
       <Button
