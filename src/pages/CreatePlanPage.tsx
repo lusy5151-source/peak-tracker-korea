@@ -6,12 +6,14 @@ import { useHikingPlans } from "@/hooks/useHikingPlans";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Mountain, CalendarIcon, Clock, Cloud, Sun, CloudRain, CloudSnow, CloudSun,
-  Wind, Droplets, ArrowLeft, MapPin, ChevronDown, Search,
+  Wind, Droplets, ArrowLeft, MapPin, ChevronDown, Search, Globe,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -33,6 +35,8 @@ const CreatePlanPage = () => {
   const [date, setDate] = useState<Date>();
   const [startTime, setStartTime] = useState("");
   const [notes, setNotes] = useState("");
+  const [meetingLocation, setMeetingLocation] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [mountainSearch, setMountainSearch] = useState("");
   const [showMountainList, setShowMountainList] = useState(false);
