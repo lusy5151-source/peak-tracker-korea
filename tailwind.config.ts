@@ -84,6 +84,26 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        coral: {
+          DEFAULT: "hsl(var(--coral))",
+          light: "hsl(var(--coral-light))",
+        },
+        peach: {
+          DEFAULT: "hsl(var(--peach))",
+        },
+        lavender: {
+          DEFAULT: "hsl(var(--lavender))",
+          light: "hsl(var(--lavender-light))",
+        },
+        mint: {
+          DEFAULT: "hsl(var(--mint))",
+          light: "hsl(var(--mint-light))",
+        },
+        "sky-hero": "hsl(var(--sky-hero))",
+        "orange-accent": {
+          DEFAULT: "hsl(var(--orange-accent))",
+          light: "hsl(var(--orange-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
