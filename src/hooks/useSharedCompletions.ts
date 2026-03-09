@@ -152,11 +152,17 @@ export function useSharedCompletions() {
 
   const isSharedCompleted = useCallback(async (mountainId: number): Promise<boolean> => {
     if (!user) return false;
-    const { data } = await supabase
+    const { data: myParts } = await supabase
       .from("shared_completion_participants")
-      .select("shared_completions!inner(mountain_id)")
-      .eq("user_id", user.id)
-      .eq("shared_completions.mountain_id" as any, mountainId)
+      .select("shared_completion_id")
+      .eq("user_id", user.id);
+    if (!myParts || myParts.length === 0) return false;
+    const scIds = (myParts as any[]).map((p) => p.shared_completion_id);
+    const { data } = await supabase
+      .from("shared_completions")
+      .select("id")
+      .in("id", scIds)
+      .eq("mountain_id", mountainId)
       .limit(1);
     return (data && data.length > 0) || false;
   }, [user]);
