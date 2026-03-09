@@ -93,16 +93,22 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      fetchFeed().then((journals) => setRecentJournals(journals.slice(0, 3)));
-      fetchSharedCompletions().then((scs) => setRecentSharedCompletions(scs.slice(0, 3)));
-      Promise.all([fetchAllChallenges(), fetchUserChallenges()]).then(([all, mine]) => {
-        const active = mine
-          .filter((uc) => !uc.completed)
-          .slice(0, 3)
-          .map((uc) => ({ ...uc, ch: all.find((c) => c.id === uc.challenge_id)! }))
-          .filter((uc) => uc.ch);
-        setActiveChallenges(active);
-      });
+      fetchFeed()
+        .then((journals) => setRecentJournals(journals.slice(0, 3)))
+        .catch(() => setRecentJournals([]));
+      fetchSharedCompletions()
+        .then((scs) => setRecentSharedCompletions(scs.slice(0, 3)))
+        .catch(() => setRecentSharedCompletions([]));
+      Promise.all([fetchAllChallenges(), fetchUserChallenges()])
+        .then(([all, mine]) => {
+          const active = mine
+            .filter((uc) => !uc.completed)
+            .slice(0, 3)
+            .map((uc) => ({ ...uc, ch: all.find((c) => c.id === uc.challenge_id)! }))
+            .filter((uc) => uc.ch);
+          setActiveChallenges(active);
+        })
+        .catch(() => setActiveChallenges([]));
     }
   }, [user]);
 
