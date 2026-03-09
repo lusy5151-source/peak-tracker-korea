@@ -41,36 +41,42 @@ export type Database = {
       challenges: {
         Row: {
           badge_id: string | null
+          category: string
           created_at: string
           description: string | null
           end_date: string | null
           goal_type: string
           goal_value: number
           id: string
+          level: number
           start_date: string | null
           title: string
           type: string
         }
         Insert: {
           badge_id?: string | null
+          category?: string
           created_at?: string
           description?: string | null
           end_date?: string | null
           goal_type?: string
           goal_value?: number
           id?: string
+          level?: number
           start_date?: string | null
           title: string
           type?: string
         }
         Update: {
           badge_id?: string | null
+          category?: string
           created_at?: string
           description?: string | null
           end_date?: string | null
           goal_type?: string
           goal_value?: number
           id?: string
+          level?: number
           start_date?: string | null
           title?: string
           type?: string
