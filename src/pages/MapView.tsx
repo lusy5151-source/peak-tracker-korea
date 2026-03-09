@@ -1,15 +1,36 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { mountains } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSharedCompletions, type SharedCompletion } from "@/hooks/useSharedCompletions";
+import { Progress } from "@/components/ui/progress";
 
 const MapView = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const navigate = useNavigate();
   const { isCompleted, completedCount } = useStore();
+  const { user } = useAuth();
+  const { fetchSharedCompletions } = useSharedCompletions();
+  const [sharedMountains, setSharedMountains] = useState<Set<number>>(new Set());
+  const [sharedCompletionMap, setSharedCompletionMap] = useState<Map<number, SharedCompletion>>(new Map());
+
+  useEffect(() => {
+    if (user) {
+      fetchSharedCompletions().then((scs) => {
+        const ids = new Set(scs.map((sc) => sc.mountain_id));
+        setSharedMountains(ids);
+        const map = new Map<number, SharedCompletion>();
+        scs.forEach((sc) => {
+          if (!map.has(sc.mountain_id)) map.set(sc.mountain_id, sc);
+        });
+        setSharedCompletionMap(map);
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -37,26 +58,57 @@ const MapView = () => {
 
     mountains.forEach((m) => {
       const completed = isCompleted(m.id);
-      const color = completed ? "#4a9d6e" : "#94a3b8";
+      const shared = sharedMountains.has(m.id);
+
+      let color = "#94a3b8"; // not completed
+      let size = 12;
+      let emoji = "";
+
+      if (shared) {
+        color = "#6366f1"; // shared completion - indigo
+        size = 16;
+        emoji = "👥";
+      } else if (completed) {
+        color = "#4a9d6e"; // personal completion
+        emoji = "👤";
+      }
 
       const icon = L.divIcon({
         className: "custom-marker",
-        html: `<div style="
-          width: 12px; height: 12px;
-          background: ${color};
-          border: 2px solid white;
-          border-radius: 50%;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
+        html: shared
+          ? `<div style="
+              display: flex; align-items: center; justify-content: center;
+              width: ${size}px; height: ${size}px;
+              background: ${color};
+              border: 2px solid white;
+              border-radius: 50%;
+              box-shadow: 0 2px 8px rgba(99,102,241,0.4);
+              font-size: 8px;
+            ">👥</div>`
+          : `<div style="
+              width: ${size}px; height: ${size}px;
+              background: ${color};
+              border: 2px solid white;
+              border-radius: 50%;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            "></div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
       });
 
       const marker = L.marker([m.lat, m.lng], { icon }).addTo(map);
-      marker.bindTooltip(
-        `<strong>${m.nameKo}</strong><br/>${m.height}m · ${m.difficulty}${completed ? "<br/>✓ 완등" : ""}`,
-        { direction: "top", offset: [0, -8] }
-      );
+
+      const sc = sharedCompletionMap.get(m.id);
+      const participantCount = sc?.participants?.length || 0;
+
+      let tooltipHtml = `<strong>${m.nameKo}</strong><br/>${m.height}m · ${m.difficulty}`;
+      if (shared) {
+        tooltipHtml += `<br/>👥 공동 완등 (${participantCount}명)`;
+      } else if (completed) {
+        tooltipHtml += `<br/>👤 완등`;
+      }
+
+      marker.bindTooltip(tooltipHtml, { direction: "top", offset: [0, -8] });
       marker.on("click", () => navigate(`/mountains/${m.id}`));
     });
 
@@ -66,7 +118,10 @@ const MapView = () => {
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [isCompleted, navigate]);
+  }, [isCompleted, navigate, sharedMountains, sharedCompletionMap]);
+
+  const totalMountains = mountains.length;
+  const progressPercent = Math.round((completedCount / totalMountains) * 100);
 
   return (
     <div className="space-y-4">
@@ -80,7 +135,11 @@ const MapView = () => {
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded-full bg-primary" />
-            완등
+            👤 완등
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-3 w-3 rounded-full" style={{ background: "#6366f1" }} />
+            👥 공동
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded-full" style={{ background: "#94a3b8" }} />
@@ -88,9 +147,20 @@ const MapView = () => {
           </span>
         </div>
       </div>
+
+      {/* Progress bar */}
+      <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-semibold text-foreground">Mountain Completion</span>
+          <span className="text-sm font-bold text-primary">{completedCount} / {totalMountains}</span>
+        </div>
+        <Progress value={progressPercent} className="h-3 rounded-full" />
+        <p className="text-[10px] text-muted-foreground mt-1">{progressPercent}% 완료</p>
+      </div>
+
       <div
         ref={mapRef}
-        className="h-[calc(100vh-200px)] min-h-[400px] rounded-2xl border border-border overflow-hidden shadow-sm"
+        className="h-[calc(100vh-300px)] min-h-[400px] rounded-2xl border border-border overflow-hidden shadow-sm"
       />
     </div>
   );
