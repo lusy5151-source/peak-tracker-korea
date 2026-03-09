@@ -331,9 +331,9 @@ function LevelCard({ item, categoryStyle }: { item: LevelItem; categoryStyle: ty
               {uc.progress} / {ch.goal_value} ({pct}%)
             </span>
           </div>
-          <div className={`h-2.5 w-full rounded-full bg-secondary overflow-hidden`}>
+          <div className="h-2.5 w-full rounded-full bg-secondary overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-700 ease-out ${categoryStyle.progressBar.replace("[&>div]:", "")}`}
+              className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>
