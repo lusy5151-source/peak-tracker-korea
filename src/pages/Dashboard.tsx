@@ -40,6 +40,7 @@ const Dashboard = () => {
   const { plans } = useHikingPlans();
   const { fetchFeed } = useHikingJournals();
   const { fetchAllChallenges, fetchUserChallenges } = useChallenges();
+  const { fetchSharedCompletions } = useSharedCompletions();
 
   const [recentJournals, setRecentJournals] = useState<HikingJournal[]>([]);
   const [activeChallenges, setActiveChallenges] = useState<(UserChallenge & { ch: Challenge })[]>([]);
