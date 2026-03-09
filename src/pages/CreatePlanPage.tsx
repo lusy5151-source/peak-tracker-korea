@@ -6,12 +6,14 @@ import { useHikingPlans } from "@/hooks/useHikingPlans";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Mountain, CalendarIcon, Clock, Cloud, Sun, CloudRain, CloudSnow, CloudSun,
-  Wind, Droplets, ArrowLeft, MapPin, ChevronDown, Search,
+  Wind, Droplets, ArrowLeft, MapPin, ChevronDown, Search, Globe,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -33,6 +35,8 @@ const CreatePlanPage = () => {
   const [date, setDate] = useState<Date>();
   const [startTime, setStartTime] = useState("");
   const [notes, setNotes] = useState("");
+  const [meetingLocation, setMeetingLocation] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [mountainSearch, setMountainSearch] = useState("");
   const [showMountainList, setShowMountainList] = useState(false);
@@ -70,7 +74,9 @@ const CreatePlanPage = () => {
       planned_date: format(date, "yyyy-MM-dd"),
       start_time: startTime || undefined,
       notes: notes || undefined,
-    });
+      meeting_location: meetingLocation || undefined,
+      is_public: isPublic,
+    } as any);
     setSubmitting(false);
 
     if (error) {
@@ -263,15 +269,41 @@ const CreatePlanPage = () => {
         </div>
       )}
 
+      {/* Meeting Location */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">모임 장소 (선택)</label>
+        <div className="flex items-center gap-2 rounded-xl border border-input bg-card px-3 py-2">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
+          <Input
+            value={meetingLocation}
+            onChange={(e) => setMeetingLocation(e.target.value)}
+            placeholder="예: 북한산 국립공원 정문"
+            className="border-0 p-0 h-auto shadow-none focus-visible:ring-0"
+          />
+        </div>
+      </div>
+
       {/* Notes */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">메모 (선택)</label>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="모임 장소, 준비물, 주의사항 등..."
+          placeholder="준비물, 주의사항 등..."
           className="min-h-[80px]"
         />
+      </div>
+
+      {/* Public toggle */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-2">
+          <Globe className="h-4 w-4 text-muted-foreground" />
+          <div>
+            <Label className="text-sm font-medium">공개 일정</Label>
+            <p className="text-[10px] text-muted-foreground">다른 사용자도 참여할 수 있습니다</p>
+          </div>
+        </div>
+        <Switch checked={isPublic} onCheckedChange={setIsPublic} />
       </div>
 
       <Button
