@@ -330,6 +330,8 @@ const PlansPage = () => {
                         <Globe className="h-2.5 w-2.5" /> 공개
                       </span>
                     )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                 </Link>
               );
             })}
