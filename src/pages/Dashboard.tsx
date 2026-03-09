@@ -11,7 +11,7 @@ import { useChallenges, Challenge, UserChallenge } from "@/hooks/useChallenges";
 import { useSharedCompletions, type SharedCompletion } from "@/hooks/useSharedCompletions";
 import { SharedCompletionCard } from "@/components/SharedCompletionCard";
 import AchievementModal from "@/components/AchievementModal";
-import { StackedAvatars } from "@/components/StackedAvatars";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Progress } from "@/components/ui/progress";
 import {
   Mountain, Plus, Calendar, ChevronRight,
