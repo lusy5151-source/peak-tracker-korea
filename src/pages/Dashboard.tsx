@@ -43,6 +43,7 @@ const Dashboard = () => {
   const { fetchSharedCompletions } = useSharedCompletions();
 
   const [recentJournals, setRecentJournals] = useState<HikingJournal[]>([]);
+  const [recentSharedCompletions, setRecentSharedCompletions] = useState<SharedCompletion[]>([]);
   const [activeChallenges, setActiveChallenges] = useState<(UserChallenge & { ch: Challenge })[]>([]);
   const [userGoal, setUserGoal] = useState<number>(() => {
     const saved = localStorage.getItem(GOAL_KEY);
