@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
+import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import {
   ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
