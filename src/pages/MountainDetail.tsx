@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
+import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import {
   ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
@@ -144,6 +145,18 @@ const MountainDetail = () => {
           updateDuration={updateDuration}
           updateDifficulty={updateDifficulty}
         />
+      )}
+
+      {/* Share Card */}
+      {completed && record && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold text-foreground">📤 공유 카드</h2>
+          <HikingShareCard
+            mountain={mountain}
+            record={record}
+            photoUrl={record.photos && record.photos.length > 0 ? record.photos[0] : undefined}
+          />
+        </div>
       )}
     </div>
   );
@@ -630,6 +643,7 @@ function JournalSection({
           )}
         </div>
       </div>
+
 
       {/* Lightbox */}
       {lightboxIndex !== null && (

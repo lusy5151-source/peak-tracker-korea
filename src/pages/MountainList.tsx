@@ -5,6 +5,7 @@ import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, M
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import MountainMapSection from "@/components/MountainMapSection";
 
 type SortKey = "name" | "height" | "popularity";
 type ViewMode = "all" | "baekdu" | "region" | "oreum" | "full";
@@ -90,6 +91,9 @@ const MountainList = () => {
           전체 {mountains.length}개 · 완등 {completedCount}개 · 백대명산 {completedBaekdu}/{totalBaekdu}
         </p>
       </div>
+
+      {/* Interactive Map */}
+      <MountainMapSection />
 
       {/* Search */}
       <div className="relative">
