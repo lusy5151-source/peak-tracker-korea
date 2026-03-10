@@ -632,6 +632,18 @@ function JournalSection({
         </div>
       </div>
 
+      {/* Share Card */}
+      {completed && mountain && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold text-foreground">📤 공유 카드</h2>
+          <HikingShareCard
+            mountain={mountain}
+            record={record || undefined}
+            photoUrl={photos.length > 0 ? photos[0] : undefined}
+          />
+        </div>
+      )}
+
       {/* Lightbox */}
       {lightboxIndex !== null && (
         <div
