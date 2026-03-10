@@ -146,6 +146,18 @@ const MountainDetail = () => {
           updateDifficulty={updateDifficulty}
         />
       )}
+
+      {/* Share Card */}
+      {completed && record && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold text-foreground">📤 공유 카드</h2>
+          <HikingShareCard
+            mountain={mountain}
+            record={record}
+            photoUrl={record.photos && record.photos.length > 0 ? record.photos[0] : undefined}
+          />
+        </div>
+      )}
     </div>
   );
 };
