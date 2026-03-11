@@ -111,8 +111,9 @@ export function useAchievementStore(
   const checkBadges = useCallback(() => {
     const count = records.length;
     const maxSharedParticipants =
-      sharedCompletions.length > 0 ? Math.max(...sharedCompletions.map((sc) => sc.participant_count)) : 0;
-
+      sharedCompletions && sharedCompletions.length > 0
+        ? Math.max(...sharedCompletions.map((sc) => sc.participant_count))
+        : 0;
     badges.forEach((badge) => {
       if (isEarned(badge.id)) return;
 
