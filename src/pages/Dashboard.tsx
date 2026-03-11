@@ -21,6 +21,7 @@ import {
   MessageCircle, Newspaper, Clock, Settings2,
   Bell, User, Users,
 } from "lucide-react";
+import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 
