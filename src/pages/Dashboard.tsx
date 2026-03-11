@@ -21,6 +21,7 @@ import {
   MessageCircle, Newspaper, Clock, Settings2,
   Bell, User, Users,
 } from "lucide-react";
+import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 
@@ -125,11 +126,7 @@ const Dashboard = () => {
   const todayIndex = new Date().getDate() % mountains.length;
   const todayMountain = mountains[todayIndex];
 
-  const newsItems = [
-    { id: 1, title: "봄철 등산 안전 수칙 안내", date: "2026-03-05", summary: "해빙기 산행 시 주의사항을 확인하세요." },
-    { id: 2, title: "국립공원 예약제 일부 변경", date: "2026-03-03", summary: "3월부터 일부 코스 예약제가 변경됩니다." },
-    { id: 3, title: "설악산 탐방로 개방 안내", date: "2026-03-01", summary: "겨울 통제 해제, 탐방로가 순차 개방됩니다." },
-  ];
+  // newsItems removed — replaced by AnnouncementSection
 
   return (
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
@@ -403,20 +400,9 @@ const Dashboard = () => {
 
           {/* ── Announcements / News ── */}
           <section>
-            <SectionHeader title="공지사항" />
-            <div className="rounded-3xl bg-card border border-border p-4 shadow-sm space-y-2">
-              {newsItems.map((n) => (
-                <div key={n.id} className="flex items-center gap-3 rounded-xl bg-secondary/50 p-3.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-card shrink-0">
-                    <Newspaper className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
-                    <p className="text-[10px] text-muted-foreground">{n.date}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                </div>
-              ))}
+            <SectionHeader title="공지 · 산악정보" />
+            <div className="rounded-3xl bg-card border border-border p-4 shadow-sm">
+              <AnnouncementSection />
             </div>
           </section>
         </div>

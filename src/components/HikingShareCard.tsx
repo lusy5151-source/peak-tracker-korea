@@ -5,10 +5,9 @@ import { Mountain } from "@/data/mountains";
 import { CompletionRecord } from "@/hooks/useMountainStore";
 import { SharedCompletion } from "@/hooks/useSharedCompletions";
 import { useStore } from "@/context/StoreContext";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Share2, Instagram, MessageCircle, Twitter, Facebook } from "lucide-react";
+import { StackedAvatars } from "@/components/StackedAvatars";
 import html2canvas from "html2canvas";
 
 interface HikingShareCardProps {
@@ -28,7 +27,7 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
     if (!miniMapRef.current) return;
     const map = L.map(miniMapRef.current, {
       center: [mountain.lat, mountain.lng],
-      zoom: 12,
+      zoom: 13,
       zoomControl: false,
       dragging: false,
       scrollWheelZoom: false,
@@ -41,9 +40,9 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
     L.marker([mountain.lat, mountain.lng], {
       icon: L.divIcon({
         className: "custom-marker",
-        html: `<div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;background:hsl(160 40% 40%);border:2px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:12px;">📍</div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
+        html: `<div style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:hsl(160 40% 40%);border:2.5px solid white;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.25);font-size:14px;">📍</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
       }),
     }).addTo(map);
 
@@ -56,8 +55,17 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
     : "";
 
   const displayPhoto = photoUrl || (record?.photos && record.photos.length > 0 ? record.photos[0] : null);
+  const isShared = sharedCompletion?.participants && sharedCompletion.participants.length > 0;
+  const completionLabel = isShared ? "함께 완등" : "완등";
+  const duration = record?.duration || "";
+
   const totalMountains = 100;
   const progressPercent = Math.round((completedCount / totalMountains) * 100);
+
+  const participantProfiles = sharedCompletion?.participants?.map((p) => ({
+    nickname: p.profile?.nickname || null,
+    avatar_url: p.profile?.avatar_url || null,
+  })) || [];
 
   const handleExport = async () => {
     if (!cardRef.current || exporting) return;
@@ -105,98 +113,83 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
 
   return (
     <div className="space-y-4">
-      {/* The exportable card */}
+      {/* The exportable card — 4:5 aspect ratio */}
       <div
         ref={cardRef}
-        className="w-full max-w-[400px] mx-auto aspect-square rounded-2xl overflow-hidden"
-        style={{ background: "linear-gradient(180deg, hsl(160 20% 97%), hsl(200 20% 94%))" }}
+        className="w-full max-w-[400px] mx-auto rounded-3xl overflow-hidden shadow-lg"
+        style={{
+          aspectRatio: "4 / 5",
+          background: "linear-gradient(180deg, hsl(160 20% 97%), hsl(200 15% 94%))",
+        }}
       >
-        <div className="h-full flex flex-col p-5">
-          {/* Top: Mountain name + badge */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">🏔</span>
-            <h2 className="text-xl font-bold text-foreground">{mountain.nameKo}</h2>
-            {mountain.is_baekdu && (
-              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-primary/30 text-primary">
-                백대명산
-              </Badge>
-            )}
-          </div>
-
-          {/* Mini map */}
-          <div
-            ref={miniMapRef}
-            className="h-[80px] rounded-xl overflow-hidden border border-border shadow-sm mb-1"
-          />
-          <p className="text-[9px] text-muted-foreground text-center mb-2">📍 정상 위치</p>
-
-          {/* Photo */}
-          {displayPhoto && (
-            <div className="flex-1 min-h-0 rounded-xl overflow-hidden border border-border shadow-sm mb-3">
+        <div className="h-full flex flex-col">
+          {/* Top: Photo section (fills ~45%) */}
+          <div className="relative flex-[5] min-h-0">
+            {displayPhoto ? (
               <img src={displayPhoto} alt={mountain.nameKo} className="w-full h-full object-cover" />
-            </div>
-          )}
-          {!displayPhoto && (
-            <div className="flex-1 min-h-0 rounded-xl overflow-hidden border border-border shadow-sm mb-3 bg-secondary flex items-center justify-center">
-              <span className="text-4xl">⛰</span>
-            </div>
-          )}
-
-          {/* Stats grid */}
-          <div className="grid grid-cols-4 gap-2 mb-3">
-            <div className="text-center">
-              <p className="text-[9px] text-muted-foreground">📅 날짜</p>
-              <p className="text-[11px] font-semibold text-foreground">{formattedDate || "-"}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[9px] text-muted-foreground">📍 정상</p>
-              <p className="text-[11px] font-semibold text-foreground">{mountain.nameKo}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[9px] text-muted-foreground">⛰ 해발</p>
-              <p className="text-[11px] font-semibold text-foreground">{mountain.height}m</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[9px] text-muted-foreground">🥾 난이도</p>
-              <p className="text-[11px] font-semibold text-foreground">{mountain.difficulty}</p>
-            </div>
-          </div>
-
-          {/* Shared completion section */}
-          {sharedCompletion?.participants && sharedCompletion.participants.length > 0 && (
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-medium text-muted-foreground">👥 함께 완등</span>
-              <div className="flex -space-x-1.5">
-                {sharedCompletion.participants.slice(0, 5).map((p, i) => (
-                  <div
-                    key={p.id}
-                    className="h-5 w-5 rounded-full bg-accent border border-card flex items-center justify-center text-[8px] font-bold text-accent-foreground"
-                    style={{ zIndex: 5 - i }}
-                  >
-                    {(p.profile?.nickname || "?")[0]}
-                  </div>
-                ))}
-                {sharedCompletion.participants.length > 5 && (
-                  <div className="h-5 w-5 rounded-full bg-secondary border border-card flex items-center justify-center text-[7px] text-muted-foreground">
-                    +{sharedCompletion.participants.length - 5}
-                  </div>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[hsl(160_30%_85%)] to-[hsl(200_25%_80%)] flex items-center justify-center">
+                <span className="text-6xl">⛰</span>
+              </div>
+            )}
+            {/* Gradient overlay at bottom of photo */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+            {/* Mountain name overlaid on photo */}
+            <div className="absolute bottom-4 left-5 right-5">
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg">{mountain.nameKo}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/25 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-white">
+                  {isShared ? "👥" : "👤"} {completionLabel}
+                </span>
+                {mountain.is_baekdu && (
+                  <span className="rounded-full bg-white/25 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-white">
+                    백대명산
+                  </span>
                 )}
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between border-t border-border/50 pt-2">
-            <div>
-              <p className="text-[9px] text-muted-foreground">100대 명산 진행률</p>
-              <div className="flex items-center gap-1.5">
-                <div className="h-1.5 w-16 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${progressPercent}%` }} />
-                </div>
-                <span className="text-[10px] font-bold text-primary">{completedCount} / {totalMountains}</span>
-              </div>
+          {/* Middle: Info section */}
+          <div className="flex-[4] flex flex-col justify-between p-5">
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              <StatItem emoji="📅" label="날짜" value={formattedDate || "-"} />
+              <StatItem emoji="⛰" label="해발" value={`${mountain.height}m`} />
+              <StatItem emoji="🥾" label={duration ? "소요시간" : "난이도"} value={duration || mountain.difficulty} />
             </div>
-            <p className="text-[8px] text-muted-foreground/70">완등 앱에서 기록한 등산 🏔</p>
+
+            {/* Participants section */}
+            {isShared && participantProfiles.length > 0 && (
+              <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-black/[0.03] p-3">
+                <StackedAvatars profiles={participantProfiles} max={5} size="sm" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold text-muted-foreground">함께 완등한 친구</p>
+                  <p className="text-xs text-foreground truncate">
+                    {participantProfiles.map((p) => p.nickname || "?").join(", ")}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Mini map */}
+            <div className="mt-3 rounded-2xl overflow-hidden border border-border/50 shadow-sm">
+              <div ref={miniMapRef} className="h-[72px]" />
+            </div>
+
+            {/* Footer */}
+            <div className="mt-3 flex items-center justify-between">
+              <div>
+                <p className="text-[9px] text-muted-foreground">100대 명산 진행률</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className="h-1.5 w-16 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progressPercent}%` }} />
+                  </div>
+                  <span className="text-[10px] font-bold text-primary">{completedCount} / {totalMountains}</span>
+                </div>
+              </div>
+              <p className="text-[8px] text-muted-foreground/60">완등 앱에서 기록한 등산 🏔</p>
+            </div>
           </div>
         </div>
       </div>
@@ -222,5 +215,14 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
     </div>
   );
 };
+
+function StatItem({ emoji, label, value }: { emoji: string; label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-black/[0.03] p-2.5 text-center">
+      <p className="text-[9px] text-muted-foreground">{emoji} {label}</p>
+      <p className="text-xs font-semibold text-foreground mt-0.5">{value}</p>
+    </div>
+  );
+}
 
 export default HikingShareCard;
