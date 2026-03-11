@@ -10,7 +10,7 @@ export interface BadgeDefinition {
 export type BadgeCategory = "starter" | "milestone" | "seasonal" | "special" | "weather" | "shared";
 
 export interface BadgeCondition {
-  type: "completedCount" | "specificMountain" | "weather" | "firstAction" | "seasonal";
+  type: "completedCount" | "specificMountain" | "weather" | "firstAction" | "seasonal" | "sharedParticipants";
   value?: number;
   mountainId?: number;
   weatherCondition?: string;
