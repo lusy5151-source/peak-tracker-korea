@@ -90,7 +90,7 @@ export function useAchievementStore(
       const user = (await supabase.auth.getUser()).data.user;
 
       if (user) {
-        await supabase.from("user_achievements" as any).upsert(
+        await supabase.from("user_achievements").upsert(
           {
             user_id: user.id,
             badge_id: badgeId,
