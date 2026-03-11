@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { badges, BadgeDefinition, EarnedBadge } from "@/data/badges";
 import type { CompletionRecord } from "@/hooks/useMountainStore";
@@ -45,6 +46,29 @@ export function useAchievementStore(
 
   useEffect(() => { saveEarned(earned); }, [earned]);
   useEffect(() => {
+  const loadFromDB = async () => {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("user_achievements")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (!data) return;
+
+    setEarned(
+      data.map((d) => ({
+        badgeId: d.badge_id,
+        earnedAt: d.earned_at
+      }))
+    );
+  };
+
+  loadFromDB();
+}, []);
+
+  useEffect(() => {
     if (featuredBadgeId) localStorage.setItem(FEATURED_KEY, featuredBadgeId);
     else localStorage.removeItem(FEATURED_KEY);
   }, [featuredBadgeId]);
@@ -54,14 +78,32 @@ export function useAchievementStore(
     [earned]
   );
 
-  const earnBadge = useCallback((badgeId: string) => {
-    setEarned((prev) => {
-      if (prev.some((e) => e.badgeId === badgeId)) return prev;
-      return [...prev, { badgeId, earnedAt: new Date().toISOString() }];
-    });
-    const badge = badges.find((b) => b.id === badgeId);
-    if (badge) setNewlyEarned(badge);
-  }, []);
+  const earnBadge = useCallback(async (badgeId: string) => {
+    if (earned.some((e) => e.badgeId === badgeId)) return;
+ 
+  setEarned((prev) => {
+    if (prev.some((e) => e.badgeId === badgeId)) return prev;
+    return [...prev, { badgeId, earnedAt: new Date().toISOString() }];
+  });
+
+  const badge = badges.find((b) => b.id === badgeId);
+  if (badge) setNewlyEarned(badge);
+    
+ const user = (await supabase.auth.getUser()).data.user;
+
+  if (user) {
+    await supabase
+      .from("user_achievements")
+      .upsert(
+        {
+        user_id: user.id,
+        badge_id: badgeId
+      },
+      { onConflict: "user_id,badge_id" }
+  );
+
+},[earned]);
+
 
   const dismissNewBadge = useCallback(() => setNewlyEarned(null), []);
 
@@ -70,9 +112,10 @@ export function useAchievementStore(
   // Check and award badges based on current state
   const checkBadges = useCallback(() => {
     const count = records.length;
-    const maxSharedParticipants = sharedCompletions.length > 0
-      ? Math.max(...sharedCompletions.map((sc) => sc.participant_count))
-      : 0;
+    const maxSharedParticipants = Math.max(
+    0,
+     ...sharedCompletions.map((sc) => sc.participant_count)
+  );
 
     badges.forEach((badge) => {
       if (isEarned(badge.id)) return;
@@ -115,7 +158,11 @@ export function useAchievementStore(
   useEffect(() => { checkBadges(); }, [checkBadges]);
 
   const earnedBadges = useMemo(
-    () => earned.map((e) => ({ ...e, badge: badges.find((b) => b.id === e.badgeId)! })).filter((e) => e.badge),
+    () => earned.map((e) => ({ 
+    ...e,
+    badge: badges.find((b) => b.id === e.badgeId) 
+    }))
+    .filter((e) => e.badge),
     [earned]
   );
 
