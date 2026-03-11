@@ -36,74 +36,72 @@ function getSeason(date: Date): string {
 export function useAchievementStore(
   records: CompletionRecord[],
   gearItems: GearItem[],
-  sharedCompletions: SharedCompletionData[] = []
+  sharedCompletions: SharedCompletionData[] = [],
 ) {
   const [earned, setEarned] = useState<EarnedBadge[]>(loadEarned);
-  const [featuredBadgeId, setFeaturedBadgeId] = useState<string | null>(
-    () => localStorage.getItem(FEATURED_KEY)
-  );
+  const [featuredBadgeId, setFeaturedBadgeId] = useState<string | null>(() => localStorage.getItem(FEATURED_KEY));
   const [newlyEarned, setNewlyEarned] = useState<BadgeDefinition | null>(null);
 
-  useEffect(() => { saveEarned(earned); }, [earned]);
   useEffect(() => {
-  const loadFromDB = async () => {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) return;
+    saveEarned(earned);
+  }, [earned]);
+  useEffect(() => {
+    const loadFromDB = async () => {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) return;
 
-    const { data } = await supabase
-      .from("user_achievements" as any)
-      .select("*")
-      .eq("user_id", user.id);
+      const { data } = await supabase
+        .from("user_achievements" as any)
+        .select("*")
+        .eq("user_id", user.id);
 
-    if (!data) return;
+      if (!data) return;
 
-    setEarned(
-      (data as any[]).map((d: any) => ({
-        badgeId: d.badge_id,
-        earnedAt: d.earned_at
-      }))
-    );
-  };
+      setEarned(
+        (data as any[]).map((d: any) => ({
+          badgeId: d.badge_id,
+          earnedAt: d.earned_at,
+        })),
+      );
+    };
 
-  loadFromDB();
-}, []);
+    loadFromDB();
+  }, []);
 
   useEffect(() => {
     if (featuredBadgeId) localStorage.setItem(FEATURED_KEY, featuredBadgeId);
     else localStorage.removeItem(FEATURED_KEY);
   }, [featuredBadgeId]);
 
-  const isEarned = useCallback(
-    (badgeId: string) => earned.some((e) => e.badgeId === badgeId),
-    [earned]
-  );
+  const isEarned = useCallback((badgeId: string) => earned.some((e) => e.badgeId === badgeId), [earned]);
 
-  const earnBadge = useCallback(async (badgeId: string) => {
-    if (earned.some((e) => e.badgeId === badgeId)) return;
- 
-  setEarned((prev) => {
-    if (prev.some((e) => e.badgeId === badgeId)) return prev;
-    return [...prev, { badgeId, earnedAt: new Date().toISOString() }];
-  });
+  const earnBadge = useCallback(
+    async (badgeId: string) => {
+      if (earned.some((e) => e.badgeId === badgeId)) return;
 
-  const badge = badges.find((b) => b.id === badgeId);
-  if (badge) setNewlyEarned(badge);
-    
-    const user = (await supabase.auth.getUser()).data.user;
+      setEarned((prev) => {
+        if (prev.some((e) => e.badgeId === badgeId)) return prev;
+        return [...prev, { badgeId, earnedAt: new Date().toISOString() }];
+      });
 
-    if (user) {
-      await supabase
-        .from("user_achievements" as any)
-        .upsert(
+      const badge = badges.find((b) => b.id === badgeId);
+      if (badge) setNewlyEarned(badge);
+
+      const user = (await supabase.auth.getUser()).data.user;
+
+      if (user) {
+        await supabase.from("user_achievements" as any).upsert(
           {
             user_id: user.id,
             badge_id: badgeId,
+            earned_at: new Date().toISOString(),
           },
-          { onConflict: "user_id,badge_id" }
+          { onConflict: "user_id,badge_id" },
         );
-    }
-  }, [earned]);
-
+      }
+    },
+    [earned],
+  );
 
   const dismissNewBadge = useCallback(() => setNewlyEarned(null), []);
 
@@ -112,10 +110,8 @@ export function useAchievementStore(
   // Check and award badges based on current state
   const checkBadges = useCallback(() => {
     const count = records.length;
-    const maxSharedParticipants = Math.max(
-    0,
-     ...sharedCompletions.map((sc) => sc.participant_count)
-  );
+    const maxSharedParticipants =
+      sharedCompletions.length > 0 ? Math.max(...sharedCompletions.map((sc) => sc.participant_count)) : 0;
 
     badges.forEach((badge) => {
       if (isEarned(badge.id)) return;
@@ -155,20 +151,24 @@ export function useAchievementStore(
   }, [records, gearItems, sharedCompletions, isEarned, earnBadge]);
 
   // Run badge checks whenever records, gear, or shared completions change
-  useEffect(() => { checkBadges(); }, [checkBadges]);
+  useEffect(() => {
+    checkBadges();
+  }, [checkBadges]);
 
   const earnedBadges = useMemo(
-    () => earned.map((e) => ({ 
-    ...e,
-    badge: badges.find((b) => b.id === e.badgeId) 
-    }))
-    .filter((e) => e.badge),
-    [earned]
+    () =>
+      earned
+        .map((e) => ({
+          ...e,
+          badge: badges.find((b) => b.id === e.badgeId),
+        }))
+        .filter((e) => e.badge),
+    [earned],
   );
 
   const featuredBadge = useMemo(
     () => (featuredBadgeId ? badges.find((b) => b.id === featuredBadgeId) : null),
-    [featuredBadgeId]
+    [featuredBadgeId],
   );
 
   // Progress toward next milestone
