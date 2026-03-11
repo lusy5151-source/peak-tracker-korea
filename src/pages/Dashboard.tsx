@@ -126,11 +126,7 @@ const Dashboard = () => {
   const todayIndex = new Date().getDate() % mountains.length;
   const todayMountain = mountains[todayIndex];
 
-  const newsItems = [
-    { id: 1, title: "봄철 등산 안전 수칙 안내", date: "2026-03-05", summary: "해빙기 산행 시 주의사항을 확인하세요." },
-    { id: 2, title: "국립공원 예약제 일부 변경", date: "2026-03-03", summary: "3월부터 일부 코스 예약제가 변경됩니다." },
-    { id: 3, title: "설악산 탐방로 개방 안내", date: "2026-03-01", summary: "겨울 통제 해제, 탐방로가 순차 개방됩니다." },
-  ];
+  // newsItems removed — replaced by AnnouncementSection
 
   return (
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
