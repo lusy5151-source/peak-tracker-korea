@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/context/StoreContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
+import { useSharedCompletionCounts } from "@/hooks/useSharedCompletionCounts";
 import { useProfile } from "@/hooks/useProfile";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
 import { useFriends } from "@/hooks/useFriends";
@@ -31,8 +32,9 @@ const ProfilePage = () => {
   const { user, signOut } = useAuth();
   const { records, completedCount } = useStore();
   const { items: gearItems } = useGearStore();
+  const sharedCompletions = useSharedCompletionCounts();
   const { earnedBadges, earnedCount, totalBadges, featuredBadge, setFeatured, featuredBadgeId } =
-    useAchievementStore(records, gearItems);
+    useAchievementStore(records, gearItems, sharedCompletions);
   const { profile, loading: profileLoading, updateProfile, uploadAvatar } = useProfile();
   const { fetchMyJournals } = useHikingJournals();
   const { friends } = useFriends();

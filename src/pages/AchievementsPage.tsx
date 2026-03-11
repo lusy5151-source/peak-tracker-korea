@@ -2,13 +2,15 @@ import { badges, badgeCategories, BadgeCategory } from "@/data/badges";
 import { useStore } from "@/context/StoreContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
+import { useSharedCompletionCounts } from "@/hooks/useSharedCompletionCounts";
 import { useState, useMemo } from "react";
 import { Trophy, Lock } from "lucide-react";
 
 const AchievementsPage = () => {
   const { records, completedCount } = useStore();
   const { items: gearItems } = useGearStore();
-  const { isEarned, earnedCount, totalBadges, earnedBadges } = useAchievementStore(records, gearItems);
+  const sharedCompletions = useSharedCompletionCounts();
+  const { isEarned, earnedCount, totalBadges, earnedBadges } = useAchievementStore(records, gearItems, sharedCompletions);
   const [activeCategory, setActiveCategory] = useState<BadgeCategory | "all">("all");
 
   const filteredBadges = useMemo(() => {

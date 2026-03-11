@@ -5,6 +5,7 @@ import { useWeather } from "@/hooks/useWeather";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
+import { useSharedCompletionCounts } from "@/hooks/useSharedCompletionCounts";
 import { useHikingPlans } from "@/hooks/useHikingPlans";
 import { useHikingJournals, HikingJournal } from "@/hooks/useHikingJournals";
 import { useChallenges, Challenge, UserChallenge } from "@/hooks/useChallenges";
@@ -34,8 +35,9 @@ const GOAL_KEY = "wandeng-user-goal";
 const Dashboard = () => {
   const { records, completedCount, isCompleted } = useStore();
   const { items: gearItems } = useGearStore();
+  const sharedCompletions = useSharedCompletionCounts();
   const { earnedBadges, isEarned, newlyEarned, dismissNewBadge, earnedCount, totalBadges } =
-    useAchievementStore(records, gearItems);
+    useAchievementStore(records, gearItems, sharedCompletions);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { plans } = useHikingPlans();
