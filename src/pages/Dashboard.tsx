@@ -400,20 +400,9 @@ const Dashboard = () => {
 
           {/* ── Announcements / News ── */}
           <section>
-            <SectionHeader title="공지사항" />
-            <div className="rounded-3xl bg-card border border-border p-4 shadow-sm space-y-2">
-              {newsItems.map((n) => (
-                <div key={n.id} className="flex items-center gap-3 rounded-xl bg-secondary/50 p-3.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-card shrink-0">
-                    <Newspaper className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
-                    <p className="text-[10px] text-muted-foreground">{n.date}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                </div>
-              ))}
+            <SectionHeader title="공지 · 산악정보" />
+            <div className="rounded-3xl bg-card border border-border p-4 shadow-sm">
+              <AnnouncementSection />
             </div>
           </section>
         </div>
