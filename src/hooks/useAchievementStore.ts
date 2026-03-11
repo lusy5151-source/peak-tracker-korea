@@ -51,14 +51,14 @@ export function useAchievementStore(
     if (!user) return;
 
     const { data } = await supabase
-      .from("user_achievements")
+      .from("user_achievements" as any)
       .select("*")
       .eq("user_id", user.id);
 
     if (!data) return;
 
     setEarned(
-      data.map((d) => ({
+      (data as any[]).map((d: any) => ({
         badgeId: d.badge_id,
         earnedAt: d.earned_at
       }))
