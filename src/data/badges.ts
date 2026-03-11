@@ -10,7 +10,7 @@ export interface BadgeDefinition {
 export type BadgeCategory = "starter" | "milestone" | "seasonal" | "special" | "weather" | "shared";
 
 export interface BadgeCondition {
-  type: "completedCount" | "specificMountain" | "weather" | "firstAction" | "seasonal";
+  type: "completedCount" | "specificMountain" | "weather" | "firstAction" | "seasonal" | "sharedParticipants";
   value?: number;
   mountainId?: number;
   weatherCondition?: string;
@@ -66,9 +66,9 @@ export const badges: BadgeDefinition[] = [
   { id: "autumn-foliage", name: "가을 단풍", icon: "🍁", description: "가을(9~11월)에 등산을 완료하세요", category: "seasonal", condition: { type: "seasonal", season: "autumn" } },
   { id: "winter-snow", name: "겨울 설산", icon: "⛄", description: "겨울(12~2월)에 등산을 완료하세요", category: "seasonal", condition: { type: "seasonal", season: "winter" } },
 
-  // Shared completions
-  { id: "first-shared", name: "첫 공동 완등", icon: "🤝", description: "처음으로 친구와 함께 완등하세요", category: "shared", condition: { type: "firstAction", actionType: "shared_completion" } },
-  { id: "shared-3", name: "3인 공동 등산", icon: "👥", description: "3명 이상 공동 완등을 달성하세요", category: "shared", condition: { type: "completedCount", value: 3 } },
-  { id: "shared-5", name: "5인 원정대", icon: "🏕️", description: "5명 이상 공동 완등을 달성하세요", category: "shared", condition: { type: "completedCount", value: 5 } },
-  { id: "shared-10", name: "10인 대원정", icon: "🎪", description: "10명 이상 공동 완등을 달성하세요", category: "shared", condition: { type: "completedCount", value: 10 } },
+  // Shared completions - based on participant count, NOT mountain count
+  { id: "first-shared", name: "첫 공동 완등", icon: "🤝", description: "처음으로 친구와 함께 완등하세요 (2명 이상)", category: "shared", condition: { type: "sharedParticipants", value: 2 } },
+  { id: "shared-3", name: "3인 공동 등산", icon: "👥", description: "3명 이상과 공동 완등을 달성하세요", category: "shared", condition: { type: "sharedParticipants", value: 3 } },
+  { id: "shared-5", name: "5인 원정대", icon: "🏕️", description: "5명 이상과 공동 완등을 달성하세요", category: "shared", condition: { type: "sharedParticipants", value: 5 } },
+  { id: "shared-10", name: "10인 대원정", icon: "🎪", description: "10명 이상과 공동 완등을 달성하세요", category: "shared", condition: { type: "sharedParticipants", value: 10 } },
 ];

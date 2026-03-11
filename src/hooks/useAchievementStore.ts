@@ -6,6 +6,11 @@ import type { GearItem } from "@/hooks/useGearStore";
 const STORAGE_KEY = "korea-100-badges";
 const FEATURED_KEY = "korea-100-featured-badge";
 
+export interface SharedCompletionData {
+  id: string;
+  participant_count: number;
+}
+
 function loadEarned(): EarnedBadge[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -27,7 +32,11 @@ function getSeason(date: Date): string {
   return "winter";
 }
 
-export function useAchievementStore(records: CompletionRecord[], gearItems: GearItem[]) {
+export function useAchievementStore(
+  records: CompletionRecord[],
+  gearItems: GearItem[],
+  sharedCompletions: SharedCompletionData[] = []
+) {
   const [earned, setEarned] = useState<EarnedBadge[]>(loadEarned);
   const [featuredBadgeId, setFeaturedBadgeId] = useState<string | null>(
     () => localStorage.getItem(FEATURED_KEY)
@@ -61,6 +70,9 @@ export function useAchievementStore(records: CompletionRecord[], gearItems: Gear
   // Check and award badges based on current state
   const checkBadges = useCallback(() => {
     const count = records.length;
+    const maxSharedParticipants = sharedCompletions.length > 0
+      ? Math.max(...sharedCompletions.map((sc) => sc.participant_count))
+      : 0;
 
     badges.forEach((badge) => {
       if (isEarned(badge.id)) return;
@@ -90,13 +102,16 @@ export function useAchievementStore(records: CompletionRecord[], gearItems: Gear
         case "seasonal":
           unlocked = records.some((r) => getSeason(new Date(r.completedAt)) === condition.season);
           break;
+        case "sharedParticipants":
+          unlocked = maxSharedParticipants >= (condition.value || 0);
+          break;
       }
 
       if (unlocked) earnBadge(badge.id);
     });
-  }, [records, gearItems, isEarned, earnBadge]);
+  }, [records, gearItems, sharedCompletions, isEarned, earnBadge]);
 
-  // Run badge checks whenever records or gear change
+  // Run badge checks whenever records, gear, or shared completions change
   useEffect(() => { checkBadges(); }, [checkBadges]);
 
   const earnedBadges = useMemo(
