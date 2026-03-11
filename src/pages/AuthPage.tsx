@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Mountain, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -49,18 +48,28 @@ const AuthPage = () => {
   const handleSocialLogin = async (provider: "google" | "apple") => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast({ title: "오류", description: String(result.error), variant: "destructive" });
-      }
-    } catch (err: any) {
-      toast({ title: "오류", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+      const handleSocialLogin = async (provider: "google" | "apple") => {
+  setLoading(true);
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: provider,
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) throw error;
+
+  } catch (err: any) {
+    toast({
+      title: "오류",
+      description: err.message,
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center pb-24">
