@@ -89,20 +89,20 @@ export function useAchievementStore(
   const badge = badges.find((b) => b.id === badgeId);
   if (badge) setNewlyEarned(badge);
     
- const user = (await supabase.auth.getUser()).data.user;
+    const user = (await supabase.auth.getUser()).data.user;
 
-  if (user) {
-    await supabase
-      .from("user_achievements")
-      .upsert(
-        {
-        user_id: user.id,
-        badge_id: badgeId
-      },
-      { onConflict: "user_id,badge_id" }
-  );
-
-},[earned]);
+    if (user) {
+      await supabase
+        .from("user_achievements")
+        .upsert(
+          {
+            user_id: user.id,
+            badge_id: badgeId,
+          },
+          { onConflict: "user_id,badge_id" }
+        );
+    }
+  }, [earned]);
 
 
   const dismissNewBadge = useCallback(() => setNewlyEarned(null), []);
