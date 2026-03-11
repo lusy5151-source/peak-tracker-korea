@@ -93,7 +93,7 @@ export function useAchievementStore(
 
     if (user) {
       await supabase
-        .from("user_achievements")
+        .from("user_achievements" as any)
         .upsert(
           {
             user_id: user.id,
