@@ -62,16 +62,79 @@ const AppRoutes = () => {
       <Route path="/records" element={<Records />} />
       <Route path="/gear" element={<GearPage />} />
       <Route path="/social" element={<SocialPage />} />
-      <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
-      <Route path="/plans/create" element={<ProtectedRoute><CreatePlanPage /></ProtectedRoute>} />
-      <Route path="/plans/:id" element={<ProtectedRoute><PlanDetailPage /></ProtectedRoute>} />
-      <Route path="/challenges" element={<ProtectedRoute><ChallengePage /></ProtectedRoute>} />
+      <Route
+        path="/plans"
+        element={
+          <ProtectedRoute>
+            <PlansPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plans/create"
+        element={
+          <ProtectedRoute>
+            <CreatePlanPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plans/:id"
+        element={
+          <ProtectedRoute>
+            <PlanDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/challenges"
+        element={
+          <ProtectedRoute>
+            <ChallengePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/achievements" element={<AchievementsPage />} />
-      <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
-      <Route path="/shared-completions" element={<ProtectedRoute><SharedCompletionPage /></ProtectedRoute>} />
-      <Route path="/groups" element={<ProtectedRoute><GroupsPage /></ProtectedRoute>} />
-      <Route path="/profile/:userId" element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route
+        path="/feed"
+        element={
+          <ProtectedRoute>
+            <FeedPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/shared-completions"
+        element={
+          <ProtectedRoute>
+            <SharedCompletionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/groups"
+        element={
+          <ProtectedRoute>
+            <GroupsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/:userId"
+        element={
+          <ProtectedRoute>
+            <FriendProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
