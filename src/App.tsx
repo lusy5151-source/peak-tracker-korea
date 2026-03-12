@@ -54,6 +54,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={user && !loading ? <Navigate to="/" replace /> : <AuthPage />} />
+      <Route path="/kakao/callback" element={<KakaoCallback />} />
       <Route path="/" element={<Dashboard />} />
       <Route path="/mountains" element={<MountainList />} />
       <Route path="/mountains/:id" element={<MountainDetail />} />
