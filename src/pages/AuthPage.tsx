@@ -95,7 +95,7 @@ const AuthPage = () => {
         {/* Social login */}
         <div className="space-y-2">
           <button
-            onClick={() => handleSocialLogin("google")}
+            onClick={handleGoogleLogin}
             disabled={loading}
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary/50 disabled:opacity-50"
           >
