@@ -11,39 +11,30 @@ const KakaoCallback = () => {
 
       if (!code) return;
 
-      const tokenRes = await fetch(
-        "https://kauth.kakao.com/oauth/token",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/x-www-form-urlencoded;charset=utf-8",
-          },
-          body: new URLSearchParams({
-            grant_type: "authorization_code",
-            client_id: "여기에_카카오_REST_API_KEY",
-            redirect_uri:
-              "https://peak-tracker-korea.lovable.app/kakao/callback",
-            code: code!,
-          }),
-        }
-      );
+      const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: "c8b31eed7d32a5ad3a13a56f3b8e3995",
+          redirect_uri: "https://peak-tracker-korea.lovable.app/kakao/callback",
+          code: code!,
+        }),
+      });
 
       const token = await tokenRes.json();
 
-      const userRes = await fetch(
-        "https://kapi.kakao.com/v2/user/me",
-        {
-          headers: {
-            Authorization: `Bearer ${token.access_token}`,
-          },
-        }
-      );
+      const userRes = await fetch("https://kapi.kakao.com/v2/user/me", {
+        headers: {
+          Authorization: `Bearer ${token.access_token}`,
+        },
+      });
 
       const user = await userRes.json();
 
-      const email =
-        user.kakao_account?.email || `${user.id}@kakao.user`;
+      const email = user.kakao_account?.email || `${user.id}@kakao.user`;
 
       const password = String(user.id);
 
