@@ -7,8 +7,6 @@ const KakaoCallback = () => {
 
   useEffect(() => {
     const handleLogin = async () => {
-      const hash = window.location.hash;
-
       const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
 
       if (error) {
