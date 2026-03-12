@@ -7,10 +7,12 @@ const KakaoCallback = () => {
 
   useEffect(() => {
     const handleLogin = async () => {
-      const { data, error } = await supabase.auth.getSession();
+      const hash = window.location.hash;
+
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
 
       if (error) {
-        console.error("로그인 오류", error);
+        console.error("카카오 로그인 실패", error);
         return;
       }
 
