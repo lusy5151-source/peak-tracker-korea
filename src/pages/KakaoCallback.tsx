@@ -43,12 +43,20 @@ const KakaoCallback = () => {
         });
 
         if (loginError) {
-          await supabase.auth.signUp({
+          const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
           });
+
+          if (!signUpError) {
+            await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+          }
         }
 
+        await supabase.auth.getSession();
         navigate("/");
       } catch (err) {
         console.error("카카오 로그인 오류", err);
