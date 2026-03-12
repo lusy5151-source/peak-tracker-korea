@@ -25,6 +25,7 @@ import FriendProfilePage from "@/pages/FriendProfilePage";
 import ChallengePage from "@/pages/ChallengePage";
 import SharedCompletionPage from "@/pages/SharedCompletionPage";
 import GroupsPage from "@/pages/GroupsPage";
+import KakaoCallback from "@/pages/KakaoCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -53,6 +54,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={user && !loading ? <Navigate to="/" replace /> : <AuthPage />} />
+      <Route path="/kakao/callback" element={<KakaoCallback />} />
       <Route path="/" element={<Dashboard />} />
       <Route path="/mountains" element={<MountainList />} />
       <Route path="/mountains/:id" element={<MountainDetail />} />
