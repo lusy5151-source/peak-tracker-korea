@@ -37,10 +37,31 @@ const KakaoCallback = () => {
         const email = user.kakao_account?.email || `${user.id}@kakao.user`;
         const password = `kakao_${user.id}`;
 
-        const { error: loginError } = await supabase.auth.signInWithPassword({
+        let { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+
+        if (error) {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+          });
+
+          if (!signUpError) {
+            const { error: loginError2 } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+
+            if (loginError2) {
+              console.error("로그인 실패", loginError2);
+              return;
+            }
+          }
+        }
+
+        navigate("/");
 
         if (loginError) {
           const { error: signUpError } = await supabase.auth.signUp({
