@@ -55,7 +55,6 @@ const AuthPage = () => {
           redirectTo: window.location.origin,
         },
       });
-
       if (error) throw error;
     } catch (err: any) {
       toast({
@@ -66,6 +65,20 @@ const AuthPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleKakaoLogin = () => {
+    const REST_API_KEY = "c8b31eed7d32a5ad3a13a56f3b8e3995";
+
+    const REDIRECT_URI = "https://peak-tracker-korea.lovable.app/kakao/callback";
+
+    const kakaoAuthURL =
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?client_id=${REST_API_KEY}` +
+      `&redirect_uri=${REDIRECT_URI}` +
+      `&response_type=code`;
+
+    window.location.href = kakaoAuthURL;
   };
 
   return (
@@ -120,6 +133,13 @@ const AuthPage = () => {
             Apple로 계속하기
           </button>
         </div>
+        <button
+          onClick={handleKakaoLogin}
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-yellow-400 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-yellow-500 disabled:opacity-50"
+        >
+          카카오로 계속하기
+        </button>
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
