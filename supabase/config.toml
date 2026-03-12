@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.plan-reminders]
 verify_jwt = false
+
+[functions.kakao-auth]
+verify_jwt = false
