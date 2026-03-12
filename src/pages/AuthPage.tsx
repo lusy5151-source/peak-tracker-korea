@@ -65,9 +65,8 @@ const AuthPage = () => {
   };
 
   const handleKakaoLogin = () => {
-    const REST_API_KEY = "c8b31eed7d32a5ad3a13a56f3b8e3995";
-
-    const REDIRECT_URI = "https://peak-tracker-korea.lovable.app/kakao/callback";
+    const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY || "c8b31eed7d32a5ad3a13a56f3b8e3995";
+    const REDIRECT_URI = `${window.location.origin}/kakao/callback`;
 
     const kakaoAuthURL =
       `https://kauth.kakao.com/oauth/authorize` +
