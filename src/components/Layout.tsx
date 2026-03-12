@@ -19,10 +19,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-nature-100 bg-sky-hero/80 backdrop-blur-md">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2">
-            <Mountain className="h-5 w-5 text-primary" />
+            <Mountain className="h-5 w-5 text-nature-600" />
             <span className="text-base font-bold text-foreground">완등</span>
           </Link>
           <div className="flex items-center gap-2">
