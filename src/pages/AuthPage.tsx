@@ -119,14 +119,17 @@ const AuthPage = () => {
             </svg>
             Google로 계속하기
           </button>
+          <button
+            onClick={handleKakaoLogin}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(50,100%,50%)] px-4 py-3 text-sm font-medium text-[hsl(0,0%,10%)] transition-colors hover:bg-[hsl(50,100%,45%)] disabled:opacity-50"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3C6.48 3 2 6.36 2 10.5c0 2.67 1.8 5.01 4.5 6.36-.15.54-.97 3.48-1 3.6 0 .07.03.14.09.18.04.02.08.03.12.03.06 0 .12-.03.17-.07.75-.54 3-2.16 4.38-3.17.56.07 1.14.11 1.74.11 5.52 0 10-3.36 10-7.5S17.52 3 12 3z"/>
+            </svg>
+            카카오로 계속하기
+          </button>
         </div>
-        <button
-          onClick={handleKakaoLogin}
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-yellow-400 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-yellow-500 disabled:opacity-50"
-        >
-          카카오로 계속하기
-        </button>
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
