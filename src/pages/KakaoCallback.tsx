@@ -11,7 +11,6 @@ const KakaoCallback = () => {
       if (!code) return;
 
       try {
-        // 1️⃣ 카카오 토큰 요청
         const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
           method: "POST",
           headers: {
@@ -27,7 +26,6 @@ const KakaoCallback = () => {
 
         const token = await tokenRes.json();
 
-        // 2️⃣ 카카오 유저 정보
         const userRes = await fetch("https://kapi.kakao.com/v2/user/me", {
           headers: {
             Authorization: `Bearer ${token.access_token}`,
@@ -39,13 +37,11 @@ const KakaoCallback = () => {
         const email = user.kakao_account?.email || `${user.id}@kakao.user`;
         const password = `kakao_${user.id}`;
 
-        // 3️⃣ 로그인 먼저 시도
         const { error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        // 4️⃣ 로그인 실패하면 회원가입
         if (loginError) {
           await supabase.auth.signUp({
             email,
