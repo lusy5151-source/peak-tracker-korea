@@ -140,11 +140,15 @@ const GroupsPage = () => {
 };
 
 function GroupCard({ group, isMember, onJoin }: { group: HikingGroup; isMember: boolean; onJoin?: () => void }) {
+  const navigate = useNavigate();
   return (
-    <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+    <div
+      className="rounded-2xl bg-card border border-border p-4 shadow-sm cursor-pointer hover:border-primary/30 transition-colors"
+      onClick={() => navigate(`/groups/${group.id}`)}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-mint-light">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
             <Users className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -165,7 +169,7 @@ function GroupCard({ group, isMember, onJoin }: { group: HikingGroup; isMember: 
           </div>
         </div>
         {onJoin ? (
-          <Button size="sm" variant="outline" onClick={onJoin} className="rounded-full text-xs">
+          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); onJoin(); }} className="rounded-full text-xs">
             가입
           </Button>
         ) : isMember ? (
