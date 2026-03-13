@@ -64,17 +64,11 @@ const AuthPage = () => {
     }
   };
 
-  const handleKakaoLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-
-    if (error) {
-      console.error("카카오 로그인 오류", error);
-    }
+  const handleKakaoLogin = () => {
+    const KAKAO_REST_API_KEY = "4eaborig2c547a9c8b1f3d8e6f7a2b4c";
+    const redirectUri = `${window.location.origin}/kakao/callback`;
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+    window.location.href = kakaoAuthUrl;
   };
 
   return (

@@ -116,8 +116,9 @@ Deno.serve(async (req) => {
 
       user = newUser.user;
     } else {
-      // Update user metadata
+      // Update user metadata and confirm email
       await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        email_confirm: true,
         user_metadata: {
           ...user.user_metadata,
           full_name: nickname,
