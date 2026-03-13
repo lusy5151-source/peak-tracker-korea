@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Mountain, Loader2 } from "lucide-react";
@@ -6,8 +6,12 @@ import { Mountain, Loader2 } from "lucide-react";
 const KakaoCallback = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const handleKakaoLogin = async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
