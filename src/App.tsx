@@ -25,6 +25,7 @@ import FriendProfilePage from "@/pages/FriendProfilePage";
 import ChallengePage from "@/pages/ChallengePage";
 import SharedCompletionPage from "@/pages/SharedCompletionPage";
 import GroupsPage from "@/pages/GroupsPage";
+import GroupDetailPage from "@/pages/GroupDetailPage";
 import KakaoCallback from "@/pages/KakaoCallback";
 import NotFound from "./pages/NotFound";
 
