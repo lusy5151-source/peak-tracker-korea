@@ -44,6 +44,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
