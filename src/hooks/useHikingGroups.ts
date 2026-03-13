@@ -277,6 +277,7 @@ export function useHikingGroups() {
     fetchGroupById,
     createGroup,
     updateGroup,
+    deleteGroup,
     joinGroup,
     leaveGroup,
     removeMember,
