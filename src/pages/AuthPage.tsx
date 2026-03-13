@@ -64,17 +64,17 @@ const AuthPage = () => {
     }
   };
 
-  const handleKakaoLogin = () => {
-    const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY || "c8b31eed7d32a5ad3a13a56f3b8e3995";
-    const REDIRECT_URI = `${window.location.origin}/kakao/callback`;
+  const handleKakaoLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "kakao",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
 
-    const kakaoAuthURL =
-      `https://kauth.kakao.com/oauth/authorize` +
-      `?client_id=${REST_API_KEY}` +
-      `&redirect_uri=${REDIRECT_URI}` +
-      `&response_type=code`;
-
-    window.location.href = kakaoAuthURL;
+    if (error) {
+      console.error("카카오 로그인 오류", error);
+    }
   };
 
   return (
@@ -124,7 +124,7 @@ const AuthPage = () => {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(50,100%,50%)] px-4 py-3 text-sm font-medium text-[hsl(0,0%,10%)] transition-colors hover:bg-[hsl(50,100%,45%)] disabled:opacity-50"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 3C6.48 3 2 6.36 2 10.5c0 2.67 1.8 5.01 4.5 6.36-.15.54-.97 3.48-1 3.6 0 .07.03.14.09.18.04.02.08.03.12.03.06 0 .12-.03.17-.07.75-.54 3-2.16 4.38-3.17.56.07 1.14.11 1.74.11 5.52 0 10-3.36 10-7.5S17.52 3 12 3z"/>
+              <path d="M12 3C6.48 3 2 6.36 2 10.5c0 2.67 1.8 5.01 4.5 6.36-.15.54-.97 3.48-1 3.6 0 .07.03.14.09.18.04.02.08.03.12.03.06 0 .12-.03.17-.07.75-.54 3-2.16 4.38-3.17.56.07 1.14.11 1.74.11 5.52 0 10-3.36 10-7.5S17.52 3 12 3z" />
             </svg>
             카카오로 계속하기
           </button>
