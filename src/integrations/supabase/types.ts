@@ -65,6 +65,54 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          alert_type: string
+          category: string
+          created_at: string
+          date: string
+          description: string
+          full_description: string
+          id: string
+          is_active: boolean
+          mountain_name: string | null
+          severity: string
+          source: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type?: string
+          category?: string
+          created_at?: string
+          date?: string
+          description: string
+          full_description: string
+          id?: string
+          is_active?: boolean
+          mountain_name?: string | null
+          severity?: string
+          source?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          full_description?: string
+          id?: string
+          is_active?: boolean
+          mountain_name?: string | null
+          severity?: string
+          source?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           created_at: string

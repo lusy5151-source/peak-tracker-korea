@@ -1,23 +1,11 @@
 import { useState } from "react";
-import { AlertTriangle, TreePine, CloudLightning, Construction, ChevronRight, X, Flame, Shield, Info, Megaphone } from "lucide-react";
+import { AlertTriangle, TreePine, CloudLightning, Construction, ChevronRight, X, Flame, Shield, Info, Megaphone, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAnnouncements, type Announcement } from "@/hooks/useAnnouncements";
 
 type AnnouncementCategory = "all" | "app" | "mountain" | "event";
 type AlertType = "trail_closure" | "weather_alert" | "wildfire" | "app_update" | "event";
-
-interface Announcement {
-  id: string;
-  title: string;
-  mountainName?: string;
-  date: string;
-  description: string;
-  fullDescription: string;
-  category: AnnouncementCategory;
-  alertType: AlertType;
-  severity: "info" | "warning" | "critical";
-  source?: string;
-}
 
 const alertIcons: Record<AlertType, typeof AlertTriangle> = {
   trail_closure: Construction,
@@ -52,19 +40,16 @@ const categoryLabels: Record<AnnouncementCategory, string> = {
   event: "이벤트",
 };
 
-// Mock announcements combining all data sources
-const mockAnnouncements: Announcement[] = [];
-
 export function AnnouncementSection() {
+  const { announcements, loading } = useAnnouncements();
   const [selectedCategory, setSelectedCategory] = useState<AnnouncementCategory>("all");
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
   const filtered = selectedCategory === "all"
-    ? mockAnnouncements
-    : mockAnnouncements.filter((a) => a.category === selectedCategory);
+    ? announcements
+    : announcements.filter((a) => a.category === selectedCategory);
 
-  // Count critical/warning alerts
-  const alertCount = mockAnnouncements.filter((a) => a.severity === "critical" || a.severity === "warning").length;
+  const alertCount = announcements.filter((a) => a.severity === "critical" || a.severity === "warning").length;
 
   return (
     <div className="space-y-3">
@@ -90,31 +75,45 @@ export function AnnouncementSection() {
         ))}
       </div>
 
+      {/* Loading state */}
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && filtered.length === 0 && (
+        <div className="text-center py-8 text-sm text-muted-foreground">
+          공지사항이 없습니다.
+        </div>
+      )}
+
       {/* Announcement cards */}
       <div className="space-y-2">
         {filtered.map((announcement) => {
-          const Icon = alertIcons[announcement.alertType];
+          const Icon = alertIcons[announcement.alert_type as AlertType] || Info;
           return (
             <button
               key={announcement.id}
               onClick={() => setSelectedAnnouncement(announcement)}
-              className={`w-full text-left rounded-2xl border p-4 transition-all hover:shadow-md ${severityStyles[announcement.severity]}`}
+              className={`w-full text-left rounded-2xl border p-4 transition-all hover:shadow-md ${severityStyles[announcement.severity] || severityStyles.info}`}
             >
               <div className="flex items-start gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${severityIconBg[announcement.severity]}`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${severityIconBg[announcement.severity] || severityIconBg.info}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="text-sm font-semibold truncate">{announcement.title}</p>
                     {announcement.severity === "critical" && (
-                      <Badge className={`text-[9px] px-1.5 py-0 h-4 ${severityBadge[announcement.severity]}`}>긴급</Badge>
+                      <Badge className={`text-[9px] px-1.5 py-0 h-4 ${severityBadge.critical}`}>긴급</Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-[10px] opacity-70">
-                    {announcement.mountainName && (
+                    {announcement.mountain_name && (
                       <span className="flex items-center gap-0.5">
-                        <TreePine className="h-3 w-3" /> {announcement.mountainName}
+                        <TreePine className="h-3 w-3" /> {announcement.mountain_name}
                       </span>
                     )}
                     <span>{announcement.date}</span>
@@ -141,7 +140,7 @@ export function AnnouncementSection() {
 }
 
 function AnnouncementDetail({ announcement, onClose }: { announcement: Announcement; onClose: () => void }) {
-  const Icon = alertIcons[announcement.alertType];
+  const Icon = alertIcons[announcement.alert_type as AlertType] || Info;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
@@ -150,18 +149,18 @@ function AnnouncementDetail({ announcement, onClose }: { announcement: Announcem
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`rounded-t-3xl sm:rounded-t-3xl p-5 ${severityStyles[announcement.severity]}`}>
+        <div className={`rounded-t-3xl sm:rounded-t-3xl p-5 ${severityStyles[announcement.severity] || severityStyles.info}`}>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${severityIconBg[announcement.severity]}`}>
+              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${severityIconBg[announcement.severity] || severityIconBg.info}`}>
                 <Icon className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold">{announcement.title}</h3>
                 <div className="flex items-center gap-2 mt-0.5 text-xs opacity-70">
-                  {announcement.mountainName && (
+                  {announcement.mountain_name && (
                     <span className="flex items-center gap-0.5">
-                      <TreePine className="h-3 w-3" /> {announcement.mountainName}
+                      <TreePine className="h-3 w-3" /> {announcement.mountain_name}
                     </span>
                   )}
                   <span>{announcement.date}</span>
@@ -183,7 +182,7 @@ function AnnouncementDetail({ announcement, onClose }: { announcement: Announcem
             </div>
           )}
           <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">
-            {announcement.fullDescription}
+            {announcement.full_description}
           </p>
           <Button className="w-full rounded-xl" onClick={onClose}>
             확인
