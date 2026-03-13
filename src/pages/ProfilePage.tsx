@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { useStore } from "@/context/StoreContext";
 import { useGearStore } from "@/hooks/useGearStore";
 import { useAchievementStore } from "@/hooks/useAchievementStore";
@@ -30,6 +31,7 @@ const HIKING_STYLES = [
 
 const ProfilePage = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const { records, completedCount } = useStore();
   const { items: gearItems } = useGearStore();
   const sharedCompletions = useSharedCompletionCounts();
@@ -447,6 +449,19 @@ const ProfilePage = () => {
           전체 업적 보기
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
+
+        {isAdmin && (
+          <Link
+            to="/admin/announcements"
+            className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
+              관리자 메뉴
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </Link>
+        )}
 
         <button
           onClick={signOut}
