@@ -65,7 +65,7 @@ const AuthPage = () => {
   };
 
   const handleKakaoLogin = () => {
-    const KAKAO_REST_API_KEY = "4eaborig2c547a9c8b1f3d8e6f7a2b4c";
+    const KAKAO_REST_API_KEY = "c8b31eed7d32a5ad3a13a56f3b8e3995";
     const redirectUri = `${window.location.origin}/kakao/callback`;
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
     window.location.href = kakaoAuthUrl;
