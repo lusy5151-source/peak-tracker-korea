@@ -27,6 +27,7 @@ import SharedCompletionPage from "@/pages/SharedCompletionPage";
 import GroupsPage from "@/pages/GroupsPage";
 import GroupDetailPage from "@/pages/GroupDetailPage";
 import KakaoCallback from "@/pages/KakaoCallback";
+import AdminAnnouncementsPage from "@/pages/AdminAnnouncementsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -141,6 +142,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/announcements"
+        element={
+          <ProtectedRoute>
+            <AdminAnnouncementsPage />
           </ProtectedRoute>
         }
       />
