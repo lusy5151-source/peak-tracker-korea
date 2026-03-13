@@ -244,6 +244,18 @@ const GroupDetailPage = () => {
     }
   };
 
+  const handleDeleteGroup = async () => {
+    if (!id) return;
+    const { error } = await deleteGroup(id);
+    setConfirmDelete(false);
+    if (error) {
+      toast({ title: "삭제에 실패했습니다", variant: "destructive" });
+    } else {
+      toast({ title: "모임이 삭제되었습니다" });
+      navigate("/groups");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
