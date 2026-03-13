@@ -145,6 +145,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/announcements"
+        element={
+          <ProtectedRoute>
+            <AdminAnnouncementsPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
