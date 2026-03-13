@@ -59,6 +59,7 @@ const GroupDetailPage = () => {
     leaveGroup,
     removeMember,
     updateGroup,
+    deleteGroup,
     sendInvite,
     requestJoin,
     fetchInvitations,
