@@ -287,9 +287,14 @@ const GroupDetailPage = () => {
         </Button>
         <h1 className="text-lg font-bold text-foreground truncate">{group.name}</h1>
         {isLeader && (
-          <Button variant="ghost" size="icon" className="ml-auto shrink-0" onClick={openEdit}>
-            <Settings className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-1 ml-auto">
+            <Button variant="ghost" size="icon" className="shrink-0" onClick={openEdit}>
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </div>
 
