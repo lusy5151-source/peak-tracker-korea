@@ -44,6 +44,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,6 +59,7 @@ const GroupDetailPage = () => {
     leaveGroup,
     removeMember,
     updateGroup,
+    deleteGroup,
     sendInvite,
     requestJoin,
     fetchInvitations,
@@ -81,6 +83,7 @@ const GroupDetailPage = () => {
   const [showRequests, setShowRequests] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Invite search
   const [searchQuery, setSearchQuery] = useState("");
@@ -241,6 +244,18 @@ const GroupDetailPage = () => {
     }
   };
 
+  const handleDeleteGroup = async () => {
+    if (!id) return;
+    const { error } = await deleteGroup(id);
+    setConfirmDelete(false);
+    if (error) {
+      toast({ title: "삭제에 실패했습니다", variant: "destructive" });
+    } else {
+      toast({ title: "모임이 삭제되었습니다" });
+      navigate("/groups");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -272,9 +287,14 @@ const GroupDetailPage = () => {
         </Button>
         <h1 className="text-lg font-bold text-foreground truncate">{group.name}</h1>
         {isLeader && (
-          <Button variant="ghost" size="icon" className="ml-auto shrink-0" onClick={openEdit}>
-            <Settings className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-1 ml-auto">
+            <Button variant="ghost" size="icon" className="shrink-0" onClick={openEdit}>
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </div>
 
@@ -540,6 +560,24 @@ const GroupDetailPage = () => {
             <AlertDialogCancel className="rounded-xl">취소</AlertDialogCancel>
             <AlertDialogAction onClick={handleRemoveMember} className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
               제거
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Group Confirm */}
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>모임 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              이 모임을 삭제하시겠습니까? 모든 멤버와 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteGroup} className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

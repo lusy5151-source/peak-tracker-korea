@@ -111,6 +111,16 @@ export function useHikingGroups() {
     return { data: data as HikingGroup | null, error };
   };
 
+  const deleteGroup = async (groupId: string) => {
+    if (!user) return { error: { message: "Not authenticated" } };
+    const { error } = await supabase
+      .from("hiking_groups")
+      .delete()
+      .eq("id", groupId);
+    if (!error) fetchMyGroups();
+    return { error };
+  };
+
   const updateGroup = async (groupId: string, params: { name?: string; description?: string; is_public?: boolean }) => {
     if (!user) return { error: { message: "Not authenticated" } };
     const { error } = await supabase
@@ -267,6 +277,7 @@ export function useHikingGroups() {
     fetchGroupById,
     createGroup,
     updateGroup,
+    deleteGroup,
     joinGroup,
     leaveGroup,
     removeMember,
