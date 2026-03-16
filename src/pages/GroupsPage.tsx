@@ -90,7 +90,7 @@ const GroupsPage = () => {
                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
               </div>
               <Button onClick={handleCreate} disabled={creating || !name.trim()} className="w-full rounded-xl">
-                {creating ? "생성 중..." : "모임 만들기"}
+                {creating ? "생성 중..." : "산악회 만들기"}
               </Button>
             </div>
           </DialogContent>
