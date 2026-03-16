@@ -228,6 +228,25 @@ const GroupDetailPage = () => {
     else { toast({ title: "산악회가 삭제되었습니다" }); navigate("/social"); }
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+    setUploadingLogo(true);
+    const ext = file.name.split(".").pop();
+    const path = `${id}/logo.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from("club-logos").upload(path, file, { upsert: true });
+    if (uploadErr) {
+      toast({ title: "로고 업로드에 실패했습니다", variant: "destructive" });
+      setUploadingLogo(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("club-logos").getPublicUrl(path);
+    await supabase.from("hiking_groups").update({ avatar_url: urlData.publicUrl } as any).eq("id", id);
+    setUploadingLogo(false);
+    toast({ title: "로고가 업데이트되었습니다!" });
+    loadData();
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><p className="text-sm text-muted-foreground">불러오는 중...</p></div>;
 
   if (!group) {
