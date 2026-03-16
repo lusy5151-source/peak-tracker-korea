@@ -45,7 +45,7 @@ const GroupsPage = () => {
   const handleJoin = async (groupId: string) => {
     const { error } = await joinGroup(groupId);
     if (error) {
-      toast({ title: "이미 가입된 모임입니다", variant: "destructive" });
+      toast({ title: "이미 가입된 산악회입니다", variant: "destructive" });
     } else {
       toast({ title: "모임에 가입했습니다!" });
       fetchPublicGroups().then(setPublicGroups);
