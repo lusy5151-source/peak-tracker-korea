@@ -282,7 +282,7 @@ const GroupDetailPage = () => {
               <Button variant="secondary" className="flex-1 rounded-xl gap-1.5" disabled><Clock className="h-4 w-4" /> 승인 대기 중</Button>
             ) : (
               <Button className="flex-1 rounded-xl gap-1.5" onClick={handleJoin}>
-                <UserPlus className="h-4 w-4" /> {group.is_public ? "가입하기" : "가입 요청"}
+                <UserPlus className="h-4 w-4" /> 가입 요청
               </Button>
             )
           )}
