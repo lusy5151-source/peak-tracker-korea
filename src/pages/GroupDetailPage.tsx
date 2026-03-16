@@ -519,7 +519,7 @@ const GroupDetailPage = () => {
               <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="mt-1 rounded-xl" rows={3} />
             </div>
             <div className="flex items-center justify-between">
-              <Label className="text-xs">공개 모임</Label>
+              <Label className="text-xs">공개 산악회</Label>
               <Switch checked={editPublic} onCheckedChange={setEditPublic} />
             </div>
             <Button onClick={handleEditSave} disabled={!editName.trim()} className="w-full rounded-xl">
