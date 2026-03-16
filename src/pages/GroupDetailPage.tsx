@@ -152,7 +152,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "가입에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임에 가입했습니다!" });
+      toast({ title: "산악회에 가입했습니다!" });
       loadData();
     }
   };
