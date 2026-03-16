@@ -507,7 +507,7 @@ const GroupDetailPage = () => {
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent className="rounded-2xl">
           <DialogHeader>
-            <DialogTitle>모임 정보 수정</DialogTitle>
+            <DialogTitle>산악회 정보 수정</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
