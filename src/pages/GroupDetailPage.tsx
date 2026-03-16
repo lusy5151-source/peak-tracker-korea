@@ -229,7 +229,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "수정에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임 정보를 수정했습니다" });
+      toast({ title: "산악회 정보를 수정했습니다" });
       setShowEdit(false);
       loadData();
     }
