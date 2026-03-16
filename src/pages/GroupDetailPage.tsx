@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,9 +25,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Users, Globe, Lock, ArrowLeft, Crown, UserPlus, LogOut, Search,
-  UserMinus, Settings, CheckCircle, XCircle, Clock, Trash2, Flag, Mountain,
+  UserMinus, Settings, CheckCircle, XCircle, Clock, Trash2, Flag, Mountain, Camera,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ClubChat from "@/components/ClubChat";
+import ClubHikingPlans from "@/components/ClubHikingPlans";
 
 interface ClubSummitClaim {
   id: string;
