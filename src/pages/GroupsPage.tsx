@@ -47,7 +47,7 @@ const GroupsPage = () => {
     if (error) {
       toast({ title: "이미 가입된 산악회입니다", variant: "destructive" });
     } else {
-      toast({ title: "모임에 가입했습니다!" });
+      toast({ title: "산악회에 가입했습니다!" });
       fetchPublicGroups().then(setPublicGroups);
     }
   };
