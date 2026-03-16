@@ -760,6 +760,90 @@ export type Database = {
           },
         ]
       }
+      summit_claims: {
+        Row: {
+          claimed_at: string
+          created_at: string
+          group_id: string | null
+          id: string
+          latitude: number
+          longitude: number
+          mountain_id: number
+          photo_url: string
+          summit_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          mountain_id: number
+          photo_url: string
+          summit_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          mountain_id?: number
+          photo_url?: string
+          summit_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "summit_claims_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summit_claims_summit_id_fkey"
+            columns: ["summit_id"]
+            isOneToOne: false
+            referencedRelation: "summits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      summits: {
+        Row: {
+          created_at: string
+          elevation: number
+          id: string
+          latitude: number
+          longitude: number
+          mountain_id: number
+          summit_name: string
+        }
+        Insert: {
+          created_at?: string
+          elevation?: number
+          id?: string
+          latitude: number
+          longitude: number
+          mountain_id: number
+          summit_name: string
+        }
+        Update: {
+          created_at?: string
+          elevation?: number
+          id?: string
+          latitude?: number
+          longitude?: number
+          mountain_id?: number
+          summit_name?: string
+        }
+        Relationships: []
+      }
       trails: {
         Row: {
           course_type: string
