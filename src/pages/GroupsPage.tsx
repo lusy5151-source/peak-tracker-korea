@@ -118,7 +118,7 @@ const GroupsPage = () => {
 
       {/* Public groups */}
       <section>
-        <h2 className="text-sm font-semibold text-muted-foreground mb-3">공개 모임</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">공개 산악회</h2>
         {publicGroups.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <Globe className="mx-auto h-8 w-8 text-muted-foreground/30" />
