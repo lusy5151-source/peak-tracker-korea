@@ -10,17 +10,20 @@ import { useHikingPlans } from "@/hooks/useHikingPlans";
 import { useHikingJournals, HikingJournal } from "@/hooks/useHikingJournals";
 import { useChallenges, Challenge, UserChallenge } from "@/hooks/useChallenges";
 import { useSharedCompletions, type SharedCompletion } from "@/hooks/useSharedCompletions";
+import { useLiveSummitFeed } from "@/hooks/useLiveSummitFeed";
 import { SharedCompletionCard } from "@/components/SharedCompletionCard";
 import AchievementModal from "@/components/AchievementModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StackedAvatars } from "@/components/StackedAvatars";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Mountain, Plus, Calendar, ChevronRight,
   Sun, Cloud, CloudRain, CloudSnow, CloudSun,
   Target, BookOpen, Heart, Search,
   MessageCircle, Newspaper, Clock, Settings2,
-  Bell, User, Users,
+  Bell, User, Users, Flag, Crown, Flame,
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
