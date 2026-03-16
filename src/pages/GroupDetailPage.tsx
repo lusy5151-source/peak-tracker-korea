@@ -164,7 +164,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "탈퇴에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임에서 탈퇴했습니다" });
+      toast({ title: "산악회에서 탈퇴했습니다" });
       navigate("/groups");
     }
   };
