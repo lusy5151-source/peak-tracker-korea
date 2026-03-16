@@ -65,7 +65,7 @@ const GroupsPage = () => {
   return (
     <div className="space-y-6 pb-24 max-w-lg mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">등산 모임</h1>
+        <h1 className="text-xl font-bold text-foreground">산악회</h1>
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogTrigger asChild>
             <Button size="sm" className="rounded-full gap-1.5">
