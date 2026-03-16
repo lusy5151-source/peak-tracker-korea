@@ -199,11 +199,82 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
                   </div>
                 )}
 
-                {/* Recent claims */}
-                {summitClaims.length > 1 && (
-                  <p className="text-[10px] text-muted-foreground">
-                    총 {summitClaims.length}회 인증됨
-                  </p>
+                {/* Claim Timeline */}
+                {summitClaims.length > 0 && (
+                  <div className="space-y-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedSummit(expandedSummit === summit.id ? null : summit.id);
+                      }}
+                      className="flex items-center gap-1.5 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      <Clock className="h-3 w-3" />
+                      정복 히스토리 ({summitClaims.length}회)
+                      <span className="text-[10px]">{expandedSummit === summit.id ? "▲" : "▼"}</span>
+                    </button>
+
+                    {expandedSummit === summit.id && (
+                      <div className="relative ml-2 space-y-0">
+                        {/* Timeline line */}
+                        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border" />
+
+                        {summitClaims.map((claim, idx) => (
+                          <div key={claim.id} className="relative flex gap-3 pb-3 last:pb-0">
+                            {/* Timeline dot */}
+                            <div className={cn(
+                              "relative z-10 mt-1.5 h-[15px] w-[15px] rounded-full border-2 shrink-0",
+                              idx === 0
+                                ? "border-primary bg-primary/20"
+                                : "border-border bg-card"
+                            )} />
+
+                            {/* Claim card */}
+                            <div className="flex-1 rounded-xl border border-border bg-card p-3 shadow-sm space-y-2">
+                              {/* Header */}
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  {claim.profile?.avatar_url && <AvatarImage src={claim.profile.avatar_url} />}
+                                  <AvatarFallback className="text-[9px] bg-muted">
+                                    {(claim.profile?.nickname || "?").charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-xs font-semibold text-foreground block truncate">
+                                    {claim.profile?.nickname || "알 수 없음"}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {new Date(claim.claimed_at).toLocaleString("ko-KR", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+                                </div>
+                                {idx === 0 && (
+                                  <Badge variant="secondary" className="text-[9px] gap-0.5 shrink-0">
+                                    <Crown className="h-2.5 w-2.5" /> 현재 주인
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {/* Photo */}
+                              <div className="overflow-hidden rounded-lg">
+                                <img
+                                  src={claim.photo_url}
+                                  alt={`${summit.summit_name} 정복 사진`}
+                                  className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                                  loading="lazy"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             );
