@@ -533,9 +533,9 @@ const GroupDetailPage = () => {
       <AlertDialog open={confirmLeave} onOpenChange={setConfirmLeave}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>모임 탈퇴</AlertDialogTitle>
+            <AlertDialogTitle>산악회 탈퇴</AlertDialogTitle>
             <AlertDialogDescription>
-              정말 이 모임에서 탈퇴하시겠습니까?
+              정말 이 산악회에서 탈퇴하시겠습니까?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
