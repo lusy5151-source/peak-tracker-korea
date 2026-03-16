@@ -41,6 +41,9 @@ const FriendProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJournal, setSelectedJournal] = useState<HikingJournal | null>(null);
   const [isFriend, setIsFriend] = useState(false);
+  const [summitClaimCount, setSummitClaimCount] = useState(0);
+  const [recentClaims, setRecentClaims] = useState<any[]>([]);
+  const [leaderTitles, setLeaderTitles] = useState<string[]>([]);
 
   useEffect(() => {
     if (!userId || !user) return;
