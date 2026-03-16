@@ -412,7 +412,7 @@ function ClubCard({ group, isMember, onJoin }: { group: HikingGroup; isMember: b
         </div>
         {onJoin ? (
           <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); onJoin(); }} className="rounded-full text-xs">
-            가입
+            가입 요청
           </Button>
         ) : isMember ? (
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
