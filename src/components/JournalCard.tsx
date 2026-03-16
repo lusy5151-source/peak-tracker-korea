@@ -132,6 +132,13 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
 
       {/* Content */}
       <div className="p-4 space-y-2.5">
+        {/* Summit claim badge */}
+        {journal.notes?.includes("정상 점령 성공! 🏔") && (
+          <div className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-lg px-2.5 py-1 w-fit text-xs font-medium">
+            <Mountain className="h-3.5 w-3.5" /> Summit Claim
+          </div>
+        )}
+
         {/* Mountain info */}
         <div className="flex items-center gap-2">
           <Mountain className="h-4 w-4 text-primary shrink-0" />
