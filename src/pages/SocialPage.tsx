@@ -28,7 +28,7 @@ const SocialPage = () => {
     sendRequest, acceptRequest, declineRequest, removeFriend, searchUsers,
   } = useFriends();
   const {
-    myGroups, loading: groupsLoading, createGroup, fetchPublicGroups, joinGroup,
+    myGroups, loading: groupsLoading, createGroup, fetchPublicGroups, joinGroup, requestJoin,
   } = useHikingGroups();
   const { toast } = useToast();
 
