@@ -280,10 +280,24 @@ const GroupDetailPage = () => {
       {/* Group Info Card */}
       <div className="rounded-2xl bg-card border border-border p-5 space-y-4 shadow-sm">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 rounded-xl">
-            {group.avatar_url && <AvatarImage src={group.avatar_url} alt={group.name} />}
-            <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-lg font-bold">{group.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="relative group">
+            <Avatar className="h-16 w-16 rounded-xl">
+              {group.avatar_url && <AvatarImage src={group.avatar_url} alt={group.name} />}
+              <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-lg font-bold">{group.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            {isLeader && (
+              <>
+                <input type="file" accept="image/*" ref={logoFileRef} onChange={handleLogoUpload} className="hidden" />
+                <button
+                  onClick={() => logoFileRef.current?.click()}
+                  className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={uploadingLogo}
+                >
+                  <Camera className="h-5 w-5 text-white" />
+                </button>
+              </>
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-foreground">{group.name}</h2>
