@@ -122,7 +122,7 @@ const GroupsPage = () => {
         {publicGroups.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <Globe className="mx-auto h-8 w-8 text-muted-foreground/30" />
-            <p className="mt-2 text-sm text-muted-foreground">공개 모임이 없습니다</p>
+            <p className="mt-2 text-sm text-muted-foreground">공개 산악회가 없습니다</p>
           </div>
         ) : (
           <div className="space-y-3">
