@@ -40,12 +40,20 @@ export function useHikingJournals() {
 
   const fetchMyJournals = useCallback(async (): Promise<HikingJournal[]> => {
     if (!user) return [];
-    const { data } = await supabase
-      .from("hiking_journals")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("hiked_at", { ascending: false });
-    return (data as any[] || []) as HikingJournal[];
+    const [{ data }, { data: profileData }] = await Promise.all([
+      supabase
+        .from("hiking_journals")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("hiked_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("user_id, nickname, avatar_url")
+        .eq("user_id", user.id)
+        .single(),
+    ]);
+    const profile = profileData ? { nickname: (profileData as any).nickname, avatar_url: (profileData as any).avatar_url } : undefined;
+    return (data as any[] || []).map((j) => ({ ...j, profile })) as HikingJournal[];
   }, [user]);
 
   const fetchUserJournals = useCallback(async (userId: string): Promise<HikingJournal[]> => {
