@@ -71,6 +71,56 @@ const FriendProfilePage = () => {
       const data = await fetchUserJournals(userId);
       setJournals(data);
 
+      // Fetch summit claims
+      const { data: claimsData } = await supabase
+        .from("summit_claims")
+        .select("id, mountain_id, summit_id, photo_url, claimed_at")
+        .eq("user_id", userId)
+        .order("claimed_at", { ascending: false })
+        .limit(6);
+      setSummitClaimCount((claimsData as any[] || []).length);
+
+      // Enrich recent claims with summit names
+      if (claimsData && (claimsData as any[]).length > 0) {
+        const summitIds = [...new Set((claimsData as any[]).map((c: any) => c.summit_id))];
+        const { data: summitsData } = await supabase
+          .from("summits")
+          .select("id, summit_name")
+          .in("id", summitIds);
+        const summitMap = new Map((summitsData || []).map((s: any) => [s.id, s.summit_name]));
+        setRecentClaims((claimsData as any[]).map((c: any) => ({
+          ...c,
+          summit_name: summitMap.get(c.summit_id) || "정상",
+        })));
+      }
+
+      // Check mountain leader titles
+      const { data: allClaims } = await supabase
+        .from("summit_claims")
+        .select("user_id, mountain_id")
+        .order("claimed_at", { ascending: true });
+      if (allClaims) {
+        const mtMap = new Map<number, Map<string, number>>();
+        (allClaims as any[]).forEach((c: any) => {
+          if (!mtMap.has(c.mountain_id)) mtMap.set(c.mountain_id, new Map());
+          const um = mtMap.get(c.mountain_id)!;
+          um.set(c.user_id, (um.get(c.user_id) || 0) + 1);
+        });
+        const titles: string[] = [];
+        mtMap.forEach((userMap, mtId) => {
+          let topUser = "";
+          let topCount = 0;
+          userMap.forEach((count, uid) => {
+            if (count > topCount) { topUser = uid; topCount = count; }
+          });
+          if (topUser === userId) {
+            const mt = mountains.find((m) => m.id === mtId);
+            if (mt) titles.push(`${mt.nameKo} 대장`);
+          }
+        });
+        setLeaderTitles(titles);
+      }
+
       setLoading(false);
     };
 
