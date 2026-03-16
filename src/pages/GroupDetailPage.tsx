@@ -157,15 +157,10 @@ const GroupDetailPage = () => {
 
   const handleJoin = async () => {
     if (!id) return;
-    if (group && !group.is_public) {
-      const { error } = await requestJoin(id);
-      if (error) toast({ title: "이미 요청을 보냈습니다", variant: "destructive" });
-      else { toast({ title: "가입 요청을 보냈습니다" }); setHasPendingRequest(true); }
-      return;
-    }
-    const { error } = await joinGroup(id);
-    if (error) toast({ title: "가입에 실패했습니다", variant: "destructive" });
-    else { toast({ title: "산악회에 가입했습니다!" }); loadData(); }
+    // Always require join request (leader must approve)
+    const { error } = await requestJoin(id);
+    if (error) toast({ title: "이미 요청을 보냈습니다", variant: "destructive" });
+    else { toast({ title: "가입 요청을 보냈습니다. 리더의 승인을 기다려주세요." }); setHasPendingRequest(true); }
   };
 
   const handleLeave = async () => {
@@ -287,7 +282,7 @@ const GroupDetailPage = () => {
               <Button variant="secondary" className="flex-1 rounded-xl gap-1.5" disabled><Clock className="h-4 w-4" /> 승인 대기 중</Button>
             ) : (
               <Button className="flex-1 rounded-xl gap-1.5" onClick={handleJoin}>
-                <UserPlus className="h-4 w-4" /> {group.is_public ? "가입하기" : "가입 요청"}
+                <UserPlus className="h-4 w-4" /> 가입 요청
               </Button>
             )
           )}
