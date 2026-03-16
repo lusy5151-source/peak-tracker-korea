@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
+import { SummitClaimSection } from "@/components/SummitClaimSection";
 import {
   ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
   Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users,
