@@ -268,7 +268,7 @@ const GroupDetailPage = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
         <Users className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">모임을 찾을 수 없습니다</p>
+        <p className="text-muted-foreground">산악회를 찾을 수 없습니다</p>
         <Button variant="outline" onClick={() => navigate("/groups")}>
           돌아가기
         </Button>
