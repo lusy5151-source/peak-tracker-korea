@@ -351,7 +351,7 @@ const GroupDetailPage = () => {
               className="flex-1 rounded-xl gap-1.5 text-destructive hover:text-destructive"
               onClick={() => setConfirmLeave(true)}
             >
-              <LogOut className="h-4 w-4" /> 모임 탈퇴
+              <LogOut className="h-4 w-4" /> 산악회 탈퇴
             </Button>
           )}
           {isLeader && (
