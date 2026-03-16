@@ -87,11 +87,11 @@ const SocialPage = () => {
   };
 
   const handleJoinClub = async (groupId: string) => {
-    const { error } = await joinGroup(groupId);
+    const { error } = await requestJoin(groupId);
     if (error) {
-      toast({ title: "이미 가입된 산악회입니다", variant: "destructive" });
+      toast({ title: "이미 가입 요청을 보냈습니다", variant: "destructive" });
     } else {
-      toast({ title: "산악회에 가입했습니다!" });
+      toast({ title: "가입 요청을 보냈습니다. 리더의 승인을 기다려주세요." });
       fetchPublicGroups().then(setPublicGroups);
     }
   };
