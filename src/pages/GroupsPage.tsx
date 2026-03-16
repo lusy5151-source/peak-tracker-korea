@@ -99,7 +99,7 @@ const GroupsPage = () => {
 
       {/* My groups */}
       <section>
-        <h2 className="text-sm font-semibold text-muted-foreground mb-3">내 모임</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">내 산악회</h2>
         {loading ? (
           <div className="text-center py-8 text-sm text-muted-foreground">불러오는 중...</div>
         ) : myGroups.length === 0 ? (
