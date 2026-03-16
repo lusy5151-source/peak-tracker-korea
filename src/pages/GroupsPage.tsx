@@ -74,7 +74,7 @@ const GroupsPage = () => {
           </DialogTrigger>
           <DialogContent className="rounded-2xl">
             <DialogHeader>
-              <DialogTitle>새 등산 모임 만들기</DialogTitle>
+              <DialogTitle>새 산악회 만들기</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div>
