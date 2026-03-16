@@ -456,6 +456,13 @@ const GroupDetailPage = () => {
         </div>
       </section>
 
+
+      {/* ── Club Hiking Plans ── */}
+      {id && <ClubHikingPlans clubId={id} isLeader={isLeader} isMember={isMember || isLeader} />}
+
+      {/* ── Club Chat ── */}
+      {(isMember || isLeader) && id && <ClubChat clubId={id} />}
+
       {/* ── Modals ── */}
       {/* Invite */}
       <Dialog open={showInvite} onOpenChange={setShowInvite}>
