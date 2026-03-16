@@ -7,10 +7,11 @@ import { mountains } from "@/data/mountains";
 import { badges } from "@/data/badges";
 import { JournalCard, JournalGridCard } from "@/components/JournalCard";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, User, MapPin, Mountain, BookOpen, Trophy,
-  Calendar, Users, ChevronRight,
+  Calendar, Users, ChevronRight, Flag, Crown,
 } from "lucide-react";
 
 const HIKING_STYLES = [
@@ -40,6 +41,9 @@ const FriendProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJournal, setSelectedJournal] = useState<HikingJournal | null>(null);
   const [isFriend, setIsFriend] = useState(false);
+  const [summitClaimCount, setSummitClaimCount] = useState(0);
+  const [recentClaims, setRecentClaims] = useState<any[]>([]);
+  const [leaderTitles, setLeaderTitles] = useState<string[]>([]);
 
   useEffect(() => {
     if (!userId || !user) return;
@@ -66,6 +70,56 @@ const FriendProfilePage = () => {
       // Fetch journals (RLS handles visibility)
       const data = await fetchUserJournals(userId);
       setJournals(data);
+
+      // Fetch summit claims
+      const { data: claimsData } = await supabase
+        .from("summit_claims")
+        .select("id, mountain_id, summit_id, photo_url, claimed_at")
+        .eq("user_id", userId)
+        .order("claimed_at", { ascending: false })
+        .limit(6);
+      setSummitClaimCount((claimsData as any[] || []).length);
+
+      // Enrich recent claims with summit names
+      if (claimsData && (claimsData as any[]).length > 0) {
+        const summitIds = [...new Set((claimsData as any[]).map((c: any) => c.summit_id))];
+        const { data: summitsData } = await supabase
+          .from("summits")
+          .select("id, summit_name")
+          .in("id", summitIds);
+        const summitMap = new Map((summitsData || []).map((s: any) => [s.id, s.summit_name]));
+        setRecentClaims((claimsData as any[]).map((c: any) => ({
+          ...c,
+          summit_name: summitMap.get(c.summit_id) || "정상",
+        })));
+      }
+
+      // Check mountain leader titles
+      const { data: allClaims } = await supabase
+        .from("summit_claims")
+        .select("user_id, mountain_id")
+        .order("claimed_at", { ascending: true });
+      if (allClaims) {
+        const mtMap = new Map<number, Map<string, number>>();
+        (allClaims as any[]).forEach((c: any) => {
+          if (!mtMap.has(c.mountain_id)) mtMap.set(c.mountain_id, new Map());
+          const um = mtMap.get(c.mountain_id)!;
+          um.set(c.user_id, (um.get(c.user_id) || 0) + 1);
+        });
+        const titles: string[] = [];
+        mtMap.forEach((userMap, mtId) => {
+          let topUser = "";
+          let topCount = 0;
+          userMap.forEach((count, uid) => {
+            if (count > topCount) { topUser = uid; topCount = count; }
+          });
+          if (topUser === userId) {
+            const mt = mountains.find((m) => m.id === mtId);
+            if (mt) titles.push(`${mt.nameKo} 대장`);
+          }
+        });
+        setLeaderTitles(titles);
+      }
 
       setLoading(false);
     };
@@ -200,8 +254,8 @@ const FriendProfilePage = () => {
           <p className="text-[9px] text-muted-foreground">완등</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
-          <p className="text-lg font-bold text-foreground">{sharedHikes}</p>
-          <p className="text-[9px] text-muted-foreground">함께한 등산</p>
+          <p className="text-lg font-bold text-foreground">{summitClaimCount}</p>
+          <p className="text-[9px] text-muted-foreground">정상 정복</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">
@@ -210,6 +264,48 @@ const FriendProfilePage = () => {
           <p className="text-[9px] text-muted-foreground">진행률</p>
         </div>
       </div>
+
+      {/* Mountain Leader Titles */}
+      {leaderTitles.length > 0 && (
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-800/30 p-4 shadow-sm">
+          <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5">
+            <Crown className="h-3.5 w-3.5" /> 산 대장 타이틀
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {leaderTitles.map((title) => (
+              <Badge key={title} variant="secondary" className="text-[10px] gap-1 bg-amber-100 dark:bg-amber-800/30 text-amber-800 dark:text-amber-300">
+                👑 {title}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Summit Claims */}
+      {recentClaims.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1.5">
+            <Flag className="h-3.5 w-3.5 text-primary" /> 최근 정상 정복
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {recentClaims.slice(0, 6).map((claim: any) => {
+              const mt = mountains.find((m) => m.id === claim.mountain_id);
+              return (
+                <div key={claim.id} className="space-y-1">
+                  <img
+                    src={claim.photo_url}
+                    alt={claim.summit_name}
+                    className="w-full aspect-square rounded-lg object-cover"
+                    loading="lazy"
+                  />
+                  <p className="text-[10px] font-medium text-foreground truncate">{claim.summit_name}</p>
+                  <p className="text-[9px] text-muted-foreground">{new Date(claim.claimed_at).toLocaleDateString("ko-KR")}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Recent Hike */}
       {recentHike && recentHike.mountain && (
