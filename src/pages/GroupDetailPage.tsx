@@ -569,9 +569,9 @@ const GroupDetailPage = () => {
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>모임 삭제</AlertDialogTitle>
+            <AlertDialogTitle>산악회 삭제</AlertDialogTitle>
             <AlertDialogDescription>
-              이 모임을 삭제하시겠습니까? 모든 멤버와 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+              이 산악회를 삭제하시겠습니까? 모든 멤버와 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
