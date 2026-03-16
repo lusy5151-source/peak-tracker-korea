@@ -251,7 +251,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "삭제에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임이 삭제되었습니다" });
+      toast({ title: "산악회가 삭제되었습니다" });
       navigate("/groups");
     }
   };
