@@ -224,7 +224,10 @@ export function useSummits(mountainId?: number) {
       return { success: false, error: "인증 등록에 실패했습니다" };
     }
 
-    toast({ title: "🏔️ 정상 정복 인증 완료!" });
+    toast({
+      title: "🎉 정상 정복 인증 완료!",
+      description: "등산 기록이 피드에 자동으로 게시되었습니다.",
+    });
     await fetchClaims();
     return { success: true };
   };

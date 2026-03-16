@@ -197,6 +197,7 @@ export type Database = {
           id: string
           image_url: string | null
           message: string | null
+          reply_to_id: string | null
           user_id: string
         }
         Insert: {
@@ -205,6 +206,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           message?: string | null
+          reply_to_id?: string | null
           user_id: string
         }
         Update: {
@@ -213,6 +215,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           message?: string | null
+          reply_to_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -221,6 +224,13 @@ export type Database = {
             columns: ["club_id"]
             isOneToOne: false
             referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "club_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -535,6 +545,67 @@ export type Database = {
           },
         ]
       }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "club_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reads: {
+        Row: {
+          club_id: string
+          id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          id?: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_edit_history: {
         Row: {
           created_at: string
@@ -805,6 +876,7 @@ export type Database = {
           longitude: number
           mountain_id: number
           photo_url: string
+          record_id: string | null
           summit_id: string
           user_id: string
         }
@@ -817,6 +889,7 @@ export type Database = {
           longitude: number
           mountain_id: number
           photo_url: string
+          record_id?: string | null
           summit_id: string
           user_id: string
         }
@@ -829,6 +902,7 @@ export type Database = {
           longitude?: number
           mountain_id?: number
           photo_url?: string
+          record_id?: string | null
           summit_id?: string
           user_id?: string
         }
