@@ -553,7 +553,7 @@ const GroupDetailPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>멤버 제거</AlertDialogTitle>
             <AlertDialogDescription>
-              이 멤버를 모임에서 제거하시겠습니까?
+              이 멤버를 산악회에서 제거하시겠습니까?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
