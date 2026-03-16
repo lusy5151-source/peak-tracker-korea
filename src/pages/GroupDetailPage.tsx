@@ -511,7 +511,7 @@ const GroupDetailPage = () => {
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <Label className="text-xs">모임 이름</Label>
+              <Label className="text-xs">산악회 이름</Label>
               <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1 rounded-xl" />
             </div>
             <div>
