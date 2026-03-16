@@ -157,15 +157,10 @@ const GroupDetailPage = () => {
 
   const handleJoin = async () => {
     if (!id) return;
-    if (group && !group.is_public) {
-      const { error } = await requestJoin(id);
-      if (error) toast({ title: "이미 요청을 보냈습니다", variant: "destructive" });
-      else { toast({ title: "가입 요청을 보냈습니다" }); setHasPendingRequest(true); }
-      return;
-    }
-    const { error } = await joinGroup(id);
-    if (error) toast({ title: "가입에 실패했습니다", variant: "destructive" });
-    else { toast({ title: "산악회에 가입했습니다!" }); loadData(); }
+    // Always require join request (leader must approve)
+    const { error } = await requestJoin(id);
+    if (error) toast({ title: "이미 요청을 보냈습니다", variant: "destructive" });
+    else { toast({ title: "가입 요청을 보냈습니다. 리더의 승인을 기다려주세요." }); setHasPendingRequest(true); }
   };
 
   const handleLeave = async () => {
