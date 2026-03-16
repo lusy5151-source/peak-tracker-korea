@@ -64,8 +64,16 @@ export default function ClubChat({ clubId }: { clubId: string }) {
         filter: `club_id=eq.${clubId}`,
       }, async (payload) => {
         const newMsg = payload.new as any;
+        // Prevent duplicates
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === newMsg.id)) return prev;
+          return prev; // We'll enrich and add below
+        });
         const enriched = await enrichMessages([newMsg]);
-        setMessages((prev) => [...prev, ...enriched]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === newMsg.id)) return prev;
+          return [...prev, ...enriched];
+        });
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
       })
       .subscribe();
