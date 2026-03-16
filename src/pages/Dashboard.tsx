@@ -200,6 +200,104 @@ const Dashboard = () => {
 
         <div className="space-y-5 px-5 pt-5">
 
+          {/* ── Claim Summit CTA ── */}
+          <section>
+            <Link to="/mountains">
+              <Button className="w-full h-14 rounded-2xl text-base font-bold gap-2.5 shadow-lg bg-gradient-to-r from-primary to-nature-600 hover:from-primary/90 hover:to-nature-600/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
+                <Flag className="h-5 w-5" />
+                정상 정복 인증하기
+              </Button>
+            </Link>
+          </section>
+
+          {/* ── Live Summit Claim Feed ── */}
+          <section>
+            <div className="mb-3 flex items-center gap-2">
+              <Flame className="h-4 w-4 text-coral" />
+              <h2 className="text-base font-bold text-foreground">실시간 정상 정복</h2>
+            </div>
+            <div className="rounded-3xl bg-card border border-border p-4 shadow-sm space-y-3">
+              {liveFeedLoading ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">불러오는 중...</div>
+              ) : liveClaims.length === 0 ? (
+                <div className="py-6 text-center">
+                  <Mountain className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+                  <p className="text-sm text-muted-foreground">아직 정복 기록이 없습니다</p>
+                  <p className="text-xs text-muted-foreground mt-1">첫 번째 정복자가 되어보세요!</p>
+                </div>
+              ) : (
+                liveClaims.slice(0, 5).map((claim) => {
+                  const mt = mountains.find((m) => m.id === claim.mountain_id);
+                  const timeAgo = getTimeAgo(claim.claimed_at);
+                  return (
+                    <div key={claim.id} className="flex items-center gap-3 rounded-xl bg-secondary/30 p-3">
+                      <Link to={`/profile/${claim.user_id}`} className="shrink-0">
+                        <Avatar className="h-9 w-9 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                          {claim.avatar_url && <AvatarImage src={claim.avatar_url} />}
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                            {(claim.nickname || "?").charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs">🏔</span>
+                          <span className="text-sm font-semibold text-foreground truncate">
+                            {claim.summit_name}
+                          </span>
+                          {mt && (
+                            <span className="text-[10px] text-muted-foreground shrink-0">
+                              ({mt.nameKo})
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <Link
+                            to={`/profile/${claim.user_id}`}
+                            className="text-xs text-primary hover:underline font-medium truncate"
+                          >
+                            {claim.nickname || "등산러"}
+                          </Link>
+                          <span className="text-[10px] text-muted-foreground">· {timeAgo}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              {liveClaims.length > 5 && (
+                <Link to="/leaderboard" className="block text-center text-xs font-medium text-coral hover:underline pt-1">
+                  전체 보기 →
+                </Link>
+              )}
+            </div>
+          </section>
+
+          {/* ── Mountain King of the Day ── */}
+          {kingOfDay && (
+            <section>
+              <div className="rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-800/30 p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <Crown className="h-5 w-5 text-amber-500" />
+                  <h2 className="text-base font-bold text-foreground">오늘의 산왕</h2>
+                </div>
+                <Link to={`/profile/${kingOfDay.user_id}`} className="flex items-center gap-4">
+                  <Avatar className="h-14 w-14 ring-2 ring-amber-300 hover:ring-amber-400 transition-all">
+                    {kingOfDay.avatar_url && <AvatarImage src={kingOfDay.avatar_url} />}
+                    <AvatarFallback className="text-lg bg-amber-100 text-amber-700">
+                      {(kingOfDay.nickname || "?").charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-lg font-bold text-foreground">{kingOfDay.nickname || "등산러"}</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                      오늘 {kingOfDay.claim_count}개 정상 정복 👑
+                    </p>
+                  </div>
+                </Link>
+              </div>
+            </section>
+          )}
           {/* ── Progress Rings Section ── */}
           <section className="grid grid-cols-2 gap-4">
             {/* Completion Progress */}
