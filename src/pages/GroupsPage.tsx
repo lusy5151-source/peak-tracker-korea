@@ -34,7 +34,7 @@ const GroupsPage = () => {
     if (error) {
       toast({ title: "오류", description: "산악회 생성에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임 생성 완료!" });
+      toast({ title: "산악회 생성 완료!" });
       setShowCreate(false);
       setName("");
       setDescription("");
