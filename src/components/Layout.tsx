@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Mountain, BookOpen, Users, Home, Trophy, User, LogIn, Target, CalendarDays } from "lucide-react";
+import { Mountain, BookOpen, Users, Home, Trophy, User, LogIn, Target, CalendarDays, Flag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/NotificationCenter";
 
@@ -7,7 +7,7 @@ const navItems = [
   { to: "/", label: "홈", icon: Home },
   { to: "/mountains", label: "산", icon: Mountain },
   { to: "/records", label: "기록", icon: BookOpen },
-  { to: "/challenges", label: "챌린지", icon: Target },
+  { to: "/leaderboard", label: "순위", icon: Flag },
   { to: "/plans", label: "계획", icon: CalendarDays },
   { to: "/social", label: "친구", icon: Users },
 ];

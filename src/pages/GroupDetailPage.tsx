@@ -152,7 +152,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "가입에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임에 가입했습니다!" });
+      toast({ title: "산악회에 가입했습니다!" });
       loadData();
     }
   };
@@ -164,7 +164,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "탈퇴에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임에서 탈퇴했습니다" });
+      toast({ title: "산악회에서 탈퇴했습니다" });
       navigate("/groups");
     }
   };
@@ -229,7 +229,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "수정에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임 정보를 수정했습니다" });
+      toast({ title: "산악회 정보를 수정했습니다" });
       setShowEdit(false);
       loadData();
     }
@@ -251,7 +251,7 @@ const GroupDetailPage = () => {
     if (error) {
       toast({ title: "삭제에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임이 삭제되었습니다" });
+      toast({ title: "산악회가 삭제되었습니다" });
       navigate("/groups");
     }
   };
@@ -268,7 +268,7 @@ const GroupDetailPage = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
         <Users className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">모임을 찾을 수 없습니다</p>
+        <p className="text-muted-foreground">산악회를 찾을 수 없습니다</p>
         <Button variant="outline" onClick={() => navigate("/groups")}>
           돌아가기
         </Button>
@@ -351,7 +351,7 @@ const GroupDetailPage = () => {
               className="flex-1 rounded-xl gap-1.5 text-destructive hover:text-destructive"
               onClick={() => setConfirmLeave(true)}
             >
-              <LogOut className="h-4 w-4" /> 모임 탈퇴
+              <LogOut className="h-4 w-4" /> 산악회 탈퇴
             </Button>
           )}
           {isLeader && (
@@ -507,11 +507,11 @@ const GroupDetailPage = () => {
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent className="rounded-2xl">
           <DialogHeader>
-            <DialogTitle>모임 정보 수정</DialogTitle>
+            <DialogTitle>산악회 정보 수정</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <Label className="text-xs">모임 이름</Label>
+              <Label className="text-xs">산악회 이름</Label>
               <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1 rounded-xl" />
             </div>
             <div>
@@ -519,7 +519,7 @@ const GroupDetailPage = () => {
               <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="mt-1 rounded-xl" rows={3} />
             </div>
             <div className="flex items-center justify-between">
-              <Label className="text-xs">공개 모임</Label>
+              <Label className="text-xs">공개 산악회</Label>
               <Switch checked={editPublic} onCheckedChange={setEditPublic} />
             </div>
             <Button onClick={handleEditSave} disabled={!editName.trim()} className="w-full rounded-xl">
@@ -533,9 +533,9 @@ const GroupDetailPage = () => {
       <AlertDialog open={confirmLeave} onOpenChange={setConfirmLeave}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>모임 탈퇴</AlertDialogTitle>
+            <AlertDialogTitle>산악회 탈퇴</AlertDialogTitle>
             <AlertDialogDescription>
-              정말 이 모임에서 탈퇴하시겠습니까?
+              정말 이 산악회에서 탈퇴하시겠습니까?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -553,7 +553,7 @@ const GroupDetailPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>멤버 제거</AlertDialogTitle>
             <AlertDialogDescription>
-              이 멤버를 모임에서 제거하시겠습니까?
+              이 멤버를 산악회에서 제거하시겠습니까?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -569,9 +569,9 @@ const GroupDetailPage = () => {
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>모임 삭제</AlertDialogTitle>
+            <AlertDialogTitle>산악회 삭제</AlertDialogTitle>
             <AlertDialogDescription>
-              이 모임을 삭제하시겠습니까? 모든 멤버와 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+              이 산악회를 삭제하시겠습니까? 모든 멤버와 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

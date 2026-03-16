@@ -28,6 +28,7 @@ import GroupsPage from "@/pages/GroupsPage";
 import GroupDetailPage from "@/pages/GroupDetailPage";
 import KakaoCallback from "@/pages/KakaoCallback";
 import AdminAnnouncementsPage from "@/pages/AdminAnnouncementsPage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -150,6 +151,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AdminAnnouncementsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leaderboard"
+        element={
+          <ProtectedRoute>
+            <LeaderboardPage />
           </ProtectedRoute>
         }
       />

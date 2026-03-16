@@ -32,9 +32,9 @@ const GroupsPage = () => {
     const { error } = await createGroup({ name: name.trim(), description: description.trim() || undefined, is_public: isPublic });
     setCreating(false);
     if (error) {
-      toast({ title: "오류", description: "모임 생성에 실패했습니다", variant: "destructive" });
+      toast({ title: "오류", description: "산악회 생성에 실패했습니다", variant: "destructive" });
     } else {
-      toast({ title: "모임 생성 완료!" });
+      toast({ title: "산악회 생성 완료!" });
       setShowCreate(false);
       setName("");
       setDescription("");
@@ -45,9 +45,9 @@ const GroupsPage = () => {
   const handleJoin = async (groupId: string) => {
     const { error } = await joinGroup(groupId);
     if (error) {
-      toast({ title: "이미 가입된 모임입니다", variant: "destructive" });
+      toast({ title: "이미 가입된 산악회입니다", variant: "destructive" });
     } else {
-      toast({ title: "모임에 가입했습니다!" });
+      toast({ title: "산악회에 가입했습니다!" });
       fetchPublicGroups().then(setPublicGroups);
     }
   };
@@ -65,32 +65,32 @@ const GroupsPage = () => {
   return (
     <div className="space-y-6 pb-24 max-w-lg mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">등산 모임</h1>
+        <h1 className="text-xl font-bold text-foreground">산악회</h1>
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogTrigger asChild>
             <Button size="sm" className="rounded-full gap-1.5">
-              <Plus className="h-4 w-4" /> 모임 만들기
+              <Plus className="h-4 w-4" /> 산악회 만들기
             </Button>
           </DialogTrigger>
           <DialogContent className="rounded-2xl">
             <DialogHeader>
-              <DialogTitle>새 등산 모임 만들기</DialogTitle>
+              <DialogTitle>새 산악회 만들기</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div>
-                <Label className="text-xs">모임 이름</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="월간 등산 모임" className="mt-1 rounded-xl" />
+                <Label className="text-xs">산악회 이름</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="완등 산악회" className="mt-1 rounded-xl" />
               </div>
               <div>
                 <Label className="text-xs">설명</Label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="모임 소개를 입력하세요" className="mt-1 rounded-xl" rows={3} />
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="산악회 소개를 입력하세요" className="mt-1 rounded-xl" rows={3} />
               </div>
               <div className="flex items-center justify-between">
-                <Label className="text-xs">공개 모임</Label>
+                <Label className="text-xs">공개 산악회</Label>
                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
               </div>
               <Button onClick={handleCreate} disabled={creating || !name.trim()} className="w-full rounded-xl">
-                {creating ? "생성 중..." : "모임 만들기"}
+                {creating ? "생성 중..." : "산악회 만들기"}
               </Button>
             </div>
           </DialogContent>
@@ -99,13 +99,13 @@ const GroupsPage = () => {
 
       {/* My groups */}
       <section>
-        <h2 className="text-sm font-semibold text-muted-foreground mb-3">내 모임</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">내 산악회</h2>
         {loading ? (
           <div className="text-center py-8 text-sm text-muted-foreground">불러오는 중...</div>
         ) : myGroups.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <Users className="mx-auto h-8 w-8 text-muted-foreground/30" />
-            <p className="mt-2 text-sm text-muted-foreground">아직 가입한 모임이 없습니다</p>
+            <p className="mt-2 text-sm text-muted-foreground">아직 가입한 산악회가 없습니다</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -118,11 +118,11 @@ const GroupsPage = () => {
 
       {/* Public groups */}
       <section>
-        <h2 className="text-sm font-semibold text-muted-foreground mb-3">공개 모임</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">공개 산악회</h2>
         {publicGroups.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <Globe className="mx-auto h-8 w-8 text-muted-foreground/30" />
-            <p className="mt-2 text-sm text-muted-foreground">공개 모임이 없습니다</p>
+            <p className="mt-2 text-sm text-muted-foreground">공개 산악회가 없습니다</p>
           </div>
         ) : (
           <div className="space-y-3">
