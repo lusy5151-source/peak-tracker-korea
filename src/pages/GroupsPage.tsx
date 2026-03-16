@@ -79,7 +79,7 @@ const GroupsPage = () => {
             <div className="space-y-4 mt-2">
               <div>
                 <Label className="text-xs">산악회 이름</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="월간 등산 모임" className="mt-1 rounded-xl" />
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="완등 산악회" className="mt-1 rounded-xl" />
               </div>
               <div>
                 <Label className="text-xs">설명</Label>
