@@ -74,6 +74,8 @@ const GroupDetailPage = () => {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const logoFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Invite search
   const [searchQuery, setSearchQuery] = useState("");
