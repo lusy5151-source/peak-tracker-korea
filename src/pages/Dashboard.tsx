@@ -47,7 +47,7 @@ const Dashboard = () => {
   const { fetchFeed } = useHikingJournals();
   const { fetchAllChallenges, fetchUserChallenges } = useChallenges();
   const { fetchSharedCompletions } = useSharedCompletions();
-
+  const { claims: liveClaims, kingOfDay, loading: liveFeedLoading } = useLiveSummitFeed();
   const [recentJournals, setRecentJournals] = useState<HikingJournal[]>([]);
   const [recentSharedCompletions, setRecentSharedCompletions] = useState<SharedCompletion[]>([]);
   const [activeChallenges, setActiveChallenges] = useState<(UserChallenge & { ch: Challenge })[]>([]);
