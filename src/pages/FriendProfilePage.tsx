@@ -254,8 +254,8 @@ const FriendProfilePage = () => {
           <p className="text-[9px] text-muted-foreground">완등</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
-          <p className="text-lg font-bold text-foreground">{sharedHikes}</p>
-          <p className="text-[9px] text-muted-foreground">함께한 등산</p>
+          <p className="text-lg font-bold text-foreground">{summitClaimCount}</p>
+          <p className="text-[9px] text-muted-foreground">정상 정복</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">
@@ -264,6 +264,48 @@ const FriendProfilePage = () => {
           <p className="text-[9px] text-muted-foreground">진행률</p>
         </div>
       </div>
+
+      {/* Mountain Leader Titles */}
+      {leaderTitles.length > 0 && (
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-800/30 p-4 shadow-sm">
+          <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5">
+            <Crown className="h-3.5 w-3.5" /> 산 대장 타이틀
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {leaderTitles.map((title) => (
+              <Badge key={title} variant="secondary" className="text-[10px] gap-1 bg-amber-100 dark:bg-amber-800/30 text-amber-800 dark:text-amber-300">
+                👑 {title}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Summit Claims */}
+      {recentClaims.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1.5">
+            <Flag className="h-3.5 w-3.5 text-primary" /> 최근 정상 정복
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {recentClaims.slice(0, 6).map((claim: any) => {
+              const mt = mountains.find((m) => m.id === claim.mountain_id);
+              return (
+                <div key={claim.id} className="space-y-1">
+                  <img
+                    src={claim.photo_url}
+                    alt={claim.summit_name}
+                    className="w-full aspect-square rounded-lg object-cover"
+                    loading="lazy"
+                  />
+                  <p className="text-[10px] font-medium text-foreground truncate">{claim.summit_name}</p>
+                  <p className="text-[9px] text-muted-foreground">{new Date(claim.claimed_at).toLocaleDateString("ko-KR")}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Recent Hike */}
       {recentHike && recentHike.mountain && (
