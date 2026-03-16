@@ -83,7 +83,7 @@ const GroupsPage = () => {
               </div>
               <div>
                 <Label className="text-xs">설명</Label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="모임 소개를 입력하세요" className="mt-1 rounded-xl" rows={3} />
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="산악회 소개를 입력하세요" className="mt-1 rounded-xl" rows={3} />
               </div>
               <div className="flex items-center justify-between">
                 <Label className="text-xs">공개 모임</Label>
