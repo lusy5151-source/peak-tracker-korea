@@ -53,6 +53,7 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [expandedSummit, setExpandedSummit] = useState<string | null>(null);
 
   const leader = getMountainLeader();
 
