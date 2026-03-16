@@ -69,7 +69,7 @@ const GroupsPage = () => {
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogTrigger asChild>
             <Button size="sm" className="rounded-full gap-1.5">
-              <Plus className="h-4 w-4" /> 모임 만들기
+              <Plus className="h-4 w-4" /> 산악회 만들기
             </Button>
           </DialogTrigger>
           <DialogContent className="rounded-2xl">
