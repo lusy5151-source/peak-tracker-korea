@@ -32,7 +32,7 @@ const GroupsPage = () => {
     const { error } = await createGroup({ name: name.trim(), description: description.trim() || undefined, is_public: isPublic });
     setCreating(false);
     if (error) {
-      toast({ title: "오류", description: "모임 생성에 실패했습니다", variant: "destructive" });
+      toast({ title: "오류", description: "산악회 생성에 실패했습니다", variant: "destructive" });
     } else {
       toast({ title: "모임 생성 완료!" });
       setShowCreate(false);
