@@ -120,6 +120,9 @@ const MountainDetail = () => {
         <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{mountain.description}</p>
       </div>
 
+      {/* Summit Claim */}
+      <SummitClaimSection mountainId={mountain.id} mountainName={mountain.nameKo} />
+
       {/* Trail info */}
       <TrailInfoSection mountainId={mountain.id} fallbackTrails={mountain.trails} />
 
