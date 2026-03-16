@@ -190,6 +190,41 @@ export type Database = {
           },
         ]
       }
+      club_messages: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          message: string | null
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message?: string | null
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_messages_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friendships: {
         Row: {
           addressee_id: string

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,9 +25,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Users, Globe, Lock, ArrowLeft, Crown, UserPlus, LogOut, Search,
-  UserMinus, Settings, CheckCircle, XCircle, Clock, Trash2, Flag, Mountain,
+  UserMinus, Settings, CheckCircle, XCircle, Clock, Trash2, Flag, Mountain, Camera,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ClubChat from "@/components/ClubChat";
+import ClubHikingPlans from "@/components/ClubHikingPlans";
 
 interface ClubSummitClaim {
   id: string;
@@ -72,6 +74,8 @@ const GroupDetailPage = () => {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const logoFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Invite search
   const [searchQuery, setSearchQuery] = useState("");
@@ -224,6 +228,25 @@ const GroupDetailPage = () => {
     else { toast({ title: "산악회가 삭제되었습니다" }); navigate("/social"); }
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+    setUploadingLogo(true);
+    const ext = file.name.split(".").pop();
+    const path = `${id}/logo.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from("club-logos").upload(path, file, { upsert: true });
+    if (uploadErr) {
+      toast({ title: "로고 업로드에 실패했습니다", variant: "destructive" });
+      setUploadingLogo(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("club-logos").getPublicUrl(path);
+    await supabase.from("hiking_groups").update({ avatar_url: urlData.publicUrl } as any).eq("id", id);
+    setUploadingLogo(false);
+    toast({ title: "로고가 업데이트되었습니다!" });
+    loadData();
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><p className="text-sm text-muted-foreground">불러오는 중...</p></div>;
 
   if (!group) {
@@ -257,10 +280,24 @@ const GroupDetailPage = () => {
       {/* Group Info Card */}
       <div className="rounded-2xl bg-card border border-border p-5 space-y-4 shadow-sm">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 rounded-xl">
-            {group.avatar_url && <AvatarImage src={group.avatar_url} alt={group.name} />}
-            <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-lg font-bold">{group.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="relative group">
+            <Avatar className="h-16 w-16 rounded-xl">
+              {group.avatar_url && <AvatarImage src={group.avatar_url} alt={group.name} />}
+              <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-lg font-bold">{group.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            {isLeader && (
+              <>
+                <input type="file" accept="image/*" ref={logoFileRef} onChange={handleLogoUpload} className="hidden" />
+                <button
+                  onClick={() => logoFileRef.current?.click()}
+                  className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={uploadingLogo}
+                >
+                  <Camera className="h-5 w-5 text-white" />
+                </button>
+              </>
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-foreground">{group.name}</h2>
@@ -418,6 +455,13 @@ const GroupDetailPage = () => {
             })}
         </div>
       </section>
+
+
+      {/* ── Club Hiking Plans ── */}
+      {id && <ClubHikingPlans clubId={id} isLeader={isLeader} isMember={isMember || isLeader} />}
+
+      {/* ── Club Chat ── */}
+      {(isMember || isLeader) && id && <ClubChat clubId={id} />}
 
       {/* ── Modals ── */}
       {/* Invite */}
