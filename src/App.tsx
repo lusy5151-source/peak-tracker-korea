@@ -114,14 +114,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/groups"
-        element={
-          <ProtectedRoute>
-            <GroupsPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/groups" element={<Navigate to="/social" replace />} />
       <Route
         path="/groups/:id"
         element={
