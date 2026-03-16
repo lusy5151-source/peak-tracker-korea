@@ -7,10 +7,11 @@ import { mountains } from "@/data/mountains";
 import { badges } from "@/data/badges";
 import { JournalCard, JournalGridCard } from "@/components/JournalCard";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, User, MapPin, Mountain, BookOpen, Trophy,
-  Calendar, Users, ChevronRight,
+  Calendar, Users, ChevronRight, Flag, Crown,
 } from "lucide-react";
 
 const HIKING_STYLES = [
