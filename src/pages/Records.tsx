@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { JournalForm } from "@/components/JournalForm";
 import { JournalCard, JournalGridCard } from "@/components/JournalCard";
 import { Button } from "@/components/ui/button";
+import MountainMascot from "@/components/MountainMascot";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -263,27 +264,17 @@ const Records = () => {
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-3">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-xl border border-border bg-card p-4">
-          <div className="flex gap-3">
-            <Skeleton className="h-14 w-14 rounded-lg shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-40" />
-              <Skeleton className="h-3 w-32" />
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className="flex flex-col items-center gap-3 py-8">
+      <MountainMascot size={70} mood="loading" />
+      <span className="text-sm text-muted-foreground">기록을 불러오는 중...</span>
     </div>
   );
 }
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border bg-card p-16 text-center">
-      <Mountain className="mx-auto h-12 w-12 text-muted-foreground/30" />
+    <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+      <MountainMascot size={90} mood="waving" className="mx-auto" />
       <p className="mt-4 text-muted-foreground">아직 등산 기록이 없습니다</p>
       <p className="text-xs text-muted-foreground/70 mt-1">첫 등산 기록을 작성해보세요</p>
       <Button variant="outline" size="sm" className="mt-3 rounded-xl" onClick={onAdd}>

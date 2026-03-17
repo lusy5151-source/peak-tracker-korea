@@ -130,3 +130,66 @@
     background-image: linear-gradient(135deg, hsl(var(--nature-600)), hsl(var(--sky-600)));
   }
 }
+
+/* Mascot animations */
+@keyframes mascot-celebrate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(-3deg); }
+  50% { transform: translateY(-4px) rotate(3deg); }
+  75% { transform: translateY(-6px) rotate(-2deg); }
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes mascot-pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.15); opacity: 1; }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes mascot-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+@keyframes mascot-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes mascot-confetti {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(30px) rotate(180deg); }
+}
+
+@keyframes mascot-look {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+}
+
+@keyframes mascot-flag {
+  0%, 100% { transform: rotate(0deg); transform-origin: 100px 15px; }
+  50% { transform: rotate(8deg); transform-origin: 100px 15px; }
+}
+
+@keyframes mascot-hand {
+  0%, 100% { transform: rotate(0deg); transform-origin: 162px 128px; }
+  25% { transform: rotate(-15deg); transform-origin: 162px 128px; }
+  75% { transform: rotate(15deg); transform-origin: 162px 128px; }
+}
+
+.animate-mascot-celebrate { animation: mascot-celebrate 1s ease-in-out infinite; }
+.animate-mascot-bounce { animation: mascot-bounce 1.2s ease-in-out infinite; }
+.animate-mascot-pop { animation: mascot-pop 0.6s ease-out forwards; }
+.animate-mascot-wave { animation: mascot-wave 1.5s ease-in-out infinite; }
+.animate-mascot-sparkle { animation: mascot-sparkle 1.2s ease-in-out infinite; }
+.animate-mascot-confetti { animation: mascot-confetti 1.5s ease-out infinite; }
+.animate-mascot-look { animation: mascot-look 2s ease-in-out infinite; }
+.animate-mascot-flag { animation: mascot-flag 0.5s ease-in-out infinite; }
+.animate-mascot-hand { animation: mascot-hand 0.8s ease-in-out infinite; }

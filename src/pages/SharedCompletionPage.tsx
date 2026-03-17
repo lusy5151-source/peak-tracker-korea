@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Users, Mountain, Plus, CheckCircle2, PartyPopper, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import MountainMascot from "@/components/MountainMascot";
 
 const SharedCompletionPage = () => {
   const { user } = useAuth();
@@ -95,12 +96,12 @@ const SharedCompletionPage = () => {
     <div className="space-y-6 pb-24 max-w-lg mx-auto">
       {/* Celebration overlay */}
       {showCelebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm">
           <div className="rounded-3xl bg-card p-8 text-center shadow-2xl animate-in zoom-in-95 duration-300">
-            <PartyPopper className="mx-auto h-16 w-16 text-coral mb-4" />
-            <h2 className="text-xl font-bold text-foreground">공동 완등 달성! 🎉</h2>
+            <MountainMascot size={100} mood="celebrating" className="mx-auto" />
+            <h2 className="text-xl font-bold text-foreground mt-2">공동 완등 달성! 🎉</h2>
             <p className="text-sm text-muted-foreground mt-2">함께한 등산을 기록했습니다</p>
-            <Badge className="mt-3 bg-sky-hero text-primary border-0 gap-1">
+            <Badge className="mt-3 bg-primary/10 text-primary border-0 gap-1">
               <Users className="h-3 w-3" /> Completed Together 👥
             </Badge>
           </div>
@@ -158,8 +159,8 @@ const SharedCompletionPage = () => {
           <div className="text-center py-8 text-sm text-muted-foreground">불러오는 중...</div>
         ) : completions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-            <Users className="mx-auto h-8 w-8 text-muted-foreground/30" />
-            <p className="mt-2 text-sm text-muted-foreground">아직 공동 완등 기록이 없습니다</p>
+            <MountainMascot size={80} mood="waving" className="mx-auto" />
+            <p className="mt-3 text-sm text-muted-foreground">아직 공동 완등 기록이 없습니다</p>
             <p className="text-xs text-muted-foreground/70 mt-1">친구들과 함께 등산하고 기록해보세요</p>
           </div>
         ) : (
