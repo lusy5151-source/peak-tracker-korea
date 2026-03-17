@@ -115,11 +115,9 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">정상 정보 불러오는 중...</span>
-        </div>
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm flex flex-col items-center gap-3">
+        <MountainMascot size={80} mood="loading" />
+        <span className="text-sm text-muted-foreground">정상 정보 불러오는 중...</span>
       </div>
     );
   }
