@@ -159,8 +159,8 @@ const SharedCompletionPage = () => {
           <div className="text-center py-8 text-sm text-muted-foreground">불러오는 중...</div>
         ) : completions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-            <Users className="mx-auto h-8 w-8 text-muted-foreground/30" />
-            <p className="mt-2 text-sm text-muted-foreground">아직 공동 완등 기록이 없습니다</p>
+            <MountainMascot size={80} mood="waving" className="mx-auto" />
+            <p className="mt-3 text-sm text-muted-foreground">아직 공동 완등 기록이 없습니다</p>
             <p className="text-xs text-muted-foreground/70 mt-1">친구들과 함께 등산하고 기록해보세요</p>
           </div>
         ) : (

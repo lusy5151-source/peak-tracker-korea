@@ -143,6 +143,11 @@ const ChallengeCompletionModal = ({ challenge, onDismiss }: Props) => {
           <X className="h-4 w-4" />
         </button>
 
+        {/* Mascot celebrating */}
+        <div className="mx-auto mb-2">
+          <MountainMascot size={80} mood="success" />
+        </div>
+
         {/* Badge with glow */}
         <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30">
           <span
