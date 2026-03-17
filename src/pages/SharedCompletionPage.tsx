@@ -96,12 +96,12 @@ const SharedCompletionPage = () => {
     <div className="space-y-6 pb-24 max-w-lg mx-auto">
       {/* Celebration overlay */}
       {showCelebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm">
           <div className="rounded-3xl bg-card p-8 text-center shadow-2xl animate-in zoom-in-95 duration-300">
-            <PartyPopper className="mx-auto h-16 w-16 text-coral mb-4" />
-            <h2 className="text-xl font-bold text-foreground">공동 완등 달성! 🎉</h2>
+            <MountainMascot size={100} mood="celebrating" className="mx-auto" />
+            <h2 className="text-xl font-bold text-foreground mt-2">공동 완등 달성! 🎉</h2>
             <p className="text-sm text-muted-foreground mt-2">함께한 등산을 기록했습니다</p>
-            <Badge className="mt-3 bg-sky-hero text-primary border-0 gap-1">
+            <Badge className="mt-3 bg-primary/10 text-primary border-0 gap-1">
               <Users className="h-3 w-3" /> Completed Together 👥
             </Badge>
           </div>
