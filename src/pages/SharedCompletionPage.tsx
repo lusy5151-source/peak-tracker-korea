@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Users, Mountain, Plus, CheckCircle2, PartyPopper, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import MountainMascot from "@/components/MountainMascot";
 
 const SharedCompletionPage = () => {
   const { user } = useAuth();
