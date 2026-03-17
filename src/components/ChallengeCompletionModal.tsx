@@ -1,6 +1,7 @@
 import { X, Share2, Download } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import MountainMascot from "@/components/MountainMascot";
 
 interface Props {
   challenge: {
