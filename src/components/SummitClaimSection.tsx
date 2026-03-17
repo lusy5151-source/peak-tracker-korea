@@ -105,6 +105,8 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
     setClaiming(false);
     if (result.success) {
       setShowClaimDialog(false);
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 3000);
     } else {
       toast({ title: "인증 실패", description: result.error, variant: "destructive" });
     }
