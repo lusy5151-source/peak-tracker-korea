@@ -1,6 +1,7 @@
 import { BadgeDefinition } from "@/data/badges";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import MountainMascot from "@/components/MountainMascot";
 
 interface Props {
   badge: BadgeDefinition | null;
@@ -45,7 +46,12 @@ const AchievementModal = ({ badge, onDismiss }: Props) => {
           <X className="h-4 w-4" />
         </button>
 
-        {/* Badge icon with glow animation */}
+        {/* Mascot celebrating */}
+        <div className="mx-auto mb-2">
+          <MountainMascot size={80} mood="celebrating" />
+        </div>
+
+        {/* Badge icon */}
         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
           <span
             className="text-5xl"

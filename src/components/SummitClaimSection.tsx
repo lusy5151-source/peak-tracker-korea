@@ -127,6 +127,19 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Summit Claim Celebration */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm">
+          <div className="rounded-3xl bg-card p-8 text-center shadow-2xl animate-in zoom-in-95 duration-300">
+            <MountainMascot size={120} mood="celebrating" />
+            <h2 className="mt-3 text-xl font-bold text-foreground">정상 정복! 🏔️</h2>
+            <p className="text-sm text-muted-foreground mt-1">{selectedSummit?.summit_name} 정복을 축하합니다!</p>
+            <Badge className="mt-3 bg-primary/10 text-primary border-0 gap-1">
+              <Flag className="h-3 w-3" /> Summit Claimed!
+            </Badge>
+          </div>
+        </div>
+      )}
       {/* Mountain Leader */}
       {leader && (
         <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-800/30 p-4 shadow-sm">
