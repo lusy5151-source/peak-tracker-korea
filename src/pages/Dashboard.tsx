@@ -18,6 +18,7 @@ import { StackedAvatars } from "@/components/StackedAvatars";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import MountainMascot from "@/components/MountainMascot";
 import {
   Mountain, Plus, Calendar, ChevronRight,
   Sun, Cloud, CloudRain, CloudSnow, CloudSun,
@@ -61,7 +62,6 @@ const Dashboard = () => {
   const baekduCompleted = baekduMountains.filter((m) => isCompleted(m.id)).length;
   const goalPercent = Math.min(Math.round((completedCount / userGoal) * 100), 100);
 
-  // Upcoming hike
   const upcomingPlan = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -88,7 +88,6 @@ const Dashboard = () => {
     return `D-${diff}`;
   }, [upcomingPlan]);
 
-  // Challenge progress (for ring)
   const challengeProgress = useMemo(() => {
     if (activeChallenges.length === 0) return 0;
     const totalPct = activeChallenges.reduce((sum, ac) => {
@@ -126,30 +125,30 @@ const Dashboard = () => {
   };
 
   const CondIcon = conditionIcons[weather.condition] || Cloud;
-
-  // Today's mountain
   const todayIndex = new Date().getDate() % mountains.length;
   const todayMountain = mountains[todayIndex];
-
-  // newsItems removed — replaced by AnnouncementSection
 
   return (
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
       <div className="-mx-4 -mt-6 pb-24">
         <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />
 
-        {/* ── Hero: Mountain silhouette + Upcoming Hike ── */}
-        <section className="relative overflow-hidden bg-sky-hero px-5 pb-8 pt-6">
-          {/* Abstract mountain shapes */}
+        {/* ── Hero: Mountain illustration + Upcoming Hike ── */}
+        <section className="relative overflow-hidden px-5 pb-8 pt-6" style={{ background: "hsl(205, 50%, 88%)" }}>
+          {/* Playful mountain shapes */}
           <div className="pointer-events-none absolute bottom-0 left-0 right-0">
-            <svg viewBox="0 0 400 120" className="w-full" preserveAspectRatio="none">
-              <path d="M0 120 L0 80 Q50 30 100 60 Q150 90 200 50 Q250 10 300 55 Q350 90 400 40 L400 120 Z" fill="hsl(var(--nature-100))" opacity="0.5" />
-              <path d="M0 120 L0 95 Q80 55 160 75 Q240 95 320 65 Q360 50 400 70 L400 120 Z" fill="hsl(var(--nature-50))" opacity="0.7" />
+            <svg viewBox="0 0 400 140" className="w-full" preserveAspectRatio="none">
+              <path d="M0 140 L0 90 Q60 25 120 65 Q180 105 240 45 Q300 5 360 55 Q380 80 400 50 L400 140 Z" fill="hsl(var(--nature-200))" opacity="0.4" />
+              <path d="M0 140 L0 105 Q80 50 160 80 Q240 110 320 70 Q360 45 400 75 L400 140 Z" fill="hsl(var(--nature-100))" opacity="0.6" />
             </svg>
           </div>
 
+          {/* Mascot in hero */}
+          <div className="pointer-events-none absolute right-4 top-4 opacity-20">
+            <MountainMascot size={80} />
+          </div>
+
           <div className="relative z-10">
-            {/* Top mini header inside hero */}
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h1 className="text-xl font-bold text-foreground">완등</h1>
@@ -176,8 +175,8 @@ const Dashboard = () => {
                         {upcomingPlan.start_time && ` · ${upcomingPlan.start_time.slice(0, 5)}`}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-xl bg-sky-hero/60 px-3 py-2">
-                      <CondIcon className="h-5 w-5 text-sky-500" />
+                    <div className="flex items-center gap-1.5 rounded-xl bg-accent/60 px-3 py-2">
+                      <CondIcon className="h-5 w-5 text-sky-600" />
                       <span className="text-base font-semibold text-foreground">{weather.temp}°</span>
                     </div>
                   </div>
@@ -188,7 +187,7 @@ const Dashboard = () => {
                   <p className="text-sm text-muted-foreground">예정된 일정이 없습니다</p>
                   <Link
                     to="/plans/create"
-                    className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-coral px-5 py-2 text-xs font-semibold text-primary-foreground"
+                    className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground"
                   >
                     <Plus className="h-3.5 w-3.5" /> 계획 만들기
                   </Link>
@@ -203,9 +202,9 @@ const Dashboard = () => {
           {/* ── Claim Summit CTA ── */}
           <section>
             <Link to="/mountains">
-              <Button className="w-full h-14 rounded-2xl text-base font-bold gap-2.5 shadow-lg bg-gradient-to-r from-primary to-nature-600 hover:from-primary/90 hover:to-nature-600/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
+              <Button className="w-full h-14 rounded-2xl text-base font-bold gap-2.5 shadow-lg bg-primary hover:bg-primary/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
                 <Flag className="h-5 w-5" />
-                정상 정복 인증하기
+                정상 인증하기
               </Button>
             </Link>
           </section>
@@ -298,12 +297,13 @@ const Dashboard = () => {
               </div>
             </section>
           )}
+
           {/* ── Progress Rings Section ── */}
           <section className="grid grid-cols-2 gap-4">
-            {/* Completion Progress */}
+            {/* 100대 명산 완등 Progress */}
             <div className="rounded-3xl bg-card p-5 shadow-sm border border-border">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-muted-foreground">100대 명산 완등</p>
+                <p className="text-xs font-semibold text-muted-foreground">100대 명산 진행률</p>
                 <button onClick={() => setShowGoalEdit(!showGoalEdit)} className="text-muted-foreground hover:text-primary">
                   <Settings2 className="h-3.5 w-3.5" />
                 </button>
@@ -343,9 +343,9 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Challenge Progress */}
+            {/* 정상 점령 챌린지 Progress */}
             <div className="rounded-3xl bg-card p-5 shadow-sm border border-border">
-              <p className="text-xs font-semibold text-muted-foreground mb-3">챌린지 진행</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-3">정상 점령 챌린지</p>
               <div className="flex flex-col items-center">
                 <div className="relative h-28 w-28">
                   <svg className="h-28 w-28 -rotate-90" viewBox="0 0 112 112">
@@ -384,7 +384,7 @@ const Dashboard = () => {
             <SectionHeader title="오늘의 산" />
             <Link to={`/mountains/${todayMountain.id}`} className="block rounded-3xl bg-card border border-border p-5 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-mint-light shrink-0">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nature-50 shrink-0">
                   <Mountain className="h-7 w-7 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -405,14 +405,14 @@ const Dashboard = () => {
           <section className="grid grid-cols-2 gap-3">
             <Link
               to="/records"
-              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-orange-accent bg-orange-accent-light px-4 py-4 transition-colors hover:bg-orange-accent/10"
+              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-coral bg-coral-light px-4 py-4 transition-colors hover:bg-coral/10"
             >
-              <Plus className="h-5 w-5 text-orange-accent" />
-              <span className="text-xs font-bold text-orange-accent">등산 기록 추가</span>
+              <Plus className="h-5 w-5 text-coral" />
+              <span className="text-xs font-bold text-coral">등산 기록 추가</span>
             </Link>
             <Link
               to="/shared-completions"
-              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-sky-hero px-4 py-4 transition-colors hover:bg-primary/10"
+              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-nature-50 px-4 py-4 transition-colors hover:bg-primary/10"
             >
               <Users className="h-5 w-5 text-primary" />
               <span className="text-xs font-bold text-primary">공동 완등 기록</span>
@@ -448,7 +448,7 @@ const Dashboard = () => {
                         {j.photos && j.photos.length > 0 ? (
                           <img src={j.photos[0]} alt="" className="h-16 w-16 rounded-xl object-cover shrink-0" />
                         ) : (
-                          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-mint-light shrink-0">
+                          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-nature-50 shrink-0">
                             <Mountain className="h-6 w-6 text-primary" />
                           </div>
                         )}
@@ -477,7 +477,7 @@ const Dashboard = () => {
           {/* ── Badge Gallery ── */}
           <section>
             <SectionHeader title="업적 갤러리" linkTo="/achievements" linkLabel="전체 보기" />
-            <div className="rounded-3xl bg-lavender-light border border-border p-5 shadow-sm">
+            <div className="rounded-3xl bg-purple-light border border-border p-5 shadow-sm">
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
                 {badges.map((b) => {
                   const earned = isEarned(b.id);
@@ -519,7 +519,7 @@ function SectionHeader({ title, linkTo, linkLabel }: { title: string; linkTo?: s
   return (
     <div className="mb-3 flex items-center justify-between">
       <h2 className="text-base font-bold text-foreground">{title}</h2>
-      {linkLabel && linkTo && <Link to={linkTo} className="text-xs font-medium text-coral hover:underline">{linkLabel}</Link>}
+      {linkLabel && linkTo && <Link to={linkTo} className="text-xs font-medium text-primary hover:underline">{linkLabel}</Link>}
     </div>
   );
 }
@@ -529,7 +529,7 @@ function EmptyState({ icon: Icon, message, linkTo, linkLabel }: { icon: any; mes
     <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center">
       <Icon className="mx-auto h-8 w-8 text-muted-foreground/30" />
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-      <Link to={linkTo} className="mt-1 inline-block text-xs font-semibold text-coral hover:underline">{linkLabel}</Link>
+      <Link to={linkTo} className="mt-1 inline-block text-xs font-semibold text-primary hover:underline">{linkLabel}</Link>
     </div>
   );
 }

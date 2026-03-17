@@ -7,6 +7,7 @@ import { StoreProvider } from "@/context/StoreContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Layout from "@/components/Layout";
+import SplashScreen from "@/components/SplashScreen";
 import Dashboard from "@/pages/Dashboard";
 import MountainList from "@/pages/MountainList";
 import MountainDetail from "@/pages/MountainDetail";
@@ -30,6 +31,7 @@ import KakaoCallback from "@/pages/KakaoCallback";
 import AdminAnnouncementsPage from "@/pages/AdminAnnouncementsPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import NotFound from "./pages/NotFound";
+import { useState, useCallback } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,119 +69,81 @@ const AppRoutes = () => {
       <Route path="/social" element={<SocialPage />} />
       <Route
         path="/plans"
-        element={
-          <ProtectedRoute>
-            <PlansPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><PlansPage /></ProtectedRoute>}
       />
       <Route
         path="/plans/create"
-        element={
-          <ProtectedRoute>
-            <CreatePlanPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><CreatePlanPage /></ProtectedRoute>}
       />
       <Route
         path="/plans/:id"
-        element={
-          <ProtectedRoute>
-            <PlanDetailPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><PlanDetailPage /></ProtectedRoute>}
       />
       <Route
         path="/challenges"
-        element={
-          <ProtectedRoute>
-            <ChallengePage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><ChallengePage /></ProtectedRoute>}
       />
       <Route path="/achievements" element={<AchievementsPage />} />
       <Route
         path="/feed"
-        element={
-          <ProtectedRoute>
-            <FeedPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><FeedPage /></ProtectedRoute>}
       />
       <Route
         path="/shared-completions"
-        element={
-          <ProtectedRoute>
-            <SharedCompletionPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><SharedCompletionPage /></ProtectedRoute>}
       />
       <Route path="/groups" element={<Navigate to="/social" replace />} />
       <Route
         path="/groups/:id"
-        element={
-          <ProtectedRoute>
-            <GroupDetailPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>}
       />
       <Route
         path="/profile/:userId"
-        element={
-          <ProtectedRoute>
-            <FriendProfilePage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>}
       />
       <Route
         path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}
       />
       <Route
         path="/admin/announcements"
-        element={
-          <ProtectedRoute>
-            <AdminAnnouncementsPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><AdminAnnouncementsPage /></ProtectedRoute>}
       />
       <Route
         path="/leaderboard"
-        element={
-          <ProtectedRoute>
-            <LeaderboardPage />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>}
       />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
 
-const App = () => (
-  <ErrorBoundary fallbackMessage="데이터를 불러오는 중 오류가 발생했습니다.">
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <StoreProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Layout>
-                <ErrorBoundary fallbackMessage="데이터를 불러오는 중 오류가 발생했습니다.">
-                  <AppRoutes />
-                </ErrorBoundary>
-              </Layout>
-            </BrowserRouter>
-          </StoreProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+  const handleSplashFinish = useCallback(() => setShowSplash(false), []);
+
+  return (
+    <ErrorBoundary fallbackMessage="데이터를 불러오는 중 오류가 발생했습니다.">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <StoreProvider>
+              <Toaster />
+              <Sonner />
+              {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+              <BrowserRouter>
+                <Layout>
+                  <ErrorBoundary fallbackMessage="데이터를 불러오는 중 오류가 발생했습니다.">
+                    <AppRoutes />
+                  </ErrorBoundary>
+                </Layout>
+              </BrowserRouter>
+            </StoreProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

@@ -104,6 +104,10 @@ export default {
           DEFAULT: "hsl(var(--orange-accent))",
           light: "hsl(var(--orange-light))",
         },
+        "purple-accent": {
+          DEFAULT: "hsl(var(--purple-accent))",
+          light: "hsl(var(--purple-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
