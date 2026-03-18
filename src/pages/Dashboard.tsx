@@ -202,13 +202,13 @@ const Dashboard = () => {
           {/* ── 완등 MAGAZINE Banner ── */}
           <section>
             <Link to="/magazine">
-              <div className="relative rounded-3xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, hsl(var(--magazine)), hsl(216, 100%, 35%))" }}>
+              <div className="relative rounded-3xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] border-2" style={{ background: "hsl(var(--magazine))", borderColor: "hsl(var(--magazine-line))" }}>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-20">
-                  <Newspaper className="h-16 w-16" style={{ color: "hsl(var(--magazine-foreground))" }} />
+                  <Newspaper className="h-16 w-16 text-foreground/20" />
                 </div>
                 <div className="relative z-10">
-                  <h2 className="text-lg font-bold" style={{ color: "hsl(var(--magazine-foreground))" }}>완등 MAGAZINE</h2>
-                  <p className="text-xs mt-1" style={{ color: "hsl(var(--magazine-foreground) / 0.8)" }}>등산 정보 · 코스 · 장비 · 안전 팁</p>
+                  <h2 className="text-lg font-bold text-foreground">완등 MAGAZINE</h2>
+                  <p className="text-xs mt-1 text-muted-foreground">등산 정보 · 코스 · 장비 · 안전 팁</p>
                 </div>
               </div>
             </Link>

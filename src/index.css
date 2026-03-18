@@ -67,8 +67,9 @@
     --earth-200: 30 15% 78%;
 
     /* Magazine */
-    --magazine: 216 100% 28%;
+    --magazine: 270 35% 79%;
     --magazine-foreground: 0 0% 100%;
+    --magazine-line: 1 95% 70%;
 
     /* Progress */
     --progress-track: 78 30% 92%;
