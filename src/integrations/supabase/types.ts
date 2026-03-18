@@ -955,6 +955,7 @@ export type Database = {
       }
       trails: {
         Row: {
+          car_access: Json | null
           course_type: string
           created_at: string
           description: string | null
@@ -962,13 +963,19 @@ export type Database = {
           distance_km: number
           duration_minutes: number
           elevation_gain_m: number | null
+          end_point: string | null
           id: string
           is_popular: boolean
           mountain_id: number
           name: string
+          parking_info: Json | null
+          public_transit: Json | null
           starting_point: string
+          starting_point_description: string | null
+          tips: Json | null
         }
         Insert: {
+          car_access?: Json | null
           course_type?: string
           created_at?: string
           description?: string | null
@@ -976,13 +983,19 @@ export type Database = {
           distance_km: number
           duration_minutes: number
           elevation_gain_m?: number | null
+          end_point?: string | null
           id?: string
           is_popular?: boolean
           mountain_id: number
           name: string
+          parking_info?: Json | null
+          public_transit?: Json | null
           starting_point: string
+          starting_point_description?: string | null
+          tips?: Json | null
         }
         Update: {
+          car_access?: Json | null
           course_type?: string
           created_at?: string
           description?: string | null
@@ -990,11 +1003,16 @@ export type Database = {
           distance_km?: number
           duration_minutes?: number
           elevation_gain_m?: number | null
+          end_point?: string | null
           id?: string
           is_popular?: boolean
           mountain_id?: number
           name?: string
+          parking_info?: Json | null
+          public_transit?: Json | null
           starting_point?: string
+          starting_point_description?: string | null
+          tips?: Json | null
         }
         Relationships: []
       }
