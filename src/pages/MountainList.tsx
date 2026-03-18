@@ -236,7 +236,7 @@ function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof
       <Link to={`/mountains/${m.id}`} className="flex flex-1 items-center justify-between min-w-0">
         <div className="min-w-0 space-y-0.5">
           <div className="flex items-center gap-1.5">
-            <p className={`font-medium truncate ${completed ? "text-primary" : "text-foreground"}`}>{m.nameKo}</p>
+            <p className="font-medium truncate text-foreground">{m.nameKo}</p>
             {m.is_baekdu && (
               <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400">
                 백대
