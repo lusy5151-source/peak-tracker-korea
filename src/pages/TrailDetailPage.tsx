@@ -91,7 +91,7 @@ export default function TrailDetailPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl py-20 text-center">
-        <MountainMascot mood="loading" size="md" />
+        <MountainMascot mood="loading" size={80} />
         <p className="mt-4 text-sm text-muted-foreground">코스 정보를 불러오는 중...</p>
       </div>
     );
