@@ -31,6 +31,9 @@ import GroupDetailPage from "@/pages/GroupDetailPage";
 import KakaoCallback from "@/pages/KakaoCallback";
 import AdminAnnouncementsPage from "@/pages/AdminAnnouncementsPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
+import MagazinePage from "@/pages/MagazinePage";
+import AdminMagazinePage from "@/pages/AdminMagazinePage";
+import MagazinePopup from "@/components/MagazinePopup";
 import NotFound from "./pages/NotFound";
 import { useState, useCallback } from "react";
 
