@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { useTrails } from "@/hooks/useTrails";
 import type { TrailInfo as TrailInfoType } from "@/data/mountains";
-import { Route, Clock, MapPin, Ruler, TrendingUp, Star, AlertCircle } from "lucide-react";
+import { Route, Clock, MapPin, Ruler, TrendingUp, Star, AlertCircle, ChevronRight } from "lucide-react";
 
 interface TrailInfoSectionProps {
   mountainId: number;
@@ -18,7 +19,6 @@ function formatDuration(minutes: number): string {
 export function TrailInfoSection({ mountainId, fallbackTrails = [] }: TrailInfoSectionProps) {
   const { trails, loading, error } = useTrails(mountainId);
 
-  // Use DB trails if available, otherwise fall back to static data
   const hasDbTrails = trails.length > 0;
 
   if (loading) {
@@ -63,7 +63,11 @@ export function TrailInfoSection({ mountainId, fallbackTrails = [] }: TrailInfoS
       <div className="space-y-3">
         {hasDbTrails
           ? trails.map((trail) => (
-              <div key={trail.id} className="rounded-xl bg-secondary/50 p-4">
+              <Link
+                key={trail.id}
+                to={`/trails/${trail.id}`}
+                className="block rounded-xl bg-secondary/50 p-4 transition-colors hover:bg-secondary/70"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <Route className="h-4 w-4 text-primary" />
                   <p className="font-medium text-foreground">{trail.name}</p>
@@ -75,6 +79,7 @@ export function TrailInfoSection({ mountainId, fallbackTrails = [] }: TrailInfoS
                   <span className="ml-auto rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                     {trail.difficulty}
                   </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
                 </div>
                 {trail.description && (
                   <p className="text-xs text-muted-foreground mb-3">{trail.description}</p>
@@ -87,7 +92,7 @@ export function TrailInfoSection({ mountainId, fallbackTrails = [] }: TrailInfoS
                     <TrailStat icon={TrendingUp} label="고도차" value={`${trail.elevation_gain_m}m`} />
                   )}
                 </div>
-              </div>
+              </Link>
             ))
           : fallbackTrails.map((trail, i) => (
               <div key={i} className="rounded-xl bg-secondary/50 p-4">

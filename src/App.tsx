@@ -11,6 +11,7 @@ import SplashScreen from "@/components/SplashScreen";
 import Dashboard from "@/pages/Dashboard";
 import MountainList from "@/pages/MountainList";
 import MountainDetail from "@/pages/MountainDetail";
+import TrailDetailPage from "@/pages/TrailDetailPage";
 import MapView from "@/pages/MapView";
 import Records from "@/pages/Records";
 import GearPage from "@/pages/GearPage";
@@ -63,6 +64,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Dashboard />} />
       <Route path="/mountains" element={<MountainList />} />
       <Route path="/mountains/:id" element={<MountainDetail />} />
+      <Route path="/trails/:trailId" element={<TrailDetailPage />} />
       <Route path="/map" element={<MapView />} />
       <Route path="/records" element={<Records />} />
       <Route path="/gear" element={<GearPage />} />
