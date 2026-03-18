@@ -228,10 +228,10 @@ function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof
     }`}>
       <button
         onClick={() => toggleComplete(m.id)}
-        className="shrink-0 text-primary"
+        className="shrink-0"
         aria-label={completed ? "완등 취소" : "완등 표시"}
       >
-        {completed ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5 text-muted-foreground/40" />}
+        {completed ? <CheckCircle2 className="h-5 w-5 text-foreground" /> : <Circle className="h-5 w-5 text-muted-foreground/40" />}
       </button>
       <Link to={`/mountains/${m.id}`} className="flex flex-1 items-center justify-between min-w-0">
         <div className="min-w-0 space-y-0.5">
