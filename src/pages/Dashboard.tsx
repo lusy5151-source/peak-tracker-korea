@@ -207,8 +207,8 @@ const Dashboard = () => {
                   <Newspaper className="h-16 w-16 text-white/20" />
                 </div>
                 <div className="relative z-10">
-                  <h2 className="text-lg font-bold text-foreground">완등 MAGAZINE</h2>
-                  <p className="text-xs mt-1 text-muted-foreground">등산 정보 · 코스 · 장비 · 안전 팁</p>
+                  <h2 className="text-lg font-bold text-white">완등 MAGAZINE</h2>
+                  <p className="text-xs mt-1 text-white/80">등산 정보 · 코스 · 장비 · 안전 팁</p>
                 </div>
               </div>
             </Link>
