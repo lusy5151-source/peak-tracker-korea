@@ -64,6 +64,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Dashboard />} />
       <Route path="/mountains" element={<MountainList />} />
       <Route path="/mountains/:id" element={<MountainDetail />} />
+      <Route path="/trails/:trailId" element={<TrailDetailPage />} />
       <Route path="/map" element={<MapView />} />
       <Route path="/records" element={<Records />} />
       <Route path="/gear" element={<GearPage />} />
