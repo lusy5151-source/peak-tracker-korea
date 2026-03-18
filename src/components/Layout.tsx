@@ -6,7 +6,7 @@ import NotificationCenter from "@/components/NotificationCenter";
 const navItems = [
   { to: "/", label: "홈", icon: Home },
   { to: "/mountains", label: "산", icon: Mountain },
-  { to: "/records", label: "기록", icon: FileText },
+  { to: "/records", label: "등산일지", icon: FileText },
   { to: "/leaderboard", label: "순위", icon: Flag },
   { to: "/plans", label: "계획", icon: BookOpen },
   { to: "/social", label: "친구", icon: Users },
