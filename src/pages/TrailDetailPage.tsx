@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { mountains } from "@/data/mountains";
-import { MountainMascot } from "@/components/MountainMascot";
+import MountainMascot from "@/components/MountainMascot";
 import {
   ArrowLeft, Route, Clock, MapPin, Ruler, TrendingUp, Star, Car, Bus,
   ParkingCircle, Copy, Navigation, ExternalLink, Info, Lightbulb, AlertTriangle,
