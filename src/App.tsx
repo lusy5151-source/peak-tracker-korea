@@ -31,6 +31,9 @@ import GroupDetailPage from "@/pages/GroupDetailPage";
 import KakaoCallback from "@/pages/KakaoCallback";
 import AdminAnnouncementsPage from "@/pages/AdminAnnouncementsPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
+import MagazinePage from "@/pages/MagazinePage";
+import AdminMagazinePage from "@/pages/AdminMagazinePage";
+import MagazinePopup from "@/components/MagazinePopup";
 import NotFound from "./pages/NotFound";
 import { useState, useCallback } from "react";
 
@@ -115,6 +118,11 @@ const AppRoutes = () => {
         path="/leaderboard"
         element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>}
       />
+      <Route path="/magazine" element={<MagazinePage />} />
+      <Route
+        path="/admin/magazine"
+        element={<ProtectedRoute><AdminMagazinePage /></ProtectedRoute>}
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -133,6 +141,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+              {!showSplash && <MagazinePopup />}
               <BrowserRouter>
                 <Layout>
                   <ErrorBoundary fallbackMessage="데이터를 불러오는 중 오류가 발생했습니다.">

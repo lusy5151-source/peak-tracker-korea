@@ -199,6 +199,21 @@ const Dashboard = () => {
 
         <div className="space-y-5 px-5 pt-5">
 
+          {/* ── 완등 MAGAZINE Banner ── */}
+          <section>
+            <Link to="/magazine">
+              <div className="relative rounded-3xl bg-gradient-to-r from-primary to-primary/80 p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-20">
+                  <Newspaper className="h-16 w-16 text-primary-foreground" />
+                </div>
+                <div className="relative z-10">
+                  <h2 className="text-lg font-bold text-primary-foreground">완등 MAGAZINE</h2>
+                  <p className="text-xs text-primary-foreground/80 mt-1">등산 정보 · 코스 · 장비 · 안전 팁</p>
+                </div>
+              </div>
+            </Link>
+          </section>
+
           {/* ── Claim Summit CTA ── */}
           <section>
             <Link to="/mountains">

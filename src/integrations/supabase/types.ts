@@ -545,6 +545,132 @@ export type Database = {
           },
         ]
       }
+      magazine_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "magazine_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "magazine_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      magazine_posts: {
+        Row: {
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_featured: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      magazine_saves: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "magazine_saves_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "magazine_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      magazine_slides: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          post_id: string
+          slide_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          post_id: string
+          slide_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          post_id?: string
+          slide_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "magazine_slides_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "magazine_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_reactions: {
         Row: {
           created_at: string
