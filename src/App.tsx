@@ -11,6 +11,7 @@ import SplashScreen from "@/components/SplashScreen";
 import Dashboard from "@/pages/Dashboard";
 import MountainList from "@/pages/MountainList";
 import MountainDetail from "@/pages/MountainDetail";
+import TrailDetailPage from "@/pages/TrailDetailPage";
 import MapView from "@/pages/MapView";
 import Records from "@/pages/Records";
 import GearPage from "@/pages/GearPage";
