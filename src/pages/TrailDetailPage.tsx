@@ -100,7 +100,7 @@ export default function TrailDetailPage() {
   if (!trail) {
     return (
       <div className="mx-auto max-w-2xl py-20 text-center">
-        <MountainMascot mood="sad" size="md" />
+        <MountainMascot mood="sad" size={80} />
         <p className="mt-4 text-muted-foreground">코스를 찾을 수 없습니다</p>
         <Link to="/mountains" className="mt-2 inline-block text-sm text-primary hover:underline">
           산 목록으로 돌아가기
