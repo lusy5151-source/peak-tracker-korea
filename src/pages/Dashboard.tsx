@@ -202,7 +202,7 @@ const Dashboard = () => {
           {/* ── 완등 MAGAZINE Banner ── */}
           <section>
             <Link to="/magazine">
-              <div className="relative rounded-3xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, hsl(var(--magazine)), hsl(216, 100%, 35%))" }}>
+              <div className="relative rounded-3xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] border-2" style={{ background: "hsl(var(--magazine))", borderColor: "hsl(var(--magazine-line))" }}>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-20">
                   <Newspaper className="h-16 w-16" style={{ color: "hsl(var(--magazine-foreground))" }} />
                 </div>
