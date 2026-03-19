@@ -84,7 +84,7 @@ const MountainList = () => {
   };
 
   return (
-    <div className="space-y-5 pb-24">
+    <div className="space-y-5 pb-24 -mx-5 -mt-4 px-5 pt-4" style={{ background: "linear-gradient(180deg, hsl(205, 60%, 94%) 0%, hsl(var(--background)) 40%)" }}>
       <div>
         <h1 className="text-2xl font-bold text-foreground">산 탐색</h1>
         <p className="mt-1 text-muted-foreground text-sm">
