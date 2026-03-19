@@ -86,37 +86,10 @@ const MountainMascot: React.FC<MountainMascotProps> = ({ size = 120, className =
       </text>
 
       {/* Eyes */}
-      {mood === "celebrating" || mood === "success" ? (
-        <>
-          {/* Happy squint eyes */}
-          <path d="M210 300 Q235 275 260 300" stroke="#666666" strokeWidth="6" strokeLinecap="round" fill="none" />
-          <path d="M296 300 Q321 275 346 300" stroke="#666666" strokeWidth="6" strokeLinecap="round" fill="none" />
-        </>
-      ) : mood === "sad" ? (
-        <>
-          <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
-          <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
-          <ellipse cx="233.047" cy="305" rx="19.8337" ry="26.445" fill="#666666" />
-          <ellipse cx="318.993" cy="305" rx="19.8337" ry="26.445" fill="#666666" />
-          {/* Tear */}
-          <ellipse cx="260" cy="340" rx="5" ry="8" fill="hsl(205, 50%, 75%)" opacity="0.6" />
-        </>
-      ) : mood === "loading" ? (
-        <>
-          <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
-          <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
-          <ellipse cx="233.047" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" className="animate-mascot-look" />
-          <ellipse cx="318.993" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" className="animate-mascot-look" />
-        </>
-      ) : (
-        <>
-          {/* Default eyes */}
-          <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
-          <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
-          <ellipse cx="233.047" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" />
-          <ellipse cx="318.993" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" />
-        </>
-      )}
+      <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+      <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+      <ellipse cx="233.047" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" />
+      <ellipse cx="318.993" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" />
 
       {/* Nose */}
       <ellipse
@@ -124,28 +97,6 @@ const MountainMascot: React.FC<MountainMascotProps> = ({ size = 120, className =
         transform="rotate(90.425 277.51 356.27)"
         fill="#FF696C"
       />
-
-      {/* Mouth - mood variations */}
-      {mood === "celebrating" || mood === "success" ? (
-        <path d="M248 380 Q278 415 308 380" stroke="#666666" strokeWidth="5" strokeLinecap="round" fill="#FF696C" fillOpacity="0.3" />
-      ) : mood === "sad" ? (
-        <path d="M255 395 Q278 380 300 395" stroke="#666666" strokeWidth="5" strokeLinecap="round" fill="none" />
-      ) : mood === "loading" ? (
-        <ellipse cx="278" cy="390" rx="12" ry="9" fill="#666666" opacity="0.7" />
-      ) : (
-        <path d="M255 385 Q278 405 300 385" stroke="#666666" strokeWidth="5" strokeLinecap="round" fill="none" />
-      )}
-
-      {/* Blush */}
-      <ellipse cx="200" cy="365" rx="18" ry="12" fill="#FF696C" opacity={mood === "celebrating" || mood === "success" ? "0.45" : "0.25"} />
-      <ellipse cx="355" cy="365" rx="18" ry="12" fill="#FF696C" opacity={mood === "celebrating" || mood === "success" ? "0.45" : "0.25"} />
-
-      {/* Waving hand */}
-      {mood === "waving" && (
-        <g className="animate-mascot-hand" style={{ transformOrigin: "520px 380px" }}>
-          <circle cx="540" cy="360" r="20" fill="#C7D66D" stroke="#b0c050" strokeWidth="3" />
-        </g>
-      )}
     </svg>
   );
 };
