@@ -154,9 +154,6 @@ const PlansPage = () => {
       <div className="flex items-center justify-between">
         <h1 className="font-bold text-foreground text-base">등산 계획</h1>
         <div className="flex gap-2">
-          <Link to="/groups" className="inline-flex items-center gap-1 rounded-lg border border-input bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary/60 transition-colors">
-            <Users className="h-4 w-4" /> 모임
-          </Link>
           <Button variant="outline" size="sm" onClick={() => setShowJoin(!showJoin)}>
             <Link2 className="h-4 w-4 mr-1" /> 코드 참여
           </Button>
