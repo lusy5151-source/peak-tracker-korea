@@ -21,112 +21,129 @@ const MountainMascot: React.FC<MountainMascotProps> = ({ size = 120, className =
     <svg
       width={size}
       height={size}
-      viewBox="0 0 200 200"
+      viewBox="0 0 602 676"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`${className} ${animationClass}`}
+      aria-label="WANDEUNG mountain mascot"
     >
       {/* Celebration sparkles */}
       {mood === "celebrating" && (
         <>
-          <circle cx="40" cy="40" r="3" fill="hsl(40, 100%, 60%)" className="animate-mascot-sparkle" />
-          <circle cx="160" cy="35" r="2.5" fill="hsl(0, 100%, 71%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.2s" }} />
-          <circle cx="30" cy="80" r="2" fill="hsl(270, 60%, 70%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.4s" }} />
-          <circle cx="170" cy="75" r="2.5" fill="hsl(78, 52%, 56%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.6s" }} />
-          <path d="M50 25 L53 18 L56 25 L49 21 L57 21 Z" fill="hsl(40, 100%, 60%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.3s" }} />
-          <path d="M150 20 L153 13 L156 20 L149 16 L157 16 Z" fill="hsl(0, 100%, 71%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.5s" }} />
+          <circle cx="80" cy="60" r="8" fill="hsl(40, 100%, 60%)" className="animate-mascot-sparkle" />
+          <circle cx="520" cy="50" r="7" fill="#FF696C" className="animate-mascot-sparkle" style={{ animationDelay: "0.2s" }} />
+          <circle cx="60" cy="180" r="6" fill="hsl(270, 60%, 70%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.4s" }} />
+          <circle cx="540" cy="170" r="7" fill="#C7D66D" className="animate-mascot-sparkle" style={{ animationDelay: "0.6s" }} />
+          <path d="M120 40 L126 24 L132 40 L116 32 L138 32 Z" fill="hsl(40, 100%, 60%)" className="animate-mascot-sparkle" style={{ animationDelay: "0.3s" }} />
+          <path d="M480 30 L486 14 L492 30 L476 22 L498 22 Z" fill="#FF696C" className="animate-mascot-sparkle" style={{ animationDelay: "0.5s" }} />
         </>
       )}
 
       {/* Success confetti */}
       {mood === "success" && (
         <>
-          <rect x="35" y="30" width="5" height="5" rx="1" fill="hsl(78, 52%, 56%)" className="animate-mascot-confetti" />
-          <rect x="155" y="25" width="4" height="6" rx="1" fill="hsl(0, 100%, 71%)" className="animate-mascot-confetti" style={{ animationDelay: "0.15s" }} />
-          <rect x="60" y="15" width="4" height="4" rx="1" fill="hsl(40, 100%, 60%)" className="animate-mascot-confetti" style={{ animationDelay: "0.3s" }} />
-          <rect x="140" y="20" width="5" height="4" rx="1" fill="hsl(270, 60%, 70%)" className="animate-mascot-confetti" style={{ animationDelay: "0.45s" }} />
+          <rect x="80" y="60" width="12" height="12" rx="2" fill="#C7D66D" className="animate-mascot-confetti" />
+          <rect x="500" y="45" width="10" height="14" rx="2" fill="#FF696C" className="animate-mascot-confetti" style={{ animationDelay: "0.15s" }} />
+          <rect x="160" y="25" width="10" height="10" rx="2" fill="hsl(40, 100%, 60%)" className="animate-mascot-confetti" style={{ animationDelay: "0.3s" }} />
+          <rect x="440" y="35" width="12" height="10" rx="2" fill="hsl(270, 60%, 70%)" className="animate-mascot-confetti" style={{ animationDelay: "0.45s" }} />
         </>
       )}
 
-      {/* Mountain body */}
+      {/* Main mountain body */}
       <path
-        d="M100 30 L170 150 Q170 165 155 165 L45 165 Q30 165 30 150 Z"
-        fill="hsl(78, 52%, 56%)"
+        d="M257.437 153.933C269.369 133.266 299.199 133.266 311.13 153.933L503.634 487.358C515.566 508.025 500.651 533.858 476.787 533.858H91.7804C67.9166 533.858 53.0017 508.025 64.9336 487.358L257.437 153.933Z"
+        fill="#C7D66D"
       />
-      {/* Snow cap */}
+      {/* Secondary mountain bump */}
       <path
-        d="M100 30 L120 70 L80 70 Z"
-        fill="white"
-        opacity="0.8"
+        d="M370.722 244.108C382.232 221.58 414.424 221.58 425.934 244.108L551.344 489.581C561.882 510.207 546.901 534.685 523.738 534.685H272.918C249.755 534.685 234.774 510.207 245.312 489.581L370.722 244.108Z"
+        fill="#C7D66D"
       />
 
-      {/* Eyes - mood variations */}
+      {/* Flag pole */}
+      <line
+        x1="286.896" y1="166.24" x2="286.896" y2="10.6113"
+        stroke="white" strokeWidth="8" strokeLinecap="round"
+        className={mood === "celebrating" || mood === "success" ? "animate-mascot-flag" : ""}
+      />
+      {/* Flag */}
+      <path
+        d="M389.089 46.0937C390.704 46.7869 390.704 49.0761 389.089 49.7693L299.47 88.2441C298.15 88.8108 296.681 87.8427 296.681 86.4063L296.681 9.45675C296.681 8.02038 298.15 7.05231 299.47 7.61895L389.089 46.0937Z"
+        fill="#FF696C"
+        className={mood === "celebrating" || mood === "success" ? "animate-mascot-flag" : ""}
+      />
+      {/* Flag text */}
+      <text
+        transform="translate(304.117 42.6545) rotate(-6.73346)"
+        fill="white"
+        xmlSpace="preserve"
+        fontFamily="sans-serif"
+        fontSize="10"
+        fontWeight="500"
+        letterSpacing="0em"
+      >
+        <tspan x="0" y="9.415">WANDEUNG</tspan>
+      </text>
+
+      {/* Eyes */}
       {mood === "celebrating" || mood === "success" ? (
         <>
           {/* Happy squint eyes */}
-          <path d="M74 98 Q82 90 90 98" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-          <path d="M110 98 Q118 90 126 98" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          <path d="M210 300 Q235 275 260 300" stroke="#666666" strokeWidth="6" strokeLinecap="round" fill="none" />
+          <path d="M296 300 Q321 275 346 300" stroke="#666666" strokeWidth="6" strokeLinecap="round" fill="none" />
         </>
       ) : mood === "sad" ? (
         <>
-          {/* Sad eyes */}
-          <ellipse cx="82" cy="100" rx="7" ry="8" fill="hsl(200, 25%, 20%)" />
-          <ellipse cx="84" cy="97" rx="2.5" ry="2.5" fill="white" />
-          <ellipse cx="118" cy="100" rx="7" ry="8" fill="hsl(200, 25%, 20%)" />
-          <ellipse cx="120" cy="97" rx="2.5" ry="2.5" fill="white" />
+          <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+          <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+          <ellipse cx="233.047" cy="305" rx="19.8337" ry="26.445" fill="#666666" />
+          <ellipse cx="318.993" cy="305" rx="19.8337" ry="26.445" fill="#666666" />
           {/* Tear */}
-          <ellipse cx="90" cy="110" rx="2" ry="3" fill="hsl(205, 50%, 75%)" opacity="0.6" />
+          <ellipse cx="260" cy="340" rx="5" ry="8" fill="hsl(205, 50%, 75%)" opacity="0.6" />
         </>
       ) : mood === "loading" ? (
         <>
-          {/* Looking-around eyes */}
-          <ellipse cx="82" cy="100" rx="8" ry="9" fill="hsl(200, 25%, 20%)" />
-          <ellipse cx="85" cy="98" rx="3" ry="3" fill="white" className="animate-mascot-look" />
-          <ellipse cx="118" cy="100" rx="8" ry="9" fill="hsl(200, 25%, 20%)" />
-          <ellipse cx="121" cy="98" rx="3" ry="3" fill="white" className="animate-mascot-look" />
+          <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+          <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+          <ellipse cx="233.047" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" className="animate-mascot-look" />
+          <ellipse cx="318.993" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" className="animate-mascot-look" />
         </>
       ) : (
         <>
           {/* Default eyes */}
-          <ellipse cx="82" cy="100" rx="8" ry="9" fill="hsl(200, 25%, 20%)" />
-          <ellipse cx="84" cy="97" rx="3" ry="3" fill="white" />
-          <ellipse cx="118" cy="100" rx="8" ry="9" fill="hsl(200, 25%, 20%)" />
-          <ellipse cx="120" cy="97" rx="3" ry="3" fill="white" />
+          <ellipse cx="235.525" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+          <ellipse cx="321.472" cy="314.861" rx="30.577" ry="42.1467" fill="white" />
+          <ellipse cx="233.047" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" />
+          <ellipse cx="318.993" cy="299.159" rx="19.8337" ry="26.445" fill="#666666" />
         </>
       )}
 
-      {/* Small nose */}
-      <ellipse cx="100" cy="115" rx="4" ry="3" fill="hsl(78, 50%, 45%)" />
+      {/* Nose */}
+      <ellipse
+        cx="277.51" cy="356.27" rx="20.5191" ry="31.0896"
+        transform="rotate(90.425 277.51 356.27)"
+        fill="#FF696C"
+      />
 
       {/* Mouth - mood variations */}
       {mood === "celebrating" || mood === "success" ? (
-        <path d="M85 120 Q100 138 115 120" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" fill="hsl(0, 60%, 55%)" fillOpacity="0.3" />
+        <path d="M248 380 Q278 415 308 380" stroke="#666666" strokeWidth="5" strokeLinecap="round" fill="#FF696C" fillOpacity="0.3" />
       ) : mood === "sad" ? (
-        <path d="M88 128 Q100 120 112 128" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path d="M255 395 Q278 380 300 395" stroke="#666666" strokeWidth="5" strokeLinecap="round" fill="none" />
       ) : mood === "loading" ? (
-        <ellipse cx="100" cy="125" rx="5" ry="4" fill="hsl(200, 25%, 20%)" opacity="0.7" />
+        <ellipse cx="278" cy="390" rx="12" ry="9" fill="#666666" opacity="0.7" />
       ) : (
-        <path d="M88 122 Q100 132 112 122" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path d="M255 385 Q278 405 300 385" stroke="#666666" strokeWidth="5" strokeLinecap="round" fill="none" />
       )}
 
       {/* Blush */}
-      <ellipse cx="72" cy="115" rx="7" ry="5" fill="hsl(0, 100%, 71%)" opacity={mood === "celebrating" || mood === "success" ? "0.5" : "0.3"} />
-      <ellipse cx="128" cy="115" rx="7" ry="5" fill="hsl(0, 100%, 71%)" opacity={mood === "celebrating" || mood === "success" ? "0.5" : "0.3"} />
+      <ellipse cx="200" cy="365" rx="18" ry="12" fill="#FF696C" opacity={mood === "celebrating" || mood === "success" ? "0.45" : "0.25"} />
+      <ellipse cx="355" cy="365" rx="18" ry="12" fill="#FF696C" opacity={mood === "celebrating" || mood === "success" ? "0.45" : "0.25"} />
 
-      {/* Flag pole */}
-      <line x1="100" y1="30" x2="100" y2="8" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Flag */}
-      <path
-        d="M100 8 L118 15 L100 22 Z"
-        fill="hsl(0, 100%, 71%)"
-        className={mood === "celebrating" || mood === "success" ? "animate-mascot-flag" : ""}
-      />
-
-      {/* Waving hand for waving mood */}
+      {/* Waving hand */}
       {mood === "waving" && (
-        <g className="animate-mascot-hand">
-          <circle cx="170" cy="120" r="8" fill="hsl(78, 52%, 56%)" stroke="hsl(78, 50%, 45%)" strokeWidth="1.5" />
-          <path d="M165 112 Q170 105 175 112" stroke="hsl(78, 50%, 45%)" strokeWidth="1.5" fill="none" />
+        <g className="animate-mascot-hand" style={{ transformOrigin: "520px 380px" }}>
+          <circle cx="540" cy="360" r="20" fill="#C7D66D" stroke="#b0c050" strokeWidth="3" />
         </g>
       )}
     </svg>
