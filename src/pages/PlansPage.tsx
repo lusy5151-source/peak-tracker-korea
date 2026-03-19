@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Plus, Mountain, Calendar, Clock, Users, Bell, ChevronRight, Link2, UserCheck, UserX, Mail, Globe, MapPin,
-} from "lucide-react";
+  Plus, Mountain, Calendar, Clock, Users, Bell, ChevronRight, Link2, UserCheck, UserX, Mail, Globe, MapPin } from
+"lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -43,13 +43,13 @@ const PlansPage = () => {
   const [respondingId, setRespondingId] = useState<string | null>(null);
 
   const fetchInvitations = useCallback(async () => {
-    if (!user) { setInvitationsLoading(false); return; }
-    
-    const { data: participants } = await supabase
-      .from("plan_participants")
-      .select("id, plan_id, invited_at, status, invited_by")
-      .eq("user_id", user.id)
-      .eq("status", "pending");
+    if (!user) {setInvitationsLoading(false);return;}
+
+    const { data: participants } = await supabase.
+    from("plan_participants").
+    select("id, plan_id, invited_at, status, invited_by").
+    eq("user_id", user.id).
+    eq("status", "pending");
 
     if (!participants || participants.length === 0) {
       setInvitations([]);
@@ -58,38 +58,38 @@ const PlansPage = () => {
     }
 
     const planIds = participants.map((p: any) => p.plan_id);
-    const { data: planData } = await supabase
-      .from("hiking_plans")
-      .select("id, mountain_id, planned_date, start_time, trail_name, creator_id")
-      .in("id", planIds);
+    const { data: planData } = await supabase.
+    from("hiking_plans").
+    select("id, mountain_id, planned_date, start_time, trail_name, creator_id").
+    in("id", planIds);
 
-    if (!planData) { setInvitations([]); setInvitationsLoading(false); return; }
+    if (!planData) {setInvitations([]);setInvitationsLoading(false);return;}
 
     // Resolve inviter names from invited_by field (fallback to creator_id)
     const inviterIds = [...new Set((participants as any[]).map((p) => p.invited_by).filter(Boolean))];
     const creatorIds = [...new Set((planData as any[]).map((p) => p.creator_id))];
     const allUserIds = [...new Set([...inviterIds, ...creatorIds])];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, nickname")
-      .in("user_id", allUserIds);
+    const { data: profiles } = await supabase.
+    from("profiles").
+    select("user_id, nickname").
+    in("user_id", allUserIds);
 
     const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.nickname || "알 수 없음"]));
     const planMap = new Map((planData as any[]).map((p) => [p.id, p]));
 
-    const mapped: PendingInvitation[] = (participants as any[])
-      .filter((p) => planMap.has(p.plan_id))
-      .map((p) => {
-        const plan = planMap.get(p.plan_id)!;
-        const inviterUserId = p.invited_by || plan.creator_id;
-        return {
-          id: p.id,
-          plan_id: p.plan_id,
-          invited_at: p.invited_at,
-          plan,
-          inviterName: profileMap.get(inviterUserId) || "알 수 없음",
-        };
-      });
+    const mapped: PendingInvitation[] = (participants as any[]).
+    filter((p) => planMap.has(p.plan_id)).
+    map((p) => {
+      const plan = planMap.get(p.plan_id)!;
+      const inviterUserId = p.invited_by || plan.creator_id;
+      return {
+        id: p.id,
+        plan_id: p.plan_id,
+        invited_at: p.invited_at,
+        plan,
+        inviterName: profileMap.get(inviterUserId) || "알 수 없음"
+      };
+    });
 
     setInvitations(mapped);
     setInvitationsLoading(false);
@@ -142,8 +142,8 @@ const PlansPage = () => {
         <Mountain className="h-10 w-10 text-muted-foreground" />
         <p className="text-muted-foreground">로그인이 필요합니다</p>
         <Button onClick={() => navigate("/auth")}>로그인</Button>
-      </div>
-    );
+      </div>);
+
   }
 
   const upcoming = plans.filter((p) => p.status === "upcoming" && new Date(p.planned_date) >= new Date());
@@ -152,7 +152,7 @@ const PlansPage = () => {
   return (
     <div className="space-y-5 pb-24">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">등산 계획</h1>
+        <h1 className="font-bold text-foreground text-base">등산 계획</h1>
         <div className="flex gap-2">
           <Link to="/groups" className="inline-flex items-center gap-1 rounded-lg border border-input bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary/60 transition-colors">
             <Users className="h-4 w-4" /> 모임
@@ -167,63 +167,63 @@ const PlansPage = () => {
       </div>
 
       {/* Join by code */}
-      {showJoin && (
-        <div className="rounded-xl border border-border bg-card p-4 flex gap-2">
+      {showJoin &&
+      <div className="rounded-xl border border-border bg-card p-4 flex gap-2">
           <Input
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
-            placeholder="초대 코드 입력..."
-            className="font-mono tracking-widest"
-          />
+          value={inviteCode}
+          onChange={(e) => setInviteCode(e.target.value)}
+          placeholder="초대 코드 입력..."
+          className="font-mono tracking-widest" />
+        
           <Button onClick={handleJoinByCode} disabled={joining}>
             {joining ? "참여 중..." : "참여"}
           </Button>
         </div>
-      )}
+      }
 
       {/* Notifications */}
-      {notifications.length > 0 && (
-        <div className="space-y-2">
+      {notifications.length > 0 &&
+      <div className="space-y-2">
           <p className="text-sm font-medium text-foreground flex items-center gap-1">
             <Bell className="h-4 w-4 text-primary" /> 알림
           </p>
-          {notifications.slice(0, 3).map((n) => (
-            <div
-              key={n.id}
-              className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 cursor-pointer"
-              onClick={() => {
-                markNotificationRead(n.id);
-                navigate(`/plans/${n.plan_id}`);
-              }}
-            >
+          {notifications.slice(0, 3).map((n) =>
+        <div
+          key={n.id}
+          className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 cursor-pointer"
+          onClick={() => {
+            markNotificationRead(n.id);
+            navigate(`/plans/${n.plan_id}`);
+          }}>
+          
               <Bell className="h-4 w-4 text-primary shrink-0" />
               <p className="flex-1 text-sm text-foreground">{n.message}</p>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
-          ))}
+        )}
         </div>
-      )}
+      }
 
       {/* Pending Invitations */}
-      {invitationsLoading ? (
-        <section className="space-y-2">
+      {invitationsLoading ?
+      <section className="space-y-2">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-24 w-full rounded-xl" />
-        </section>
-      ) : invitations.length > 0 && (
-        <section>
+        </section> :
+      invitations.length > 0 &&
+      <section>
           <p className="text-sm font-medium text-foreground flex items-center gap-1 mb-2">
             <Mail className="h-4 w-4 text-primary" /> 받은 초대 ({invitations.length})
           </p>
           <div className="space-y-2.5">
             {invitations.map((inv) => {
-              const mountain = mountains.find((m) => m.id === inv.plan.mountain_id);
-              const isResponding = respondingId === inv.id;
-              return (
-                <div
-                  key={inv.id}
-                  className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3"
-                >
+            const mountain = mountains.find((m) => m.id === inv.plan.mountain_id);
+            const isResponding = respondingId === inv.id;
+            return (
+              <div
+                key={inv.id}
+                className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                       <Mountain className="h-5 w-5 text-primary" />
@@ -237,12 +237,12 @@ const PlansPage = () => {
                           <Calendar className="h-3 w-3" />
                           {format(new Date(inv.plan.planned_date), "M/d (EEE)", { locale: ko })}
                         </span>
-                        {inv.plan.start_time && (
-                          <span className="flex items-center gap-1">
+                        {inv.plan.start_time &&
+                      <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {inv.plan.start_time.slice(0, 5)}
                           </span>
-                        )}
+                      }
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         <Users className="h-3 w-3 inline mr-1" />
@@ -252,54 +252,54 @@ const PlansPage = () => {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleAccept(inv)}
-                      disabled={isResponding}
-                    >
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleAccept(inv)}
+                    disabled={isResponding}>
+                    
                       <UserCheck className="h-4 w-4 mr-1" />
                       {isResponding ? "처리 중..." : "수락"}
                     </Button>
                     <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => handleDecline(inv)}
-                      disabled={isResponding}
-                    >
+                    size="sm"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleDecline(inv)}
+                    disabled={isResponding}>
+                    
                       <UserX className="h-4 w-4 mr-1" />
                       거절
                     </Button>
                   </div>
-                </div>
-              );
-            })}
+                </div>);
+
+          })}
           </div>
         </section>
-      )}
+      }
 
       {/* Upcoming Plans */}
       <section>
         <p className="text-sm font-medium text-muted-foreground mb-2">다가오는 계획 ({upcoming.length})</p>
-        {upcoming.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center">
+        {upcoming.length === 0 ?
+        <div className="rounded-xl border border-border bg-card p-8 text-center">
             <Mountain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">아직 계획이 없습니다</p>
             <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate("/plans/create")}>
               첫 계획 만들기
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
+          </div> :
+
+        <div className="space-y-2.5">
             {upcoming.map((plan) => {
-              const mountain = mountains.find((m) => m.id === plan.mountain_id);
-              if (!mountain) return null;
-              return (
-                <Link
-                  key={plan.id}
-                  to={`/plans/${plan.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm hover:bg-secondary/50 transition-colors"
-                >
+            const mountain = mountains.find((m) => m.id === plan.mountain_id);
+            if (!mountain) return null;
+            return (
+              <Link
+                key={plan.id}
+                to={`/plans/${plan.id}`}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm hover:bg-secondary/50 transition-colors">
+                
                   <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                     <Mountain className="h-5 w-5 text-primary" />
                   </div>
@@ -310,62 +310,62 @@ const PlansPage = () => {
                         <Calendar className="h-3 w-3" />
                         {format(new Date(plan.planned_date), "M/d (EEE)", { locale: ko })}
                       </span>
-                      {plan.start_time && (
-                        <span className="flex items-center gap-1">
+                      {plan.start_time &&
+                    <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {plan.start_time.slice(0, 5)}
                         </span>
-                      )}
+                    }
                     </div>
-                    {plan.trail_name && (
-                      <p className="text-[10px] text-muted-foreground/70 mt-0.5">🥾 {plan.trail_name}</p>
-                    )}
-                    {(plan as any).meeting_location && (
-                      <p className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-0.5">
+                    {plan.trail_name &&
+                  <p className="text-[10px] text-muted-foreground/70 mt-0.5">🥾 {plan.trail_name}</p>
+                  }
+                    {(plan as any).meeting_location &&
+                  <p className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-0.5">
                         <MapPin className="h-2.5 w-2.5" /> {(plan as any).meeting_location}
                       </p>
-                    )}
-                    {(plan as any).is_public && (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] text-primary mt-0.5">
+                  }
+                    {(plan as any).is_public &&
+                  <span className="inline-flex items-center gap-0.5 text-[9px] text-primary mt-0.5">
                         <Globe className="h-2.5 w-2.5" /> 공개
                       </span>
-                    )}
+                  }
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                </Link>
-              );
-            })}
+                </Link>);
+
+          })}
           </div>
-        )}
+        }
       </section>
 
       {/* Past Plans */}
-      {past.length > 0 && (
-        <section>
+      {past.length > 0 &&
+      <section>
           <p className="text-sm font-medium text-muted-foreground mb-2">지난 계획 ({past.length})</p>
           <div className="space-y-2 opacity-60">
             {past.map((plan) => {
-              const mountain = mountains.find((m) => m.id === plan.mountain_id);
-              if (!mountain) return null;
-              return (
-                <Link
-                  key={plan.id}
-                  to={`/plans/${plan.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-secondary/50 transition-colors"
-                >
+            const mountain = mountains.find((m) => m.id === plan.mountain_id);
+            if (!mountain) return null;
+            return (
+              <Link
+                key={plan.id}
+                to={`/plans/${plan.id}`}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-secondary/50 transition-colors">
+                
                   <Mountain className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-foreground flex-1">{mountain.nameKo}</span>
                   <span className="text-xs text-muted-foreground">
                     {format(new Date(plan.planned_date), "M/d", { locale: ko })}
                   </span>
-                </Link>
-              );
-            })}
+                </Link>);
+
+          })}
           </div>
         </section>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default PlansPage;
