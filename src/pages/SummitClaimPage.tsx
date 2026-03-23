@@ -59,7 +59,14 @@ export default function SummitClaimPage() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [aiVerification, setAiVerification] = useState<{
+    status: "idle" | "verifying" | "approved" | "rejected" | "error";
+    confidence: number;
+    reason: string;
+    elements: string[];
+  }>({ status: "idle", confidence: 0, reason: "", elements: [] });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const { summits, claimSummit, fetchClaims } = useSummits(selectedMountainId ?? undefined);
 
