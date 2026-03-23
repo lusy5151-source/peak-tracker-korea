@@ -121,6 +121,10 @@ const AppRoutes = () => {
       />
       <Route path="/magazine" element={<MagazinePage />} />
       <Route
+        path="/summit-claim"
+        element={<ProtectedRoute><SummitClaimPage /></ProtectedRoute>}
+      />
+      <Route
         path="/admin/magazine"
         element={<ProtectedRoute><AdminMagazinePage /></ProtectedRoute>}
       />
