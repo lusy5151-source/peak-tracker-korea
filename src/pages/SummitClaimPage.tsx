@@ -142,9 +142,45 @@ export default function SummitClaimPage() {
     const file = e.target.files?.[0];
     if (file) {
       setPhotoFile(file);
+      setAiVerification({ status: "idle", confidence: 0, reason: "", elements: [] });
       const reader = new FileReader();
-      reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        setPhotoPreview(dataUrl);
+        // Auto-trigger AI verification
+        verifyPhotoWithAI(dataUrl);
+      };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const verifyPhotoWithAI = async (imageDataUrl: string) => {
+    setAiVerification({ status: "verifying", confidence: 0, reason: "", elements: [] });
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-summit-photo", {
+        body: {
+          imageBase64: imageDataUrl,
+          mountainName: selectedMountain?.nameKo || "",
+          summitName: selectedSummit?.summit_name || "",
+        },
+      });
+
+      if (error) throw error;
+
+      setAiVerification({
+        status: data.approved ? "approved" : "rejected",
+        confidence: data.confidence || 0,
+        reason: data.reason || "",
+        elements: data.detected_elements || [],
+      });
+    } catch (err) {
+      console.error("AI verification error:", err);
+      setAiVerification({
+        status: "error",
+        confidence: 0,
+        reason: "AI 검증에 실패했습니다. 사진 인증은 계속 진행할 수 있습니다.",
+        elements: [],
+      });
     }
   };
 
