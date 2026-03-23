@@ -302,6 +302,7 @@ export default function SummitClaimPage() {
     setUserLocation(null);
     setSelectedGroupId("");
     setSearchQuery("");
+    setAiVerification({ status: "idle", confidence: 0, reason: "", elements: [] });
   };
 
   if (!user) {
