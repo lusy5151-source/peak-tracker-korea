@@ -263,7 +263,7 @@ export default function SummitClaimPage() {
   if (!user) {
     return (
       <div className="mx-auto max-w-lg py-20 text-center space-y-4">
-        <MountainMascot size={100} mood="idle" />
+        <MountainMascot size={100} mood="default" />
         <p className="text-muted-foreground">로그인 후 정상 인증을 할 수 있습니다.</p>
         <Link to="/auth">
           <Button>로그인</Button>
