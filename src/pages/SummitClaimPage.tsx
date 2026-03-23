@@ -23,6 +23,7 @@ import {
   ArrowLeft, Search, Mountain, Flag, Camera, MapPin,
   Navigation, Loader2, Shield, Clock, Users, Wifi, WifiOff,
   CheckCircle2, Calendar, ChevronRight, AlertTriangle,
+  ImagePlus, ShieldCheck, ShieldX, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
