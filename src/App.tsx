@@ -35,6 +35,7 @@ import MagazinePage from "@/pages/MagazinePage";
 import AdminMagazinePage from "@/pages/AdminMagazinePage";
 import SummitClaimPage from "@/pages/SummitClaimPage";
 import MagazinePopup from "@/components/MagazinePopup";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import NotFound from "./pages/NotFound";
 import { useState, useCallback } from "react";
 
