@@ -790,9 +790,13 @@ export default function SummitClaimPage() {
                 </p>
               </div>
               <div className="rounded-lg bg-secondary/50 p-3">
-                <p className="text-[10px] text-muted-foreground">네트워크</p>
+                <p className="text-[10px] text-muted-foreground">AI 검증</p>
                 <p className="text-sm font-medium text-foreground">
-                  {isOnline ? "✅ 온라인" : "📱 오프라인"}
+                  {aiVerification.status === "approved" && `✅ 통과 ${aiVerification.confidence}%`}
+                  {aiVerification.status === "rejected" && `⚠️ 미통과`}
+                  {aiVerification.status === "error" && "⏭️ 건너뜀"}
+                  {aiVerification.status === "verifying" && "🔄 검증중"}
+                  {aiVerification.status === "idle" && "—"}
                 </p>
               </div>
             </div>
