@@ -179,6 +179,14 @@ const AuthPage = () => {
             {isLogin ? "회원가입" : "로그인"}
           </button>
         </p>
+
+        <p className="text-center text-[11px] text-muted-foreground/70">
+          가입 시{" "}
+          <a href="/privacy" className="text-primary hover:underline">
+            개인정보처리방침
+          </a>
+          에 동의하는 것으로 간주합니다.
+        </p>
       </div>
     </div>
   );

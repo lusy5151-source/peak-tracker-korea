@@ -476,6 +476,17 @@ const ProfilePage = () => {
           </Link>
         )}
 
+        <Link
+          to="/privacy"
+          className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
+        >
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            개인정보처리방침
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
+
         <button
           onClick={signOut}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10"

@@ -35,6 +35,7 @@ import MagazinePage from "@/pages/MagazinePage";
 import AdminMagazinePage from "@/pages/AdminMagazinePage";
 import SummitClaimPage from "@/pages/SummitClaimPage";
 import MagazinePopup from "@/components/MagazinePopup";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import NotFound from "./pages/NotFound";
 import { useState, useCallback } from "react";
 
@@ -128,6 +129,7 @@ const AppRoutes = () => {
         path="/admin/magazine"
         element={<ProtectedRoute><AdminMagazinePage /></ProtectedRoute>}
       />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
