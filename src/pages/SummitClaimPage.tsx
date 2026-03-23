@@ -671,7 +671,7 @@ export default function SummitClaimPage() {
             )}
 
             {!isOnline && (
-              <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 p-3 text-xs text-amber-700 dark:text-amber-400">
+              <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 p-3 text-xs text-amber-700 dark:text-amber-300">
                 <WifiOff className="h-4 w-4 shrink-0" />
                 오프라인 상태입니다. 인증이 로컬에 저장되며 네트워크 연결 시 자동 업로드됩니다.
               </div>

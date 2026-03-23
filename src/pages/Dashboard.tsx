@@ -216,7 +216,7 @@ const Dashboard = () => {
 
           {/* ── Claim Summit CTA ── */}
           <section>
-            <Link to="/mountains">
+            <Link to="/summit-claim">
               <Button className="w-full h-14 rounded-2xl text-base font-bold gap-2.5 shadow-lg bg-primary hover:bg-primary/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
                 <Flag className="h-5 w-5" />
                 정상 인증하기
