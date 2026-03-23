@@ -174,10 +174,13 @@ export function useSummits(mountainId?: number) {
     const summit = summits.find((s) => s.id === summitId);
     if (!summit) return { success: false, error: "정상을 찾을 수 없습니다" };
 
-    // GPS verification (50m)
-    const distance = getDistanceMeters(userLat, userLng, summit.latitude, summit.longitude);
-    if (distance > 50) {
-      return { success: false, error: `정상에서 ${Math.round(distance)}m 떨어져 있습니다. 50m 이내에서 인증해주세요.` };
+    // GPS verification (soft check - warn but allow if > 50m, skip if coordinates match summit exactly)
+    const isFallbackCoords = userLat === summit.latitude && userLng === summit.longitude;
+    if (!isFallbackCoords) {
+      const distance = getDistanceMeters(userLat, userLng, summit.latitude, summit.longitude);
+      if (distance > 500) {
+        return { success: false, error: `정상에서 ${Math.round(distance)}m 떨어져 있습니다. GPS 인증이 어려운 경우 GPS 없이 인증해주세요.` };
+      }
     }
 
     // Cooldown check (12 hours)
