@@ -620,6 +620,7 @@ export default function SummitClaimPage() {
             <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
               <Camera className="h-3.5 w-3.5" /> 정상 사진 <span className="text-destructive">*</span>
             </label>
+            {/* Camera capture input */}
             <input
               ref={fileInputRef}
               type="file"
@@ -628,27 +629,112 @@ export default function SummitClaimPage() {
               className="hidden"
               onChange={handlePhotoChange}
             />
+            {/* Gallery input (no capture attribute) */}
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
             {photoPreview ? (
-              <div className="relative">
-                <img src={photoPreview} alt="Summit" className="w-full h-48 object-cover rounded-xl" />
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="absolute bottom-2 right-2 rounded-full text-xs"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  다시 선택
-                </Button>
+              <div className="space-y-3">
+                <div className="relative">
+                  <img src={photoPreview} alt="Summit" className="w-full h-48 object-cover rounded-xl" />
+                  <div className="absolute bottom-2 right-2 flex gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-full text-xs gap-1"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Camera className="h-3 w-3" /> 촬영
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-full text-xs gap-1"
+                      onClick={() => galleryInputRef.current?.click()}
+                    >
+                      <ImagePlus className="h-3 w-3" /> 앨범
+                    </Button>
+                  </div>
+                </div>
+
+                {/* AI Verification Status */}
+                {aiVerification.status === "verifying" && (
+                  <div className="rounded-xl bg-muted/50 p-3 flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                        <Sparkles className="h-3 w-3" /> AI 사진 검증 중...
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">정상 사진인지 확인하고 있습니다</p>
+                    </div>
+                  </div>
+                )}
+                {aiVerification.status === "approved" && (
+                  <div className="rounded-xl border border-green-200 bg-green-50 dark:bg-green-900/10 dark:border-green-800/30 p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400">
+                        AI 검증 통과 (신뢰도 {aiVerification.confidence}%)
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-green-600 dark:text-green-300">{aiVerification.reason}</p>
+                    {aiVerification.elements.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {aiVerification.elements.map((el, i) => (
+                          <Badge key={i} variant="secondary" className="text-[9px] bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                            {el}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {aiVerification.status === "rejected" && (
+                  <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <ShieldX className="h-4 w-4 text-destructive" />
+                      <p className="text-xs font-medium text-destructive">
+                        AI 검증 실패 (신뢰도 {aiVerification.confidence}%)
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-destructive/80">{aiVerification.reason}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      다른 정상 사진을 선택하거나, 그래도 인증을 진행할 수 있습니다.
+                    </p>
+                  </div>
+                )}
+                {aiVerification.status === "error" && (
+                  <div className="rounded-xl bg-muted/50 p-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-[11px] text-muted-foreground">{aiVerification.reason}</p>
+                  </div>
+                )}
               </div>
             ) : (
-              <Button
-                variant="outline"
-                className="w-full rounded-xl h-32 flex-col gap-2 border-dashed"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Camera className="h-8 w-8 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">사진 촬영 또는 선택</span>
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-xl h-28 flex-col gap-2 border-dashed"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="h-6 w-6 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">카메라 촬영</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl h-28 flex-col gap-2 border-dashed"
+                  onClick={() => galleryInputRef.current?.click()}
+                >
+                  <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">앨범에서 선택</span>
+                </Button>
+              </div>
             )}
           </div>
 
