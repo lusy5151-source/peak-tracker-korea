@@ -129,6 +129,7 @@ const AppRoutes = () => {
         path="/admin/magazine"
         element={<ProtectedRoute><AdminMagazinePage /></ProtectedRoute>}
       />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
