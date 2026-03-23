@@ -484,7 +484,7 @@ export default function SummitClaimPage() {
 
           {summits.length === 0 ? (
             <div className="text-center py-8 space-y-3">
-              <MountainMascot size={80} mood="idle" />
+              <MountainMascot size={80} mood="default" />
               <p className="text-sm text-muted-foreground">등록된 정상이 없습니다</p>
             </div>
           ) : (
