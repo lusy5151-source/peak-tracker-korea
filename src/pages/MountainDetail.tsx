@@ -65,9 +65,9 @@ const MountainDetail = () => {
   const { id } = useParams<{ id: string }>();
   const mountain = mountains.find((m) => m.id === Number(id));
   const {
-    isCompleted, toggleComplete, getRecord, updateNotes, updateDate,
-    updateWeather, addPhotos, removePhoto, updateTaggedFriends,
-    updateCourseInfo, updateDuration, updateDifficulty,
+    isCompleted, toggleComplete, addCompletion, getRecord, getCompletionCount,
+    updateNotes, updateDate, updateWeather, addPhotos, removePhoto,
+    updateTaggedFriends, updateCourseInfo, updateDuration, updateDifficulty,
   } = useStore();
 
   if (!mountain) {
