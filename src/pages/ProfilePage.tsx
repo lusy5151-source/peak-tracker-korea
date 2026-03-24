@@ -32,7 +32,7 @@ const HIKING_STYLES = [
 const ProfilePage = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
-  const { records, completedCount } = useStore();
+  const { records, completedCount, totalCompletions } = useStore();
   const { items: gearItems } = useGearStore();
   const sharedCompletions = useSharedCompletionCounts();
   const { earnedBadges, earnedCount, totalBadges, featuredBadge, setFeatured, featuredBadgeId } =
