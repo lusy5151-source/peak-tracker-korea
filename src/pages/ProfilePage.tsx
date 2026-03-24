@@ -397,6 +397,35 @@ const ProfilePage = () => {
             </div>
           </div>
 
+          {/* Repeat completions */}
+          {repeatMountains.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground mb-3">재등반 기록</h2>
+              <div className="space-y-2.5">
+                {repeatMountains.map(({ mountain: mt, count }) => (
+                  <Link
+                    key={mt!.id}
+                    to={`/mountains/${mt!.id}`}
+                    className="flex items-center justify-between rounded-xl bg-secondary/50 p-3 hover:bg-secondary/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                        <Mountain className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{mt!.nameKo}</p>
+                        <p className="text-[10px] text-muted-foreground">{mt!.region} · {mt!.height}m</p>
+                      </div>
+                    </div>
+                    <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+                      {count}회
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Recent achievement */}
           {recentBadge && (
             <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
