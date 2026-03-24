@@ -32,7 +32,7 @@ const HIKING_STYLES = [
 const ProfilePage = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
-  const { records, completedCount } = useStore();
+  const { records, completedCount, totalCompletions } = useStore();
   const { items: gearItems } = useGearStore();
   const sharedCompletions = useSharedCompletionCounts();
   const { earnedBadges, earnedCount, totalBadges, featuredBadge, setFeatured, featuredBadgeId } =
@@ -87,14 +87,32 @@ const ProfilePage = () => {
   }, [recentTaggedFriends]);
 
   const regionProgress = useMemo(() => {
+    const uniqueByRegion = new Map<string, Set<number>>();
+    records.forEach((r) => {
+      const m = mountains.find((mt) => mt.id === r.mountainId);
+      if (m) {
+        if (!uniqueByRegion.has(m.region)) uniqueByRegion.set(m.region, new Set());
+        uniqueByRegion.get(m.region)!.add(m.id);
+      }
+    });
     return regions.map((region) => {
       const total = mountains.filter((m) => m.region === region).length;
-      const completed = records.filter((r) => {
-        const m = mountains.find((mt) => mt.id === r.mountainId);
-        return m && m.region === region;
-      }).length;
+      const completed = uniqueByRegion.get(region)?.size || 0;
       return { region, total, completed };
     });
+  }, [records]);
+
+  // Mountains with repeat completions
+  const repeatMountains = useMemo(() => {
+    const countMap = new Map<number, number>();
+    records.forEach((r) => {
+      countMap.set(r.mountainId, (countMap.get(r.mountainId) || 0) + 1);
+    });
+    return Array.from(countMap.entries())
+      .filter(([, count]) => count > 1)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, count]) => ({ mountain: mountains.find((m) => m.id === id), count }))
+      .filter((x) => x.mountain);
   }, [records]);
 
   const recentBadge = useMemo(() => {
@@ -241,19 +259,23 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* Profile Summary - 4 stats */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Profile Summary - 5 stats */}
+      <div className="grid grid-cols-5 gap-2">
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">{journals.length}</p>
           <p className="text-[9px] text-muted-foreground">등산 일지</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-primary">{completedCount}</p>
-          <p className="text-[9px] text-muted-foreground">완등</p>
+          <p className="text-[9px] text-muted-foreground">완등 산</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
+          <p className="text-lg font-bold text-foreground">{totalCompletions}</p>
+          <p className="text-[9px] text-muted-foreground">총 완등</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">{sharedHikesCount}</p>
-          <p className="text-[9px] text-muted-foreground">함께한 등산</p>
+          <p className="text-[9px] text-muted-foreground">함께 등산</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">{percentage}%</p>
@@ -374,6 +396,35 @@ const ProfilePage = () => {
               ))}
             </div>
           </div>
+
+          {/* Repeat completions */}
+          {repeatMountains.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground mb-3">재등반 기록</h2>
+              <div className="space-y-2.5">
+                {repeatMountains.map(({ mountain: mt, count }) => (
+                  <Link
+                    key={mt!.id}
+                    to={`/mountains/${mt!.id}`}
+                    className="flex items-center justify-between rounded-xl bg-secondary/50 p-3 hover:bg-secondary/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                        <Mountain className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{mt!.nameKo}</p>
+                        <p className="text-[10px] text-muted-foreground">{mt!.region} · {mt!.height}m</p>
+                      </div>
+                    </div>
+                    <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+                      {count}회
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Recent achievement */}
           {recentBadge && (

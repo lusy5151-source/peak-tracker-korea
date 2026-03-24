@@ -65,9 +65,9 @@ const MountainDetail = () => {
   const { id } = useParams<{ id: string }>();
   const mountain = mountains.find((m) => m.id === Number(id));
   const {
-    isCompleted, toggleComplete, getRecord, updateNotes, updateDate,
-    updateWeather, addPhotos, removePhoto, updateTaggedFriends,
-    updateCourseInfo, updateDuration, updateDifficulty,
+    isCompleted, toggleComplete, addCompletion, getRecord, getCompletionCount,
+    updateNotes, updateDate, updateWeather, addPhotos, removePhoto,
+    updateTaggedFriends, updateCourseInfo, updateDuration, updateDifficulty,
   } = useStore();
 
   if (!mountain) {
@@ -83,6 +83,7 @@ const MountainDetail = () => {
 
   const completed = isCompleted(mountain.id);
   const record = getRecord(mountain.id);
+  const completionCount = getCompletionCount(mountain.id);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -98,17 +99,27 @@ const MountainDetail = () => {
             <h1 className="text-2xl font-bold text-foreground">{mountain.nameKo}</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">{mountain.name}</p>
           </div>
-          <button
-            onClick={() => toggleComplete(mountain.id)}
-            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              completed
-                ? "bg-primary/10 text-primary"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            }`}
-          >
-            {completed ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
-            {completed ? "완등" : "미등"}
-          </button>
+          <div className="flex items-center gap-2">
+            {completed && (
+              <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-bold text-primary">
+                완등 {completionCount}회
+              </span>
+            )}
+            <button
+              onClick={() => completed ? addCompletion(mountain.id) : toggleComplete(mountain.id)}
+              className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                completed
+                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
+              }`}
+            >
+              {completed ? (
+                <><TrendingUp className="h-4 w-4" /> 재등반</>
+              ) : (
+                <><Circle className="h-4 w-4" /> 완등 기록</>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-4">
