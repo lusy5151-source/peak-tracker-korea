@@ -1,13 +1,10 @@
-import { useRef, useState, useEffect } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useRef, useState, useCallback } from "react";
 import { Mountain } from "@/data/mountains";
 import { CompletionRecord } from "@/hooks/useMountainStore";
 import { SharedCompletion } from "@/hooks/useSharedCompletions";
-import { useStore } from "@/context/StoreContext";
 import { Button } from "@/components/ui/button";
-import { Share2, Instagram, MessageCircle, Twitter, Facebook } from "lucide-react";
-import { StackedAvatars } from "@/components/StackedAvatars";
+import { Camera, Image as ImageIcon, Download, Share2 } from "lucide-react";
+import MountainMascot from "@/components/MountainMascot";
 import html2canvas from "html2canvas";
 
 interface HikingShareCardProps {
@@ -19,53 +16,37 @@ interface HikingShareCardProps {
 
 const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: HikingShareCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const miniMapRef = useRef<HTMLDivElement>(null);
-  const { completedCount } = useStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(photoUrl || null);
   const [exporting, setExporting] = useState(false);
-
-  useEffect(() => {
-    if (!miniMapRef.current) return;
-    const map = L.map(miniMapRef.current, {
-      center: [mountain.lat, mountain.lng],
-      zoom: 13,
-      zoomControl: false,
-      dragging: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      attributionControl: false,
-    });
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
-
-    L.marker([mountain.lat, mountain.lng], {
-      icon: L.divIcon({
-        className: "custom-marker",
-        html: `<div style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:hsl(160 40% 40%);border:2.5px solid white;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.25);font-size:14px;">📍</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-      }),
-    }).addTo(map);
-
-    return () => { map.remove(); };
-  }, [mountain.lat, mountain.lng]);
 
   const completionDate = record?.completedAt || sharedCompletion?.completed_at;
   const formattedDate = completionDate
-    ? new Date(completionDate).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
+    ? new Date(completionDate).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
     : "";
-
-  const displayPhoto = photoUrl || (record?.photos && record.photos.length > 0 ? record.photos[0] : null);
-  const isShared = sharedCompletion?.participants && sharedCompletion.participants.length > 0;
-  const completionLabel = isShared ? "함께 완등" : "완등";
   const duration = record?.duration || "";
 
-  const totalMountains = 100;
-  const progressPercent = Math.round((completedCount / totalMountains) * 100);
+  const handlePhotoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setSelectedPhoto(reader.result as string);
+    reader.readAsDataURL(file);
+  }, []);
 
-  const participantProfiles = sharedCompletion?.participants?.map((p) => ({
-    nickname: p.profile?.nickname || null,
-    avatar_url: p.profile?.avatar_url || null,
-  })) || [];
+  const handleCameraCapture = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.setAttribute("capture", "environment");
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleGallerySelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.removeAttribute("capture");
+      fileInputRef.current.click();
+    }
+  };
 
   const handleExport = async () => {
     if (!cardRef.current || exporting) return;
@@ -75,21 +56,23 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
         scale: 2,
         useCORS: true,
         backgroundColor: null,
+        width: 1080 / 2,
+        height: 1920 / 2,
       });
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
       if (!blob) return;
 
-      if (navigator.share && navigator.canShare?.({ files: [new File([blob], "hiking-record.png", { type: "image/png" })] })) {
+      if (navigator.share && navigator.canShare?.({ files: [new File([blob], "wandeung-story.png", { type: "image/png" })] })) {
         await navigator.share({
-          title: `${mountain.nameKo} 완등 기록`,
-          text: `${mountain.nameKo}을(를) 완등했습니다! 🏔`,
-          files: [new File([blob], "hiking-record.png", { type: "image/png" })],
+          title: `${mountain.nameKo} 완등`,
+          text: `${mountain.nameKo} 정상에 올랐습니다! 🏔`,
+          files: [new File([blob], "wandeung-story.png", { type: "image/png" })],
         });
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${mountain.nameKo}-완등기록.png`;
+        a.download = `${mountain.nameKo}-story.png`;
         a.click();
         URL.revokeObjectURL(url);
       }
@@ -100,129 +83,133 @@ const HikingShareCard = ({ mountain, record, sharedCompletion, photoUrl }: Hikin
     }
   };
 
-  const handleSocialShare = (platform: string) => {
-    const text = encodeURIComponent(`${mountain.nameKo}을(를) 완등했습니다! 🏔 #등산 #완등 #${mountain.nameKo}`);
-    const url = encodeURIComponent(window.location.href);
-    const urls: Record<string, string> = {
-      twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`,
-    };
-    if (urls[platform]) window.open(urls[platform], "_blank", "width=600,height=400");
-    else handleExport();
-  };
-
   return (
-    <div className="space-y-4">
-      {/* The exportable card — 4:5 aspect ratio */}
+    <div className="space-y-4 pb-24">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handlePhotoSelect}
+      />
+
+      {/* Photo selection buttons */}
+      {!selectedPhoto && (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-xl" onClick={handleCameraCapture}>
+            <Camera className="h-4 w-4" /> 카메라
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-xl" onClick={handleGallerySelect}>
+            <ImageIcon className="h-4 w-4" /> 갤러리
+          </Button>
+        </div>
+      )}
+
+      {/* Story Card Preview (9:16) */}
       <div
         ref={cardRef}
-        className="w-full max-w-[400px] mx-auto rounded-3xl overflow-hidden shadow-lg"
-        style={{
-          aspectRatio: "4 / 5",
-          background: "linear-gradient(180deg, hsl(160 20% 97%), hsl(200 15% 94%))",
-        }}
+        className="relative w-full max-w-[360px] mx-auto rounded-2xl overflow-hidden shadow-xl"
+        style={{ aspectRatio: "9 / 16" }}
       >
-        <div className="h-full flex flex-col">
-          {/* Top: Photo section (fills ~45%) */}
-          <div className="relative flex-[5] min-h-0">
-            {displayPhoto ? (
-              <img src={displayPhoto} alt={mountain.nameKo} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[hsl(160_30%_85%)] to-[hsl(200_25%_80%)] flex items-center justify-center">
-                <span className="text-6xl">⛰</span>
-              </div>
-            )}
-            {/* Gradient overlay at bottom of photo */}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
-            {/* Mountain name overlaid on photo */}
-            <div className="absolute bottom-4 left-5 right-5">
-              <h2 className="text-2xl font-bold text-white drop-shadow-lg">{mountain.nameKo}</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/25 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-white">
-                  {isShared ? "👥" : "👤"} {completionLabel}
-                </span>
-                {mountain.is_baekdu && (
-                  <span className="rounded-full bg-white/25 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-white">
-                    백대명산
-                  </span>
-                )}
-              </div>
+        {/* Background */}
+        {selectedPhoto ? (
+          <img
+            src={selectedPhoto}
+            alt="summit"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--nature-600))] to-[hsl(var(--sky-600))]" />
+        )}
+
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+
+        {/* Content layer */}
+        <div className="relative h-full flex flex-col justify-between p-6">
+          {/* Top area */}
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+                {mountain.nameKo}
+              </h2>
+              <p className="text-sm text-white/80 font-medium drop-shadow">
+                {mountain.height}m
+              </p>
+              {duration && (
+                <p className="text-xs text-white/70 drop-shadow">
+                  🥾 {duration}
+                </p>
+              )}
+            </div>
+            {/* Mascot top-right */}
+            <div className="opacity-80">
+              <MountainMascot size={48} />
             </div>
           </div>
 
-          {/* Middle: Info section */}
-          <div className="flex-[4] flex flex-col justify-between p-5">
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-3">
-              <StatItem emoji="📅" label="날짜" value={formattedDate || "-"} />
-              <StatItem emoji="⛰" label="해발" value={`${mountain.height}m`} />
-              <StatItem emoji="🥾" label={duration ? "소요시간" : "난이도"} value={duration || mountain.difficulty} />
-            </div>
-
-            {/* Participants section */}
-            {isShared && participantProfiles.length > 0 && (
-              <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-black/[0.03] p-3">
-                <StackedAvatars profiles={participantProfiles} max={5} size="sm" />
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold text-muted-foreground">함께 완등한 친구</p>
-                  <p className="text-xs text-foreground truncate">
-                    {participantProfiles.map((p) => p.nickname || "?").join(", ")}
-                  </p>
-                </div>
-              </div>
+          {/* Bottom area */}
+          <div className="space-y-2">
+            {formattedDate && (
+              <p className="text-sm text-white/90 font-medium drop-shadow">
+                📅 {formattedDate}
+              </p>
             )}
-
-            {/* Mini map */}
-            <div className="mt-3 rounded-2xl overflow-hidden border border-border/50 shadow-sm">
-              <div ref={miniMapRef} className="h-[72px]" />
-            </div>
-
-            {/* Footer */}
-            <div className="mt-3 flex items-center justify-between">
-              <div>
-                <p className="text-[9px] text-muted-foreground">100대 명산 진행률</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className="h-1.5 w-16 rounded-full bg-secondary overflow-hidden">
-                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progressPercent}%` }} />
-                  </div>
-                  <span className="text-[10px] font-bold text-primary">{completedCount} / {totalMountains}</span>
-                </div>
-              </div>
-              <p className="text-[8px] text-muted-foreground/60">완등 앱에서 기록한 등산 🏔</p>
+            <p className="text-xs text-white/60 drop-shadow">
+              {mountain.region}
+            </p>
+            <div className="flex items-center gap-2 pt-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-white">
+                {sharedCompletion?.participants?.length ? "👥 함께 완등" : "⛰ 완등"}
+              </span>
+              {mountain.is_baekdu && (
+                <span className="rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-white">
+                  백대명산
+                </span>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Share buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-2 max-w-[400px] mx-auto">
-        <Button size="sm" variant="secondary" className="gap-1.5 text-xs rounded-xl" onClick={() => handleSocialShare("instagram")}>
-          <Instagram className="h-3.5 w-3.5" /> Instagram
-        </Button>
-        <Button size="sm" variant="secondary" className="gap-1.5 text-xs rounded-xl" onClick={() => handleSocialShare("kakao")}>
-          <MessageCircle className="h-3.5 w-3.5" /> KakaoTalk
-        </Button>
-        <Button size="sm" variant="secondary" className="gap-1.5 text-xs rounded-xl" onClick={() => handleSocialShare("twitter")}>
-          <Twitter className="h-3.5 w-3.5" /> X
-        </Button>
-        <Button size="sm" variant="secondary" className="gap-1.5 text-xs rounded-xl" onClick={() => handleSocialShare("facebook")}>
-          <Facebook className="h-3.5 w-3.5" /> Facebook
-        </Button>
-        <Button size="sm" className="gap-1.5 text-xs rounded-xl" onClick={handleExport} disabled={exporting}>
-          <Share2 className="h-3.5 w-3.5" /> {exporting ? "내보내는 중..." : "이미지 저장"}
-        </Button>
+      {/* Change photo button */}
+      {selectedPhoto && (
+        <div className="flex justify-center">
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground gap-1.5" onClick={handleGallerySelect}>
+            <ImageIcon className="h-3.5 w-3.5" /> 사진 변경
+          </Button>
+        </div>
+      )}
+
+      {/* Sticky save button area */}
+      <div className="fixed bottom-20 left-0 right-0 z-40 px-4 pb-[env(safe-area-inset-bottom)]">
+        <div className="max-w-[400px] mx-auto flex gap-2">
+          <Button
+            className="flex-1 gap-2 rounded-xl h-12 text-sm font-semibold shadow-lg"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            {exporting ? (
+              "저장 중..."
+            ) : (
+              <>
+                <Download className="h-4 w-4" /> 이미지 저장
+              </>
+            )}
+          </Button>
+          <Button
+            variant="secondary"
+            className="gap-2 rounded-xl h-12 px-5 shadow-lg"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
-
-function StatItem({ emoji, label, value }: { emoji: string; label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-black/[0.03] p-2.5 text-center">
-      <p className="text-[9px] text-muted-foreground">{emoji} {label}</p>
-      <p className="text-xs font-semibold text-foreground mt-0.5">{value}</p>
-    </div>
-  );
-}
 
 export default HikingShareCard;
