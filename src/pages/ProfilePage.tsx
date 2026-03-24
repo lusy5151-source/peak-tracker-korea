@@ -259,19 +259,23 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* Profile Summary - 4 stats */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Profile Summary - 5 stats */}
+      <div className="grid grid-cols-5 gap-2">
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">{journals.length}</p>
           <p className="text-[9px] text-muted-foreground">등산 일지</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-primary">{completedCount}</p>
-          <p className="text-[9px] text-muted-foreground">완등</p>
+          <p className="text-[9px] text-muted-foreground">완등 산</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
+          <p className="text-lg font-bold text-foreground">{totalCompletions}</p>
+          <p className="text-[9px] text-muted-foreground">총 완등</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">{sharedHikesCount}</p>
-          <p className="text-[9px] text-muted-foreground">함께한 등산</p>
+          <p className="text-[9px] text-muted-foreground">함께 등산</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
           <p className="text-lg font-bold text-foreground">{percentage}%</p>
