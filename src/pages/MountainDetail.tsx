@@ -83,6 +83,7 @@ const MountainDetail = () => {
 
   const completed = isCompleted(mountain.id);
   const record = getRecord(mountain.id);
+  const completionCount = getCompletionCount(mountain.id);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
