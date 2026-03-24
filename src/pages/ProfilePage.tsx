@@ -87,14 +87,32 @@ const ProfilePage = () => {
   }, [recentTaggedFriends]);
 
   const regionProgress = useMemo(() => {
+    const uniqueByRegion = new Map<string, Set<number>>();
+    records.forEach((r) => {
+      const m = mountains.find((mt) => mt.id === r.mountainId);
+      if (m) {
+        if (!uniqueByRegion.has(m.region)) uniqueByRegion.set(m.region, new Set());
+        uniqueByRegion.get(m.region)!.add(m.id);
+      }
+    });
     return regions.map((region) => {
       const total = mountains.filter((m) => m.region === region).length;
-      const completed = records.filter((r) => {
-        const m = mountains.find((mt) => mt.id === r.mountainId);
-        return m && m.region === region;
-      }).length;
+      const completed = uniqueByRegion.get(region)?.size || 0;
       return { region, total, completed };
     });
+  }, [records]);
+
+  // Mountains with repeat completions
+  const repeatMountains = useMemo(() => {
+    const countMap = new Map<number, number>();
+    records.forEach((r) => {
+      countMap.set(r.mountainId, (countMap.get(r.mountainId) || 0) + 1);
+    });
+    return Array.from(countMap.entries())
+      .filter(([, count]) => count > 1)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, count]) => ({ mountain: mountains.find((m) => m.id === id), count }))
+      .filter((x) => x.mountain);
   }, [records]);
 
   const recentBadge = useMemo(() => {
