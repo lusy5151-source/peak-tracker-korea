@@ -101,7 +101,7 @@ const MountainDetail = () => {
           </div>
           <div className="flex items-center gap-2">
             {completed && (
-              <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-bold text-primary">
+              <span className="rounded-full bg-primary px-2.5 py-1.5 text-xs font-bold text-foreground">
                 완등 {completionCount}회
               </span>
             )}

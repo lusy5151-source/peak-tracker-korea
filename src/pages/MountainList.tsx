@@ -163,8 +163,14 @@ const MountainList = () => {
             <button
               key={val}
               onClick={() => setShowCompleted(val)}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                showCompleted === val ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              className={`rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                showCompleted === val
+                  ? val === "done"
+                    ? "bg-primary text-foreground"
+                    : val === "todo"
+                    ? "bg-secondary text-info"
+                    : "bg-primary text-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }`}
             >
               {label}
@@ -223,7 +229,7 @@ function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof
     : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
 
   return (
-    <div className={`flex items-center gap-3 rounded-xl border bg-card p-3.5 shadow-sm transition-colors ${
+    <div className={`flex items-center gap-3 rounded-lg border bg-card p-3.5 shadow-sm transition-colors ${
       completed ? "border-primary/20 bg-primary/5" : "border-border"
     }`}>
       <button
@@ -231,7 +237,7 @@ function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof
         className="shrink-0"
         aria-label={completed ? "완등 취소" : "완등 표시"}
       >
-        {completed ? <CheckCircle2 className="h-5 w-5 text-foreground" /> : <Circle className="h-5 w-5 text-muted-foreground/40" />}
+        {completed ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Circle className="h-5 w-5 text-muted-foreground/40" />}
       </button>
       <Link to={`/mountains/${m.id}`} className="flex flex-1 items-center justify-between min-w-0">
         <div className="min-w-0 space-y-0.5">
