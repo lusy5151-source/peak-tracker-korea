@@ -163,8 +163,14 @@ const MountainList = () => {
             <button
               key={val}
               onClick={() => setShowCompleted(val)}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                showCompleted === val ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              className={`rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                showCompleted === val
+                  ? val === "done"
+                    ? "bg-primary text-foreground"
+                    : val === "todo"
+                    ? "bg-secondary text-info"
+                    : "bg-primary text-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }`}
             >
               {label}
