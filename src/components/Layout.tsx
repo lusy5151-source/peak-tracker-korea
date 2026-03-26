@@ -57,7 +57,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <main className="container mx-auto px-5 py-7">{children}</main>
 
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-card/80 backdrop-blur-xl">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card" style={{ borderTop: '0.5px solid hsl(210, 58%, 86%)' }}>
         <div className="container mx-auto flex items-center justify-around px-2 py-2">
           {navItems.map(({ to, label, icon: Icon }) => {
             const active = to === "/"
@@ -69,12 +69,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 to={to}
                 className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-2 transition-all ${
                   active
-                    ? "bg-nature-50 text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-primary"
+                    : "text-foreground/40"
                 }`}
               >
                 <Icon className={`h-5 w-5 transition-transform ${active ? "scale-110" : ""}`} />
-                <span className={`text-[10px] font-semibold ${active ? "text-primary" : ""}`}>{label}</span>
+                <span className={`text-[10px] font-semibold`}>{label}</span>
               </Link>
             );
           })}
