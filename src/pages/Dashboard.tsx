@@ -149,16 +149,9 @@ const Dashboard = () => {
           </div>
 
           <div className="relative z-10">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-foreground">완등</h1>
-                <p className="text-xs text-muted-foreground mt-0.5">오늘도 한 걸음 더 🏔️</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button className="rounded-full bg-card/70 p-2 text-muted-foreground backdrop-blur-sm"><Bell className="h-4 w-4" /></button>
-                <Link to="/profile" className="rounded-full bg-card/70 p-2 text-muted-foreground backdrop-blur-sm"><User className="h-4 w-4" /></Link>
-                <Link to="/social" className="rounded-full bg-card/70 p-2 text-muted-foreground backdrop-blur-sm"><Users className="h-4 w-4" /></Link>
-              </div>
+            <div className="mb-5">
+              <h1 className="text-xl font-bold text-foreground">완등</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">오늘도 한 걸음 더 🏔️</p>
             </div>
 
             {/* Upcoming schedule card */}
