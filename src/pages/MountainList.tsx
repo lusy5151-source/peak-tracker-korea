@@ -96,7 +96,9 @@ const MountainList = () => {
       </div>
 
       {/* Interactive Map */}
-      <MountainMapSection />
+      <Suspense fallback={<LoadingSpinner message="지도를 불러오는 중..." />}>
+        <MountainMapSection />
+      </Suspense>
 
       {/* Search */}
       <div className="relative">
