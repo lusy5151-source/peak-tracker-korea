@@ -180,11 +180,13 @@ const ProfilePage = () => {
           <button
             onClick={() => fileInputRef.current?.click()}
             className="absolute -bottom-1 -right-1 rounded-full bg-primary p-1.5 text-primary-foreground shadow-sm"
+            title="프로필 사진을 변경합니다. 다른 사용자에게 표시됩니다."
           >
             <Camera className="h-3 w-3" />
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </div>
+        <p className="text-[10px] text-muted-foreground mt-1">프로필 사진은 다른 사용자에게 표시됩니다</p>
 
         {editing ? (
           <div className="space-y-3 mt-2">

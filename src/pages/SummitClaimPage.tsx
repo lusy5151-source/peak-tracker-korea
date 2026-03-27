@@ -718,6 +718,7 @@ export default function SummitClaimPage() {
                 )}
               </div>
             ) : (
+              <p className="text-[10px] text-muted-foreground mb-1">정상 도달을 인증하기 위해 현장 사진이 필요합니다. 사진은 인증 용도로만 사용됩니다.</p>
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"
