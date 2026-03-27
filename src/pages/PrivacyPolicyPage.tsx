@@ -19,7 +19,7 @@ const PrivacyPolicyPage = () => {
       <div className="space-y-6">
         {/* Effective date */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-xs text-muted-foreground">시행일: 2025년 1월 1일</p>
+          <p className="text-xs text-muted-foreground">시행일: 2026년 3월 27일</p>
           <p className="mt-2 text-sm text-foreground leading-relaxed">
             완등(이하 "서비스")은 이용자의 개인정보를 소중히 여기며, 관련 법령에 따라 개인정보를 안전하게 보호하고 있습니다.
           </p>
@@ -29,135 +29,153 @@ const PrivacyPolicyPage = () => {
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
           <h2 className="text-sm font-bold text-foreground">1. 수집하는 개인정보</h2>
           <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
-            <p className="font-medium text-foreground">필수 수집 항목</p>
+            <p className="font-medium text-foreground">1-1. 필수 수집 항목</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>계정 정보: 이메일 주소, 비밀번호 (암호화 저장)</li>
               <li>프로필 정보: 닉네임, 프로필 사진, 자기소개, 지역</li>
             </ul>
-            <p className="font-medium text-foreground mt-3">선택 수집 항목</p>
+            <p className="font-medium text-foreground mt-3">1-2. 선택 수집 항목</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>위치 정보: GPS 좌표 (정상 인증 시 사용, 선택 사항)</li>
+              <li>위치 정보: GPS 좌표 (정상 인증 시 사용)</li>
               <li>사진: 등산 일지 및 정상 인증용 사진</li>
               <li>등산 기록: 등산 일지, 완등 기록, 코스 정보</li>
-              <li>소셜 정보: 친구 목록, 산악회 활동 내역</li>
+              <li>소셜 정보: 친구 목록, 활동 내역</li>
             </ul>
           </div>
         </section>
 
-        {/* 1-2. Camera & Photo access */}
+        {/* 2. Camera & Photo access */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">1-2. 카메라 및 사진첩 접근</h2>
+          <h2 className="text-sm font-bold text-foreground">2. 카메라 및 사진첩 접근</h2>
           <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
             <p className="font-medium text-foreground">접근 목적</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong className="text-foreground">정상 인증</strong>: 정상 도달을 증명하기 위해 현장 사진을 촬영하거나 앨범에서 선택합니다. 사진은 AI 기반 검증 및 인증 기록 저장에 사용됩니다.</li>
-              <li><strong className="text-foreground">등산 일지</strong>: 등산 기록에 사진을 첨부하여 기록을 보관하고, 설정한 공개 범위에 따라 다른 이용자와 공유할 수 있습니다.</li>
-              <li><strong className="text-foreground">프로필 사진</strong>: 다른 이용자에게 표시되는 프로필 이미지를 설정합니다.</li>
-              <li><strong className="text-foreground">산악회 활동</strong>: 산악회 채팅에서 이미지를 공유하거나, 산악회 로고를 설정합니다.</li>
-              <li><strong className="text-foreground">장비 관리</strong>: 등산 장비 사진을 첨부하여 개인 장비 목록을 관리합니다.</li>
+              <li>정상 인증: 정상 도달 확인을 위한 사진 촬영 또는 업로드</li>
+              <li>등산 일지: 기록 보관 및 공유</li>
+              <li>프로필 사진 설정</li>
+              <li>커뮤니티 및 활동 이미지 공유</li>
             </ul>
-            <p className="font-medium text-foreground mt-3">수집 범위 및 원칙</p>
+            <p className="font-medium text-foreground mt-3">수집 원칙</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>카메라 및 사진첩 접근은 이용자가 직접 버튼을 눌러 요청할 때에만 실행됩니다.</li>
-              <li>백그라운드에서 카메라나 사진첩에 자동으로 접근하지 않습니다.</li>
-              <li>촬영하거나 선택한 사진만 서버에 업로드되며, 기기 내 다른 사진에는 접근하지 않습니다.</li>
-              <li>업로드된 사진은 해당 기능의 목적(인증, 기록, 프로필)으로만 사용되며, 광고 등 다른 목적으로 활용되지 않습니다.</li>
-              <li>이용자는 언제든지 업로드한 사진을 삭제할 수 있습니다.</li>
+              <li>사용자가 직접 요청할 때만 접근</li>
+              <li>백그라운드 접근 없음</li>
+              <li>선택한 사진만 업로드</li>
+              <li>광고 등 다른 목적으로 사용하지 않음</li>
+              <li>언제든 삭제 가능</li>
             </ul>
           </div>
         </section>
 
-        {/* 1-3. Location data */}
+        {/* 3. Location data */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">1-3. 위치 정보 수집</h2>
+          <h2 className="text-sm font-bold text-foreground">3. 위치 정보 수집</h2>
           <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
             <p className="font-medium text-foreground">수집 목적</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong className="text-foreground">정상 인증</strong>: 정상 근처(500m 이내)에 실제로 위치하는지 확인하여 부정 인증을 방지합니다.</li>
-              <li><strong className="text-foreground">지도 내 위치 표시</strong>: 산 지도에서 이용자의 현재 위치를 표시하여 탐색을 돕습니다.</li>
+              <li>정상 인증 (반경 500m 내 위치 확인)</li>
+              <li>지도 내 위치 표시</li>
             </ul>
             <p className="font-medium text-foreground mt-3">수집 방식</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>위치 정보는 이용자가 직접 "현재 위치 가져오기" 또는 "내 위치" 버튼을 누를 때에만 1회성으로 수집됩니다.</li>
-              <li>지속적인 위치 추적(watchPosition)은 사용하지 않습니다.</li>
-              <li>앱이 백그라운드에 있을 때는 위치 정보를 수집하지 않습니다.</li>
-              <li>서비스 워커나 백그라운드 프로세스를 통한 위치 수집은 일체 없습니다.</li>
+              <li>버튼 클릭 시 1회성 수집</li>
+              <li>지속 추적 없음</li>
+              <li>백그라운드 수집 없음</li>
             </ul>
-            <p className="font-medium text-foreground mt-3">저장 및 활용 범위</p>
+            <p className="font-medium text-foreground mt-3">활용 범위</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>정상 인증 시 수집된 GPS 좌표(위도, 경도)는 인증 기록과 함께 저장됩니다.</li>
-              <li>지도 내 위치 표시 기능에서 수집된 위치 정보는 서버에 저장되지 않으며, 화면 표시 용도로만 사용됩니다.</li>
-              <li>수집된 위치 정보는 위 목적 외에 광고, 마케팅 등 다른 용도로 활용되지 않습니다.</li>
+              <li>인증 기록에만 저장</li>
+              <li>지도 기능에서는 저장하지 않음</li>
+              <li>마케팅 용도로 사용하지 않음</li>
             </ul>
             <p className="font-medium text-foreground mt-3">동의 및 철회</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>위치 정보 수집은 선택 사항이며, 브라우저의 위치 권한 요청에 동의해야 수집됩니다.</li>
-              <li>브라우저 또는 기기 설정에서 위치 권한을 해제하면 언제든지 수집을 중단할 수 있습니다.</li>
-              <li>위치 정보 제공을 거부해도 정상 인증 외 서비스 이용에는 제한이 없습니다.</li>
+              <li>위치 정보는 선택 사항</li>
+              <li>언제든 권한 해제 가능</li>
+              <li>거부해도 서비스 이용 가능</li>
             </ul>
+            <p className="mt-3 text-sm text-muted-foreground">
+              위치정보는 관련 법령에 따라 보호되며, 이용자의 동의 없이 제3자에게 제공되지 않습니다.
+            </p>
           </div>
         </section>
 
+        {/* 4. Purpose */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">2. 개인정보의 이용 목적</h2>
+          <h2 className="text-sm font-bold text-foreground">4. 개인정보 이용 목적</h2>
           <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted-foreground leading-relaxed">
             <li>서비스 제공 및 계정 관리</li>
-            <li>등산 기록 저장 및 통계 제공</li>
-            <li>정상 인증 및 GPS 기반 위치 확인</li>
-            <li>등산 일지 공유 및 소셜 기능 제공</li>
-            <li>업적 시스템 및 리더보드 운영</li>
-            <li>등산 계획 관리 및 알림 발송</li>
-            <li>서비스 개선 및 사용자 경험 향상</li>
+            <li>등산 기록 및 통계 제공</li>
+            <li>정상 인증 기능 제공</li>
+            <li>소셜 및 커뮤니티 기능 제공</li>
+            <li>업적 및 리더보드 운영</li>
+            <li>서비스 개선</li>
           </ul>
         </section>
 
-        {/* 3. How data is stored */}
+        {/* 5. Data processing delegation */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">3. 개인정보의 보관 및 보호</h2>
+          <h2 className="text-sm font-bold text-foreground">5. 개인정보 처리 위탁</h2>
+          <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+            <p>서비스는 원활한 운영을 위해 외부 서비스를 이용할 수 있습니다.</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>데이터 저장 및 인증: Supabase (또는 Firebase)</li>
+              <li>이미지 저장: 클라우드 스토리지</li>
+            </ul>
+            <p className="mt-2">이 과정에서 일부 개인정보가 해당 서비스에 저장될 수 있습니다.</p>
+          </div>
+        </section>
+
+        {/* 6. How data is stored */}
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
+          <h2 className="text-sm font-bold text-foreground">6. 개인정보 보관 및 보호</h2>
           <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
             <ul className="list-disc pl-5 space-y-1.5">
-              <li>모든 데이터는 암호화된 클라우드 서버에 안전하게 저장됩니다.</li>
-              <li>비밀번호는 단방향 암호화(해싱)되어 저장되며, 원본을 복원할 수 없습니다.</li>
-              <li>SSL/TLS 암호화를 통해 데이터 전송 시 보안을 유지합니다.</li>
-              <li>접근 권한은 최소한의 범위로 제한됩니다.</li>
-              <li>회원 탈퇴 시 개인정보는 관련 법령에 따라 일정 기간 보관 후 파기됩니다.</li>
+              <li>모든 데이터는 안전한 서버에 암호화되어 저장됩니다.</li>
+              <li>비밀번호는 단방향 암호화(해싱) 처리됩니다.</li>
+              <li>SSL/TLS를 통해 데이터 전송을 보호합니다.</li>
+              <li>접근 권한은 최소한으로 제한됩니다.</li>
+            </ul>
+            <p className="font-medium text-foreground mt-3">보관 기간</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>회원 탈퇴 시 개인정보는 즉시 삭제됩니다.</li>
+              <li>단, 법령에 따라 일정 기간 보관이 필요한 경우 해당 기간 동안 보관됩니다.</li>
             </ul>
           </div>
         </section>
 
-        {/* 4. User rights */}
+        {/* 7. User rights */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">4. 이용자의 권리</h2>
+          <h2 className="text-sm font-bold text-foreground">7. 이용자의 권리</h2>
           <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
-            <p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다:</p>
+            <p>이용자는 언제든지 다음 권리를 행사할 수 있습니다.</p>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li><strong className="text-foreground">열람권</strong>: 자신의 개인정보를 확인할 수 있습니다.</li>
-              <li><strong className="text-foreground">수정권</strong>: 프로필 정보를 수정할 수 있습니다.</li>
-              <li><strong className="text-foreground">삭제권</strong>: 등산 일지, 사진 등 개인 데이터를 삭제할 수 있습니다.</li>
-              <li><strong className="text-foreground">동의 철회권</strong>: 위치 정보 등 선택 수집 항목에 대한 동의를 철회할 수 있습니다.</li>
-              <li><strong className="text-foreground">회원 탈퇴권</strong>: 언제든지 서비스 이용을 중단하고 계정을 삭제할 수 있습니다.</li>
+              <li><strong className="text-foreground">열람권</strong>: 개인정보 확인</li>
+              <li><strong className="text-foreground">수정권</strong>: 정보 수정</li>
+              <li><strong className="text-foreground">삭제권</strong>: 데이터 삭제</li>
+              <li><strong className="text-foreground">동의 철회권</strong>: 선택 정보 수집 중단</li>
+              <li><strong className="text-foreground">회원 탈퇴</strong></li>
             </ul>
           </div>
         </section>
 
-        {/* 5. Third party */}
+        {/* 8. Third party */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">5. 개인정보의 제3자 제공</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            서비스는 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다.
-            다만, 법령에 의한 요청이 있는 경우에는 관련 법률에 따라 제공될 수 있습니다.
-          </p>
+          <h2 className="text-sm font-bold text-foreground">8. 개인정보 제3자 제공</h2>
+          <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
+            <p>서비스는 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다.</p>
+            <p>단, 법령에 따른 요청이 있는 경우 예외적으로 제공될 수 있습니다.</p>
+          </div>
         </section>
 
-        {/* 6. Contact */}
+        {/* 9. Contact */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
-          <h2 className="text-sm font-bold text-foreground">6. 문의처</h2>
+          <h2 className="text-sm font-bold text-foreground">9. 문의</h2>
           <div className="text-sm text-muted-foreground leading-relaxed space-y-1">
-            <p>개인정보 관련 문의사항이 있으시면 아래로 연락해주세요.</p>
+            <p>개인정보 관련 문의는 아래 이메일로 연락주시기 바랍니다.</p>
             <p className="mt-2">
               📧 이메일:{" "}
-              <a href="mailto:privacy@wandeung.app" className="text-primary hover:underline">
-                privacy@wandeung.app
+              <a href="mailto:lusy5151@gmail.com" className="text-primary hover:underline">
+                lusy5151@gmail.com
               </a>
             </p>
           </div>
