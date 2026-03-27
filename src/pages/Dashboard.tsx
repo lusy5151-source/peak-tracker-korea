@@ -351,7 +351,7 @@ const Dashboard = () => {
                 <p className="mt-2 text-sm font-bold text-foreground">{completedCount}<span className="text-xs font-normal text-muted-foreground"> / {userGoal}</span></p>
                 <p className="text-[10px] text-muted-foreground">백대명산 {baekduCompleted}/{baekduCount}</p>
               </div>
-            </div>
+            </Link>
 
             {/* 정상 점령 챌린지 Progress */}
             <div className="rounded-3xl bg-card p-5 shadow-sm border border-border">
