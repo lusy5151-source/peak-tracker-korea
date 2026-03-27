@@ -265,6 +265,6 @@ const MountainCard = React.memo(function MountainCard({ m, isCompleted: complete
       </Link>
     </div>
   );
-}
+});
 
 export default MountainList;
