@@ -15,8 +15,9 @@ import { JournalCard, JournalGridCard } from "@/components/JournalCard";
 import { Link } from "react-router-dom";
 import {
   User, Trophy, Mountain, ChevronRight, Star, Camera, MapPin,
-  Settings, LogOut, Shield, Edit3, BookOpen, Users, Heart,
+  Settings, LogOut, Shield, Edit3, BookOpen, Users, Heart, Globe, Lock, Eye,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
