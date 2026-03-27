@@ -44,6 +44,7 @@ const ProfilePage = () => {
   const { fetchMyJournals } = useHikingJournals();
   const { friends } = useFriends();
   const { toast } = useToast();
+  const { settings: privacySettings, updateSettings: updatePrivacy, isPrivateAccount } = usePrivacySettings();
 
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState("");
