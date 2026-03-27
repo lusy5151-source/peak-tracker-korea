@@ -37,26 +37,13 @@ const difficultyOptions = [
   { value: "어려움", label: "어려움", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
 ];
 
-function resizeImage(file: File, maxSize = 800): Promise<string> {
+async function resizeImage(file: File): Promise<string> {
+  const { compressImageToDataUrl } = await import("@/lib/imageUpload");
+  const result = await compressImageToDataUrl(file, "general");
+  if (result) return result;
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let w = img.width;
-        let h = img.height;
-        if (w > maxSize || h > maxSize) {
-          if (w > h) { h = (h / w) * maxSize; w = maxSize; }
-          else { w = (w / h) * maxSize; h = maxSize; }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.7));
-      };
-      img.src = e.target!.result as string;
-    };
+    reader.onload = (e) => resolve(e.target!.result as string);
     reader.readAsDataURL(file);
   });
 }

@@ -289,7 +289,7 @@ const GroupDetailPage = () => {
             </Avatar>
             {isLeader && (
               <>
-                <input type="file" accept="image/*" ref={logoFileRef} onChange={handleLogoUpload} className="hidden" />
+                <input type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" ref={logoFileRef} onChange={handleLogoUpload} className="hidden" />
                 <button
                   onClick={() => logoFileRef.current?.click()}
                   className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
