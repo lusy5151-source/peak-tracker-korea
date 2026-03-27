@@ -143,10 +143,6 @@ const Dashboard = () => {
             </svg>
           </div>
 
-          {/* Mascot in hero */}
-          <div className="pointer-events-none absolute right-4 top-4 opacity-20">
-            <MountainMascot size={80} />
-          </div>
 
           <div className="relative z-10">
             <div className="mb-5">
