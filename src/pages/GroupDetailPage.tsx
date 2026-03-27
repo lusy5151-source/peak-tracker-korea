@@ -232,9 +232,11 @@ const GroupDetailPage = () => {
     const file = e.target.files?.[0];
     if (!file || !id) return;
     setUploadingLogo(true);
-    const ext = file.name.split(".").pop();
-    const path = `${id}/logo.${ext}`;
-    const { error: uploadErr } = await supabase.storage.from("club-logos").upload(path, file, { upsert: true });
+    const { compressImage } = await import("@/lib/imageUpload");
+    const compressed = await compressImage(file, "profile");
+    if (!compressed) { setUploadingLogo(false); return; }
+    const path = `${id}/logo.jpg`;
+    const { error: uploadErr } = await supabase.storage.from("club-logos").upload(path, compressed, { upsert: true, contentType: "image/jpeg" });
     if (uploadErr) {
       toast({ title: "로고 업로드에 실패했습니다", variant: "destructive" });
       setUploadingLogo(false);

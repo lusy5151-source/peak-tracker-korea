@@ -162,9 +162,11 @@ export default function ClubChat({ clubId, onUnreadCount }: Props) {
 
     let uploadedUrl: string | null = null;
     if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
-      const path = `${clubId}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("club-logos").upload(path, imageFile);
+      const { compressImage } = await import("@/lib/imageUpload");
+      const compressed = await compressImage(imageFile, "general");
+      if (!compressed) { setSending(false); return; }
+      const path = `${clubId}/${Date.now()}.jpg`;
+      const { error } = await supabase.storage.from("club-logos").upload(path, compressed, { contentType: "image/jpeg" });
       if (!error) {
         const { data: urlData } = supabase.storage.from("club-logos").getPublicUrl(path);
         uploadedUrl = urlData.publicUrl;

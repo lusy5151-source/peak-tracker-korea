@@ -169,9 +169,11 @@ export function useMagazine() {
   }, [user]);
 
   const uploadImage = useCallback(async (file: File, folder: string = "covers") => {
-    const ext = file.name.split(".").pop();
-    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from("magazine-images").upload(path, file);
+    const { compressImage } = await import("@/lib/imageUpload");
+    const compressed = await compressImage(file, "general");
+    if (!compressed) throw new Error("이미지 압축에 실패했습니다");
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+    const { error } = await supabase.storage.from("magazine-images").upload(path, compressed, { contentType: "image/jpeg" });
     if (error) throw error;
     const { data: urlData } = supabase.storage.from("magazine-images").getPublicUrl(path);
     return urlData.publicUrl;
