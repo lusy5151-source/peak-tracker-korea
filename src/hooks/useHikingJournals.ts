@@ -342,11 +342,13 @@ export function useHikingJournals() {
 
   const uploadPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { compressImage } = await import("@/lib/imageUpload");
+    const compressed = await compressImage(file, "general");
+    if (!compressed) return null;
+    const path = `${user.id}/${Date.now()}.jpg`;
     const { error } = await supabase.storage
       .from("journal-photos")
-      .upload(path, file, { upsert: true });
+      .upload(path, compressed, { upsert: true, contentType: "image/jpeg" });
     if (error) return null;
     const { data: { publicUrl } } = supabase.storage
       .from("journal-photos")

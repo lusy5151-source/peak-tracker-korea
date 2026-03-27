@@ -232,9 +232,11 @@ const GroupDetailPage = () => {
     const file = e.target.files?.[0];
     if (!file || !id) return;
     setUploadingLogo(true);
-    const ext = file.name.split(".").pop();
-    const path = `${id}/logo.${ext}`;
-    const { error: uploadErr } = await supabase.storage.from("club-logos").upload(path, file, { upsert: true });
+    const { compressImage } = await import("@/lib/imageUpload");
+    const compressed = await compressImage(file, "profile");
+    if (!compressed) { setUploadingLogo(false); return; }
+    const path = `${id}/logo.jpg`;
+    const { error: uploadErr } = await supabase.storage.from("club-logos").upload(path, compressed, { upsert: true, contentType: "image/jpeg" });
     if (uploadErr) {
       toast({ title: "로고 업로드에 실패했습니다", variant: "destructive" });
       setUploadingLogo(false);
@@ -287,7 +289,7 @@ const GroupDetailPage = () => {
             </Avatar>
             {isLeader && (
               <>
-                <input type="file" accept="image/*" ref={logoFileRef} onChange={handleLogoUpload} className="hidden" />
+                <input type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" ref={logoFileRef} onChange={handleLogoUpload} className="hidden" />
                 <button
                   onClick={() => logoFileRef.current?.click()}
                   className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"

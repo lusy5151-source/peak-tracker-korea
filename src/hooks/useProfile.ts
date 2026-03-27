@@ -50,12 +50,15 @@ export function useProfile() {
   const uploadAvatar = async (file: File) => {
     if (!user) return;
 
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
+    const { compressImage, IMAGE_ACCEPT } = await import("@/lib/imageUpload");
+    const compressed = await compressImage(file, "profile");
+    if (!compressed) return;
+
+    const path = `${user.id}/avatar.jpg`;
 
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, file, { upsert: true });
+      .upload(path, compressed, { upsert: true, contentType: "image/jpeg" });
 
     if (uploadError) return { error: uploadError };
 

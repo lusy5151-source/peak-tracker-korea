@@ -138,19 +138,16 @@ export default function SummitClaimPage() {
     setGpsStatus("skipped");
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const { compressImageToDataUrl } = await import("@/lib/imageUpload");
+      const dataUrl = await compressImageToDataUrl(file, "summit");
+      if (!dataUrl) return;
       setPhotoFile(file);
       setAiVerification({ status: "idle", confidence: 0, reason: "", elements: [] });
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const dataUrl = ev.target?.result as string;
-        setPhotoPreview(dataUrl);
-        // Auto-trigger AI verification
-        verifyPhotoWithAI(dataUrl);
-      };
-      reader.readAsDataURL(file);
+      setPhotoPreview(dataUrl);
+      verifyPhotoWithAI(dataUrl);
     }
   };
 

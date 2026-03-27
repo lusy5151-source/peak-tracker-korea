@@ -184,7 +184,7 @@ const ProfilePage = () => {
           >
             <Camera className="h-3 w-3" />
           </button>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+          <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={handleAvatarUpload} />
         </div>
         <p className="text-[10px] text-muted-foreground mt-1">프로필 사진은 다른 사용자에게 표시됩니다</p>
 
