@@ -202,43 +202,46 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
 
         {/* Like & Comment row */}
         <div className="flex items-center gap-4 pt-1 border-t border-border/50">
-          <button
-            onClick={handleLike}
-            className={cn(
-              "flex items-center gap-1.5 text-xs transition-colors",
-              liked ? "text-red-500" : "text-muted-foreground hover:text-red-400"
-            )}
-          >
-            <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-          </button>
-          {likeCount > 0 && (
+          <div className="flex items-center gap-1">
             <button
-              onClick={async () => {
-                const { data } = await supabase
-                  .from("journal_likes")
-                  .select("user_id")
-                  .eq("journal_id", journal.id);
-                if (data) {
-                  const userIds = data.map((d: any) => d.user_id);
-                  const { data: profiles } = await supabase
-                    .from("profiles")
-                    .select("user_id, nickname, avatar_url")
-                    .in("user_id", userIds);
-                  setLikers(profiles || []);
-                  setShowLikers(true);
-                }
-              }}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors -ml-2"
+              onClick={handleLike}
+              className={cn(
+                "flex items-center gap-1.5 text-xs transition-colors",
+                liked ? "text-red-500" : "text-muted-foreground hover:text-red-400"
+              )}
             >
-              {likeCount}
+              <Heart className={cn("h-4 w-4", liked && "fill-current")} />
+              <span>{likeCount}</span>
             </button>
-          )}
+            {likeCount > 0 && (
+              <button
+                onClick={async () => {
+                  const { data } = await supabase
+                    .from("journal_likes")
+                    .select("user_id")
+                    .eq("journal_id", journal.id);
+                  if (data) {
+                    const userIds = data.map((d: any) => d.user_id);
+                    const { data: profiles } = await supabase
+                      .from("profiles")
+                      .select("user_id, nickname, avatar_url")
+                      .in("user_id", userIds);
+                    setLikers(profiles || []);
+                    setShowLikers(true);
+                  }
+                }}
+                className="text-[10px] text-muted-foreground hover:text-foreground hover:underline transition-colors"
+              >
+                누가?
+              </button>
+            )}
+          </div>
           <button
             onClick={handleShowComments}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
-            {commentCount > 0 && <span>{commentCount}</span>}
+            <span>{commentCount}</span>
           </button>
           {!showAuthor && (
             <div className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground">
