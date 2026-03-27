@@ -5,7 +5,10 @@ import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, M
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import MountainMapSection from "@/components/MountainMapSection";
+import React, { lazy, Suspense } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
+
+const MountainMapSection = lazy(() => import("@/components/MountainMapSection"));
 
 type SortKey = "name" | "height" | "popularity";
 type ViewMode = "all" | "baekdu" | "region" | "oreum" | "full";
