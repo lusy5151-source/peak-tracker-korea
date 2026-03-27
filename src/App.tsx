@@ -8,36 +8,40 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Layout from "@/components/Layout";
 import SplashScreen from "@/components/SplashScreen";
-import Dashboard from "@/pages/Dashboard";
-import MountainList from "@/pages/MountainList";
-import MountainDetail from "@/pages/MountainDetail";
-import TrailDetailPage from "@/pages/TrailDetailPage";
-import MapView from "@/pages/MapView";
-import Records from "@/pages/Records";
-import GearPage from "@/pages/GearPage";
-import SocialPage from "@/pages/SocialPage";
-import AchievementsPage from "@/pages/AchievementsPage";
-import ProfilePage from "@/pages/ProfilePage";
-import AuthPage from "@/pages/AuthPage";
-import PlansPage from "@/pages/PlansPage";
-import CreatePlanPage from "@/pages/CreatePlanPage";
-import PlanDetailPage from "@/pages/PlanDetailPage";
-import FeedPage from "@/pages/FeedPage";
-import FriendProfilePage from "@/pages/FriendProfilePage";
-import ChallengePage from "@/pages/ChallengePage";
-import SharedCompletionPage from "@/pages/SharedCompletionPage";
-import GroupsPage from "@/pages/GroupsPage";
-import GroupDetailPage from "@/pages/GroupDetailPage";
-import KakaoCallback from "@/pages/KakaoCallback";
-import AdminAnnouncementsPage from "@/pages/AdminAnnouncementsPage";
-import LeaderboardPage from "@/pages/LeaderboardPage";
-import MagazinePage from "@/pages/MagazinePage";
-import AdminMagazinePage from "@/pages/AdminMagazinePage";
-import SummitClaimPage from "@/pages/SummitClaimPage";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import MagazinePopup from "@/components/MagazinePopup";
-import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import NotFound from "./pages/NotFound";
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
+
+// Eagerly loaded (main entry)
+import Dashboard from "@/pages/Dashboard";
+import AuthPage from "@/pages/AuthPage";
+
+// Lazy loaded pages
+const MountainList = lazy(() => import("@/pages/MountainList"));
+const MountainDetail = lazy(() => import("@/pages/MountainDetail"));
+const TrailDetailPage = lazy(() => import("@/pages/TrailDetailPage"));
+const MapView = lazy(() => import("@/pages/MapView"));
+const Records = lazy(() => import("@/pages/Records"));
+const GearPage = lazy(() => import("@/pages/GearPage"));
+const SocialPage = lazy(() => import("@/pages/SocialPage"));
+const AchievementsPage = lazy(() => import("@/pages/AchievementsPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const PlansPage = lazy(() => import("@/pages/PlansPage"));
+const CreatePlanPage = lazy(() => import("@/pages/CreatePlanPage"));
+const PlanDetailPage = lazy(() => import("@/pages/PlanDetailPage"));
+const FeedPage = lazy(() => import("@/pages/FeedPage"));
+const FriendProfilePage = lazy(() => import("@/pages/FriendProfilePage"));
+const ChallengePage = lazy(() => import("@/pages/ChallengePage"));
+const SharedCompletionPage = lazy(() => import("@/pages/SharedCompletionPage"));
+const GroupDetailPage = lazy(() => import("@/pages/GroupDetailPage"));
+const KakaoCallback = lazy(() => import("@/pages/KakaoCallback"));
+const AdminAnnouncementsPage = lazy(() => import("@/pages/AdminAnnouncementsPage"));
+const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage"));
+const MagazinePage = lazy(() => import("@/pages/MagazinePage"));
+const AdminMagazinePage = lazy(() => import("@/pages/AdminMagazinePage"));
+const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
+const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,10 +58,16 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <LoadingSpinner message="인증 확인 중..." />;
   if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
+
+const LazyPage = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<LoadingSpinner />}>
+    {children}
+  </Suspense>
+);
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
@@ -65,71 +75,32 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={user && !loading ? <Navigate to="/" replace /> : <AuthPage />} />
-      <Route path="/kakao/callback" element={<KakaoCallback />} />
+      <Route path="/kakao/callback" element={<LazyPage><KakaoCallback /></LazyPage>} />
       <Route path="/" element={<Dashboard />} />
-      <Route path="/mountains" element={<MountainList />} />
-      <Route path="/mountains/:id" element={<MountainDetail />} />
-      <Route path="/trails/:trailId" element={<TrailDetailPage />} />
-      <Route path="/map" element={<MapView />} />
-      <Route path="/records" element={<Records />} />
-      <Route path="/gear" element={<GearPage />} />
-      <Route path="/social" element={<SocialPage />} />
-      <Route
-        path="/plans"
-        element={<ProtectedRoute><PlansPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/plans/create"
-        element={<ProtectedRoute><CreatePlanPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/plans/:id"
-        element={<ProtectedRoute><PlanDetailPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/challenges"
-        element={<ProtectedRoute><ChallengePage /></ProtectedRoute>}
-      />
-      <Route path="/achievements" element={<AchievementsPage />} />
-      <Route
-        path="/feed"
-        element={<ProtectedRoute><FeedPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/shared-completions"
-        element={<ProtectedRoute><SharedCompletionPage /></ProtectedRoute>}
-      />
+      <Route path="/mountains" element={<LazyPage><MountainList /></LazyPage>} />
+      <Route path="/mountains/:id" element={<LazyPage><MountainDetail /></LazyPage>} />
+      <Route path="/trails/:trailId" element={<LazyPage><TrailDetailPage /></LazyPage>} />
+      <Route path="/map" element={<LazyPage><MapView /></LazyPage>} />
+      <Route path="/records" element={<LazyPage><Records /></LazyPage>} />
+      <Route path="/gear" element={<LazyPage><GearPage /></LazyPage>} />
+      <Route path="/social" element={<LazyPage><SocialPage /></LazyPage>} />
+      <Route path="/plans" element={<ProtectedRoute><LazyPage><PlansPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/plans/create" element={<ProtectedRoute><LazyPage><CreatePlanPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/plans/:id" element={<ProtectedRoute><LazyPage><PlanDetailPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/challenges" element={<ProtectedRoute><LazyPage><ChallengePage /></LazyPage></ProtectedRoute>} />
+      <Route path="/achievements" element={<LazyPage><AchievementsPage /></LazyPage>} />
+      <Route path="/feed" element={<ProtectedRoute><LazyPage><FeedPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/shared-completions" element={<ProtectedRoute><LazyPage><SharedCompletionPage /></LazyPage></ProtectedRoute>} />
       <Route path="/groups" element={<Navigate to="/social" replace />} />
-      <Route
-        path="/groups/:id"
-        element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/profile/:userId"
-        element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>}
-      />
-      <Route
-        path="/profile"
-        element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}
-      />
-      <Route
-        path="/admin/announcements"
-        element={<ProtectedRoute><AdminAnnouncementsPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/leaderboard"
-        element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>}
-      />
-      <Route path="/magazine" element={<MagazinePage />} />
-      <Route
-        path="/summit-claim"
-        element={<ProtectedRoute><SummitClaimPage /></ProtectedRoute>}
-      />
-      <Route
-        path="/admin/magazine"
-        element={<ProtectedRoute><AdminMagazinePage /></ProtectedRoute>}
-      />
-      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/groups/:id" element={<ProtectedRoute><LazyPage><GroupDetailPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/profile/:userId" element={<ProtectedRoute><LazyPage><FriendProfilePage /></LazyPage></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><LazyPage><ProfilePage /></LazyPage></ProtectedRoute>} />
+      <Route path="/admin/announcements" element={<ProtectedRoute><LazyPage><AdminAnnouncementsPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/leaderboard" element={<ProtectedRoute><LazyPage><LeaderboardPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/magazine" element={<LazyPage><MagazinePage /></LazyPage>} />
+      <Route path="/summit-claim" element={<ProtectedRoute><LazyPage><SummitClaimPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/admin/magazine" element={<ProtectedRoute><LazyPage><AdminMagazinePage /></LazyPage></ProtectedRoute>} />
+      <Route path="/privacy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
