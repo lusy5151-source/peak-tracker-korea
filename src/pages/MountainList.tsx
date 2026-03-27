@@ -227,7 +227,7 @@ const MountainList = () => {
   );
 };
 
-function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof mountains[0]; isCompleted: boolean; toggleComplete: (id: number) => void }) {
+const MountainCard = React.memo(function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof mountains[0]; isCompleted: boolean; toggleComplete: (id: number) => void }) {
   const diffColor =
     m.difficulty === "쉬움" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
     : m.difficulty === "보통" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
