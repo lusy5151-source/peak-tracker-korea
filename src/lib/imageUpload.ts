@@ -24,6 +24,27 @@ function isAllowedFile(file: File): boolean {
   return false;
 }
 
+function isHeicFile(file: File): boolean {
+  const ext = getFileExtension(file.name);
+  return ext === ".heic" || ext === ".heif" || file.type === "image/heic" || file.type === "image/heif";
+}
+
+/**
+ * Convert HEIC/HEIF to JPEG using heic2any
+ */
+async function convertHeicToJpeg(file: File): Promise<File> {
+  const heic2any = (await import("heic2any")).default;
+  const blob = await heic2any({
+    blob: file,
+    toType: "image/jpeg",
+    quality: 0.92,
+  });
+  const resultBlob = Array.isArray(blob) ? blob[0] : blob;
+  return new File([resultBlob], file.name.replace(/\.(heic|heif)$/i, ".jpg"), {
+    type: "image/jpeg",
+  });
+}
+
 /**
  * Validates and compresses an image file before upload.
  * Returns the compressed File, or null if validation fails.
@@ -52,10 +73,27 @@ export async function compressImage(
     return null;
   }
 
+  let processedFile = file;
+
+  // Convert HEIC/HEIF to JPEG first
+  if (isHeicFile(file)) {
+    try {
+      processedFile = await convertHeicToJpeg(file);
+    } catch (error) {
+      console.error("HEIC conversion failed:", error);
+      toast({
+        title: "HEIC 변환 실패",
+        description: "HEIC 파일을 변환할 수 없습니다. JPG 또는 PNG로 변환 후 업로드해주세요.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  }
+
   const options = PRESET_OPTIONS[preset];
 
   try {
-    const compressed = await imageCompression(file, {
+    const compressed = await imageCompression(processedFile, {
       maxWidthOrHeight: options.maxWidthOrHeight,
       initialQuality: options.quality,
       useWebWorker: true,
@@ -64,8 +102,7 @@ export async function compressImage(
     return compressed;
   } catch (error) {
     console.error("Image compression failed:", error);
-    // Fallback: return original file if compression fails
-    return file;
+    return processedFile;
   }
 }
 
