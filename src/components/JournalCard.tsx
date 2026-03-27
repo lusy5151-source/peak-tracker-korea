@@ -37,6 +37,13 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
   const [comments, setComments] = useState<JournalComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(journal.comment_count || 0);
+
+  // Sync counts when journal prop updates
+  useEffect(() => {
+    setLikeCount(journal.like_count || 0);
+    setCommentCount(journal.comment_count || 0);
+    setLiked(journal.is_liked || false);
+  }, [journal.id, journal.like_count, journal.comment_count, journal.is_liked]);
   const [expanded, setExpanded] = useState(false);
   const [taggedProfiles, setTaggedProfiles] = useState<Map<string, { nickname: string | null; avatar_url: string | null }>>(new Map());
   const [showLikers, setShowLikers] = useState(false);

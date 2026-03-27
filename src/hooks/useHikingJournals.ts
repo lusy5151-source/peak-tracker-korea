@@ -53,7 +53,35 @@ export function useHikingJournals() {
         .single(),
     ]);
     const profile = profileData ? { nickname: (profileData as any).nickname, avatar_url: (profileData as any).avatar_url } : undefined;
-    return (data as any[] || []).map((j) => ({ ...j, profile })) as HikingJournal[];
+
+    if (!data || data.length === 0) return [];
+
+    const journalIds = (data as any[]).map((j) => j.id);
+
+    const [{ data: likes }, { data: comments }] = await Promise.all([
+      supabase.from("journal_likes").select("journal_id, user_id").in("journal_id", journalIds),
+      supabase.from("journal_comments").select("journal_id").in("journal_id", journalIds),
+    ]);
+
+    const likeCounts = new Map<string, number>();
+    const userLikes = new Set<string>();
+    (likes || []).forEach((l: any) => {
+      likeCounts.set(l.journal_id, (likeCounts.get(l.journal_id) || 0) + 1);
+      if (l.user_id === user.id) userLikes.add(l.journal_id);
+    });
+
+    const commentCounts = new Map<string, number>();
+    (comments || []).forEach((c: any) => {
+      commentCounts.set(c.journal_id, (commentCounts.get(c.journal_id) || 0) + 1);
+    });
+
+    return (data as any[]).map((j) => ({
+      ...j,
+      profile,
+      like_count: likeCounts.get(j.id) || 0,
+      comment_count: commentCounts.get(j.id) || 0,
+      is_liked: userLikes.has(j.id),
+    })) as HikingJournal[];
   }, [user]);
 
   const fetchUserJournals = useCallback(async (userId: string): Promise<HikingJournal[]> => {
