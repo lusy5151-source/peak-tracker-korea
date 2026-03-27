@@ -210,8 +210,29 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
             )}
           >
             <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-            {likeCount > 0 && <span>{likeCount}</span>}
           </button>
+          {likeCount > 0 && (
+            <button
+              onClick={async () => {
+                const { data } = await supabase
+                  .from("journal_likes")
+                  .select("user_id")
+                  .eq("journal_id", journal.id);
+                if (data) {
+                  const userIds = data.map((d: any) => d.user_id);
+                  const { data: profiles } = await supabase
+                    .from("profiles")
+                    .select("user_id, nickname, avatar_url")
+                    .in("user_id", userIds);
+                  setLikers(profiles || []);
+                  setShowLikers(true);
+                }
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors -ml-2"
+            >
+              {likeCount}
+            </button>
+          )}
           <button
             onClick={handleShowComments}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -219,6 +240,34 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
             <MessageCircle className="h-4 w-4" />
             {commentCount > 0 && <span>{commentCount}</span>}
           </button>
+          {!showAuthor && (
+            <div className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              {format(new Date(journal.hiked_at), "yyyy.M.d", { locale: ko })}
+            </div>
+          )}
+        </div>
+
+        {/* Likers popup */}
+        {showLikers && (
+          <div className="rounded-xl bg-secondary/80 p-3 space-y-2 border border-border">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-foreground">좋아요 {likeCount}명</p>
+              <button onClick={() => setShowLikers(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            {likers.map((l) => (
+              <div key={l.user_id} className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={l.avatar_url || ""} />
+                  <AvatarFallback className="text-[8px]">{l.nickname?.[0] || "?"}</AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-foreground">{l.nickname || "사용자"}</span>
+              </div>
+            ))}
+          </div>
+        )}
           {!showAuthor && (
             <div className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground">
               <Calendar className="h-3 w-3" />
