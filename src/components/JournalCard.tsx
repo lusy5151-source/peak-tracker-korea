@@ -245,11 +245,6 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
               <Calendar className="h-3 w-3" />
               {format(new Date(journal.hiked_at), "yyyy.M.d", { locale: ko })}
             </div>
-          {!showAuthor && (
-            <div className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              {format(new Date(journal.hiked_at), "yyyy.M.d", { locale: ko })}
-            </div>
           )}
         </div>
 
