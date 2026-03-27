@@ -264,7 +264,8 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
 
           {/* Photos */}
           <div>
-            <label className="text-xs font-medium text-foreground mb-1.5 block">사진</label>
+            <label className="text-xs font-medium text-foreground mb-1 block">사진</label>
+            <p className="text-[10px] text-muted-foreground mb-1.5">등산 기록에 첨부할 사진을 선택합니다. 설정한 공개 범위에 따라 공유됩니다.</p>
             <div className="flex flex-wrap gap-2">
               {photos.map((url, i) => (
                 <div key={i} className="relative h-16 w-16 rounded-lg overflow-hidden border border-border">

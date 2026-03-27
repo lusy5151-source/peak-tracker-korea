@@ -358,6 +358,7 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
                 className="hidden"
                 onChange={handlePhotoChange}
               />
+              <p className="text-[10px] text-muted-foreground">정상 도달을 인증하기 위해 현장 사진이 필요합니다. 사진은 인증 용도로만 사용됩니다.</p>
               {photoPreview ? (
                 <div className="relative">
                   <img src={photoPreview} alt="Summit" className="w-full h-40 object-cover rounded-xl" />
