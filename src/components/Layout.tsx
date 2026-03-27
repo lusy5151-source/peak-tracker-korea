@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Users, Home, Trophy, User, LogIn, Flag, FileText } from "lucide-react";
+import { Mountain, BookOpen, Users, Home, Trophy, User, LogIn, Flag, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/NotificationCenter";
 import MountainMascot from "@/components/MountainMascot";
