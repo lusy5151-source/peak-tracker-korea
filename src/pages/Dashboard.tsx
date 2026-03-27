@@ -310,11 +310,11 @@ const Dashboard = () => {
 
           {/* ── Progress Rings Section ── */}
           <section className="grid grid-cols-2 gap-4">
-            {/* 100대 명산 완등 Progress */}
-            <div className="rounded-3xl bg-card p-5 shadow-sm border border-border">
+            {/* 100대 명산 완등 Progress - clickable */}
+            <Link to="/mountains" className="block rounded-3xl bg-card p-5 shadow-sm border border-border hover:border-primary/30 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-muted-foreground">100대 명산 진행률</p>
-                <button onClick={() => setShowGoalEdit(!showGoalEdit)} className="text-muted-foreground hover:text-primary">
+                <button onClick={(e) => { e.preventDefault(); setShowGoalEdit(!showGoalEdit); }} className="text-muted-foreground hover:text-primary">
                   <Settings2 className="h-3.5 w-3.5" />
                 </button>
               </div>
