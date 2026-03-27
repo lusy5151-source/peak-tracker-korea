@@ -411,15 +411,8 @@ const Dashboard = () => {
             </Link>
           </section>
 
-          {/* ── Add Hiking Record ── */}
-          <section className="grid grid-cols-2 gap-3">
-            <Link
-              to="/records"
-              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-coral bg-coral-light px-4 py-4 transition-colors hover:bg-coral/10"
-            >
-              <Plus className="h-5 w-5 text-coral" />
-              <span className="text-xs font-bold text-coral">등산 기록 추가</span>
-            </Link>
+          {/* ── Shared Completion Link ── */}
+          <section>
             <Link
               to="/shared-completions"
               className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-nature-50 px-4 py-4 transition-colors hover:bg-primary/10"
