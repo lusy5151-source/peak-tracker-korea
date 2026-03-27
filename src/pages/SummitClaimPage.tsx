@@ -718,25 +718,27 @@ export default function SummitClaimPage() {
                 )}
               </div>
             ) : (
-              <p className="text-[10px] text-muted-foreground mb-1">정상 도달을 인증하기 위해 현장 사진이 필요합니다. 사진은 인증 용도로만 사용됩니다.</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  className="rounded-xl h-28 flex-col gap-2 border-dashed"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Camera className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">카메라 촬영</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-xl h-28 flex-col gap-2 border-dashed"
-                  onClick={() => galleryInputRef.current?.click()}
-                >
-                  <ImagePlus className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">앨범에서 선택</span>
-                </Button>
-              </div>
+              <>
+                <p className="text-[10px] text-muted-foreground mb-1">정상 도달을 인증하기 위해 현장 사진이 필요합니다. 사진은 인증 용도로만 사용됩니다.</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    className="rounded-xl h-28 flex-col gap-2 border-dashed"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Camera className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">카메라 촬영</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl h-28 flex-col gap-2 border-dashed"
+                    onClick={() => galleryInputRef.current?.click()}
+                  >
+                    <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">앨범에서 선택</span>
+                  </Button>
+                </div>
+              </>
             )}
           </div>
 
