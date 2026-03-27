@@ -484,6 +484,106 @@ const ProfilePage = () => {
         </section>
       )}
 
+      {/* Privacy Settings */}
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Eye className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">계정 공개 설정</h2>
+        </div>
+
+        {/* Account type toggle */}
+        <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
+          <div className="flex items-center gap-2">
+            {isPrivateAccount ? (
+              <Lock className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <Globe className="h-4 w-4 text-primary" />
+            )}
+            <div>
+              <p className="text-xs font-medium text-foreground">
+                {isPrivateAccount ? "비공개 계정" : "공개 계정"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {isPrivateAccount
+                  ? "친구만 내 활동을 볼 수 있습니다"
+                  : "모든 사람이 내 활동을 볼 수 있습니다"}
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={isPrivateAccount}
+            onCheckedChange={async (checked) => {
+              await updatePrivacy({
+                profile_visibility: checked ? "private" : "public",
+                journal_visibility: checked ? "friends" : "public",
+              });
+              toast({
+                title: checked ? "비공개 계정으로 전환되었습니다 🔒" : "공개 계정으로 전환되었습니다 🌐",
+              });
+            }}
+          />
+        </div>
+
+        {/* Default journal visibility */}
+        <div>
+          <p className="text-xs font-medium text-foreground mb-2">기본 일지 공개 범위</p>
+          <div className="flex gap-2">
+            {[
+              { value: "public", label: "전체 공개", icon: Globe, disabled: isPrivateAccount },
+              { value: "friends", label: "친구만", icon: Users, disabled: false },
+              { value: "private", label: "나만 보기", icon: Lock, disabled: false },
+            ].map((opt) => {
+              const Icon = opt.icon;
+              const isSelected = privacySettings?.journal_visibility === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  disabled={opt.disabled}
+                  onClick={async () => {
+                    await updatePrivacy({ journal_visibility: opt.value as any });
+                    toast({ title: `기본 공개 범위가 '${opt.label}'로 변경되었습니다` });
+                  }}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-2.5 text-xs transition-colors",
+                    isSelected
+                      ? "border-primary bg-primary/10 text-primary font-medium"
+                      : "border-border text-muted-foreground hover:bg-secondary/50",
+                    opt.disabled && "opacity-40 cursor-not-allowed"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {isPrivateAccount && (
+            <p className="text-[10px] text-muted-foreground mt-1.5">
+              비공개 계정에서는 '전체 공개'를 사용할 수 없습니다
+            </p>
+          )}
+        </div>
+
+        {/* Friend requests toggle */}
+        <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
+          <div>
+            <p className="text-xs font-medium text-foreground">친구 요청 허용</p>
+            <p className="text-[10px] text-muted-foreground">
+              다른 사람이 친구 요청을 보낼 수 있습니다
+            </p>
+          </div>
+          <Switch
+            checked={privacySettings?.allow_friend_requests ?? true}
+            onCheckedChange={async (checked) => {
+              await updatePrivacy({ allow_friend_requests: checked });
+              toast({
+                title: checked ? "친구 요청이 허용되었습니다" : "친구 요청이 차단되었습니다",
+              });
+            }}
+          />
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="space-y-2">
         <Link
