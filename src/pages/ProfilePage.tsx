@@ -8,7 +8,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
 import { useFriends } from "@/hooks/useFriends";
 import { usePrivacySettings } from "@/hooks/usePrivacySettings";
-import { useFriends } from "@/hooks/useFriends";
 import { badges, BadgeCategory } from "@/data/badges";
 import { mountains, regions } from "@/data/mountains";
 import { JournalCard, JournalGridCard } from "@/components/JournalCard";
