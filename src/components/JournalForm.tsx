@@ -40,6 +40,7 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const { createJournal, updateJournal, uploadPhoto } = useHikingJournals();
   const { friends } = useFriends();
   const { toast } = useToast();
+  const { isPrivateAccount, defaultJournalVisibility } = usePrivacySettings();
 
   const [mountainId, setMountainId] = useState<number>(editJournal?.mountain_id || 0);
   const [hikedAt, setHikedAt] = useState(editJournal?.hiked_at || new Date().toISOString().split("T")[0]);
