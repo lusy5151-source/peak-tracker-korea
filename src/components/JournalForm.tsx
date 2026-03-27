@@ -51,7 +51,9 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const [difficulty, setDifficulty] = useState(editJournal?.difficulty || "");
   const [weather, setWeather] = useState(editJournal?.weather || "");
   const [notes, setNotes] = useState(editJournal?.notes || "");
-  const [visibility, setVisibility] = useState(editJournal?.visibility || "public");
+  const [visibility, setVisibility] = useState(
+    editJournal?.visibility || (isPrivateAccount ? (defaultJournalVisibility === "public" ? "friends" : defaultJournalVisibility) : defaultJournalVisibility)
+  );
   const [photos, setPhotos] = useState<string[]>(editJournal?.photos || []);
   const [taggedFriends, setTaggedFriends] = useState<string[]>(editJournal?.tagged_friends || []);
   const [saving, setSaving] = useState(false);
