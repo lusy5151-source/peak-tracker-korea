@@ -24,7 +24,7 @@ import {
   Sun, Cloud, CloudRain, CloudSnow, CloudSun,
   Target, BookOpen, Heart, Search,
   MessageCircle, Newspaper, Clock, Settings2,
-  Bell, User, Users, Flag, Crown, Flame,
+  Users, Flag, Crown, Flame,
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
@@ -143,22 +143,11 @@ const Dashboard = () => {
             </svg>
           </div>
 
-          {/* Mascot in hero */}
-          <div className="pointer-events-none absolute right-4 top-4 opacity-20">
-            <MountainMascot size={80} />
-          </div>
 
           <div className="relative z-10">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-foreground">완등</h1>
-                <p className="text-xs text-muted-foreground mt-0.5">오늘도 한 걸음 더 🏔️</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button className="rounded-full bg-card/70 p-2 text-muted-foreground backdrop-blur-sm"><Bell className="h-4 w-4" /></button>
-                <Link to="/profile" className="rounded-full bg-card/70 p-2 text-muted-foreground backdrop-blur-sm"><User className="h-4 w-4" /></Link>
-                <Link to="/social" className="rounded-full bg-card/70 p-2 text-muted-foreground backdrop-blur-sm"><Users className="h-4 w-4" /></Link>
-              </div>
+            <div className="mb-5">
+              <h1 className="text-xl font-bold text-foreground">완등</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">오늘도 한 걸음 더 🏔️</p>
             </div>
 
             {/* Upcoming schedule card */}
@@ -214,12 +203,18 @@ const Dashboard = () => {
             </Link>
           </section>
 
-          {/* ── Claim Summit CTA ── */}
-          <section>
+          {/* ── CTA Buttons (side by side) ── */}
+          <section className="grid grid-cols-2 gap-3">
             <Link to="/summit-claim">
-              <Button className="w-full h-14 rounded-2xl text-base font-bold gap-2.5 shadow-lg bg-primary hover:bg-primary/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
+              <Button className="w-full h-14 rounded-2xl text-sm font-bold gap-2 shadow-lg bg-primary hover:bg-primary/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
                 <Flag className="h-5 w-5" />
                 정상 인증하기
+              </Button>
+            </Link>
+            <Link to="/records">
+              <Button variant="outline" className="w-full h-14 rounded-2xl text-sm font-bold gap-2 shadow-lg border-2 border-coral text-coral hover:bg-coral/10 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
+                <Plus className="h-5 w-5" />
+                등산 기록 추가
               </Button>
             </Link>
           </section>
@@ -315,11 +310,11 @@ const Dashboard = () => {
 
           {/* ── Progress Rings Section ── */}
           <section className="grid grid-cols-2 gap-4">
-            {/* 100대 명산 완등 Progress */}
-            <div className="rounded-3xl bg-card p-5 shadow-sm border border-border">
+            {/* 100대 명산 완등 Progress - clickable */}
+            <Link to="/mountains" className="block rounded-3xl bg-card p-5 shadow-sm border border-border hover:border-primary/30 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-muted-foreground">100대 명산 진행률</p>
-                <button onClick={() => setShowGoalEdit(!showGoalEdit)} className="text-muted-foreground hover:text-primary">
+                <button onClick={(e) => { e.preventDefault(); setShowGoalEdit(!showGoalEdit); }} className="text-muted-foreground hover:text-primary">
                   <Settings2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -356,7 +351,7 @@ const Dashboard = () => {
                 <p className="mt-2 text-sm font-bold text-foreground">{completedCount}<span className="text-xs font-normal text-muted-foreground"> / {userGoal}</span></p>
                 <p className="text-[10px] text-muted-foreground">백대명산 {baekduCompleted}/{baekduCount}</p>
               </div>
-            </div>
+            </Link>
 
             {/* 정상 점령 챌린지 Progress */}
             <div className="rounded-3xl bg-card p-5 shadow-sm border border-border">
@@ -416,15 +411,8 @@ const Dashboard = () => {
             </Link>
           </section>
 
-          {/* ── Add Hiking Record ── */}
-          <section className="grid grid-cols-2 gap-3">
-            <Link
-              to="/records"
-              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-coral bg-coral-light px-4 py-4 transition-colors hover:bg-coral/10"
-            >
-              <Plus className="h-5 w-5 text-coral" />
-              <span className="text-xs font-bold text-coral">등산 기록 추가</span>
-            </Link>
+          {/* ── Shared Completion Link ── */}
+          <section>
             <Link
               to="/shared-completions"
               className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-nature-50 px-4 py-4 transition-colors hover:bg-primary/10"

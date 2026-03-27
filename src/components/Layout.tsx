@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Mountain, BookOpen, Users, Home, Trophy, User, LogIn, Flag, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/NotificationCenter";
+import MountainMascot from "@/components/MountainMascot";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
@@ -21,10 +22,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Top header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-card/70 backdrop-blur-xl">
         <div className="container mx-auto flex h-14 items-center justify-between px-5">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary shadow-sm">
-              <Mountain className="h-4 w-4 text-primary-foreground" />
-            </div>
+          <Link to="/" className="flex items-center gap-2">
+            <MountainMascot size={32} />
             <span className="text-base font-bold text-foreground tracking-tight">완등</span>
           </Link>
           <div className="flex items-center gap-1.5">
