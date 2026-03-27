@@ -449,7 +449,7 @@ const Dashboard = () => {
                     <div key={j.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
                       <div className="flex gap-3">
                         {j.photos && j.photos.length > 0 ? (
-                          <img src={j.photos[0]} alt="" className="h-16 w-16 rounded-xl object-cover shrink-0" />
+                          <img src={j.photos[0]} alt="" className="h-16 w-16 rounded-xl object-cover shrink-0" loading="lazy" />
                         ) : (
                           <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-nature-50 shrink-0">
                             <Mountain className="h-6 w-6 text-primary" />
