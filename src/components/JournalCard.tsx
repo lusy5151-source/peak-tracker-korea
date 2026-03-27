@@ -234,12 +234,13 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
                       .select("user_id, nickname, avatar_url")
                       .in("user_id", userIds);
                     setLikers(profiles || []);
-                    setShowLikers(true);
+                    setShowLikers((v) => !v);
                   }
                 }}
-                className="text-[10px] text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="좋아요 누른 사람 보기"
               >
-                누가?
+                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", showLikers && "rotate-180")} />
               </button>
             )}
           </div>
