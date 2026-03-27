@@ -67,7 +67,37 @@ const PrivacyPolicyPage = () => {
           </div>
         </section>
 
-        {/* 2. How data is used */}
+        {/* 1-3. Location data */}
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
+          <h2 className="text-sm font-bold text-foreground">1-3. 위치 정보 수집</h2>
+          <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+            <p className="font-medium text-foreground">수집 목적</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong className="text-foreground">정상 인증</strong>: 정상 근처(500m 이내)에 실제로 위치하는지 확인하여 부정 인증을 방지합니다.</li>
+              <li><strong className="text-foreground">지도 내 위치 표시</strong>: 산 지도에서 이용자의 현재 위치를 표시하여 탐색을 돕습니다.</li>
+            </ul>
+            <p className="font-medium text-foreground mt-3">수집 방식</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>위치 정보는 이용자가 직접 "현재 위치 가져오기" 또는 "내 위치" 버튼을 누를 때에만 1회성으로 수집됩니다.</li>
+              <li>지속적인 위치 추적(watchPosition)은 사용하지 않습니다.</li>
+              <li>앱이 백그라운드에 있을 때는 위치 정보를 수집하지 않습니다.</li>
+              <li>서비스 워커나 백그라운드 프로세스를 통한 위치 수집은 일체 없습니다.</li>
+            </ul>
+            <p className="font-medium text-foreground mt-3">저장 및 활용 범위</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>정상 인증 시 수집된 GPS 좌표(위도, 경도)는 인증 기록과 함께 저장됩니다.</li>
+              <li>지도 내 위치 표시 기능에서 수집된 위치 정보는 서버에 저장되지 않으며, 화면 표시 용도로만 사용됩니다.</li>
+              <li>수집된 위치 정보는 위 목적 외에 광고, 마케팅 등 다른 용도로 활용되지 않습니다.</li>
+            </ul>
+            <p className="font-medium text-foreground mt-3">동의 및 철회</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>위치 정보 수집은 선택 사항이며, 브라우저의 위치 권한 요청에 동의해야 수집됩니다.</li>
+              <li>브라우저 또는 기기 설정에서 위치 권한을 해제하면 언제든지 수집을 중단할 수 있습니다.</li>
+              <li>위치 정보 제공을 거부해도 정상 인증 외 서비스 이용에는 제한이 없습니다.</li>
+            </ul>
+          </div>
+        </section>
+
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
           <h2 className="text-sm font-bold text-foreground">2. 개인정보의 이용 목적</h2>
           <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted-foreground leading-relaxed">
