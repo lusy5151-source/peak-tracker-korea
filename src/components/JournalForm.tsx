@@ -3,6 +3,7 @@ import { mountains } from "@/data/mountains";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
 import { useFriends } from "@/hooks/useFriends";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePrivacySettings } from "@/hooks/usePrivacySettings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,6 +40,7 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const { createJournal, updateJournal, uploadPhoto } = useHikingJournals();
   const { friends } = useFriends();
   const { toast } = useToast();
+  const { isPrivateAccount, defaultJournalVisibility } = usePrivacySettings();
 
   const [mountainId, setMountainId] = useState<number>(editJournal?.mountain_id || 0);
   const [hikedAt, setHikedAt] = useState(editJournal?.hiked_at || new Date().toISOString().split("T")[0]);
@@ -49,7 +51,9 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const [difficulty, setDifficulty] = useState(editJournal?.difficulty || "");
   const [weather, setWeather] = useState(editJournal?.weather || "");
   const [notes, setNotes] = useState(editJournal?.notes || "");
-  const [visibility, setVisibility] = useState(editJournal?.visibility || "public");
+  const [visibility, setVisibility] = useState(
+    editJournal?.visibility || (isPrivateAccount ? (defaultJournalVisibility === "public" ? "friends" : defaultJournalVisibility) : defaultJournalVisibility)
+  );
   const [photos, setPhotos] = useState<string[]>(editJournal?.photos || []);
   const [taggedFriends, setTaggedFriends] = useState<string[]>(editJournal?.tagged_friends || []);
   const [saving, setSaving] = useState(false);
