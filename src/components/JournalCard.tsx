@@ -39,6 +39,8 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
   const [commentCount, setCommentCount] = useState(journal.comment_count || 0);
   const [expanded, setExpanded] = useState(false);
   const [taggedProfiles, setTaggedProfiles] = useState<Map<string, { nickname: string | null; avatar_url: string | null }>>(new Map());
+  const [showLikers, setShowLikers] = useState(false);
+  const [likers, setLikers] = useState<{ user_id: string; nickname: string | null; avatar_url: string | null }[]>([]);
 
   const vis = visibilityConfig[journal.visibility] || visibilityConfig.public;
   const VisIcon = vis.icon;
