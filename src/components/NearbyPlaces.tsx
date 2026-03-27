@@ -57,20 +57,15 @@ export function NearbyPlaces({ lat, lng, mountainName }: NearbyPlacesProps) {
     );
   }
 
+  const allPlaces = [...restaurants, ...cafes].sort((a, b) => a.distance_m - b.distance_m);
+
   return (
     <div className="space-y-6">
       <PlaceSection
-        title="🍜 주변 맛집"
-        subtitle={`${mountainName} 근처 추천 식당`}
+        title="🍜 주변 맛집 & 카페"
+        subtitle={`${mountainName} 근처 추천 식당 · 카페`}
         icon={UtensilsCrossed}
-        places={restaurants}
-        loading={loading}
-      />
-      <PlaceSection
-        title="☕ 주변 카페"
-        subtitle={`${mountainName} 근처 추천 카페`}
-        icon={Coffee}
-        places={cafes}
+        places={allPlaces}
         loading={loading}
       />
     </div>

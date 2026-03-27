@@ -24,7 +24,7 @@ import {
   Sun, Cloud, CloudRain, CloudSnow, CloudSun,
   Target, BookOpen, Heart, Search,
   MessageCircle, Newspaper, Clock, Settings2,
-  Bell, User, Users, Flag, Crown, Flame,
+  Users, Flag, Crown, Flame,
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
