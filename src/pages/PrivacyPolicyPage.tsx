@@ -44,6 +44,29 @@ const PrivacyPolicyPage = () => {
           </div>
         </section>
 
+        {/* 1-2. Camera & Photo access */}
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
+          <h2 className="text-sm font-bold text-foreground">1-2. 카메라 및 사진첩 접근</h2>
+          <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+            <p className="font-medium text-foreground">접근 목적</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong className="text-foreground">정상 인증</strong>: 정상 도달을 증명하기 위해 현장 사진을 촬영하거나 앨범에서 선택합니다. 사진은 AI 기반 검증 및 인증 기록 저장에 사용됩니다.</li>
+              <li><strong className="text-foreground">등산 일지</strong>: 등산 기록에 사진을 첨부하여 기록을 보관하고, 설정한 공개 범위에 따라 다른 이용자와 공유할 수 있습니다.</li>
+              <li><strong className="text-foreground">프로필 사진</strong>: 다른 이용자에게 표시되는 프로필 이미지를 설정합니다.</li>
+              <li><strong className="text-foreground">산악회 활동</strong>: 산악회 채팅에서 이미지를 공유하거나, 산악회 로고를 설정합니다.</li>
+              <li><strong className="text-foreground">장비 관리</strong>: 등산 장비 사진을 첨부하여 개인 장비 목록을 관리합니다.</li>
+            </ul>
+            <p className="font-medium text-foreground mt-3">수집 범위 및 원칙</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>카메라 및 사진첩 접근은 이용자가 직접 버튼을 눌러 요청할 때에만 실행됩니다.</li>
+              <li>백그라운드에서 카메라나 사진첩에 자동으로 접근하지 않습니다.</li>
+              <li>촬영하거나 선택한 사진만 서버에 업로드되며, 기기 내 다른 사진에는 접근하지 않습니다.</li>
+              <li>업로드된 사진은 해당 기능의 목적(인증, 기록, 프로필)으로만 사용되며, 광고 등 다른 목적으로 활용되지 않습니다.</li>
+              <li>이용자는 언제든지 업로드한 사진을 삭제할 수 있습니다.</li>
+            </ul>
+          </div>
+        </section>
+
         {/* 2. How data is used */}
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
           <h2 className="text-sm font-bold text-foreground">2. 개인정보의 이용 목적</h2>
