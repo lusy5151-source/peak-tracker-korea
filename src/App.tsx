@@ -81,7 +81,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/auth" element={user && !loading ? <Navigate to="/" replace /> : <AuthPage />} />
       <Route path="/kakao/callback" element={<LazyPage><KakaoCallback /></LazyPage>} />
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<LazyPage fallback={<DashboardSkeleton />}><Dashboard /></LazyPage>} />
       <Route path="/mountains" element={<LazyPage><MountainList /></LazyPage>} />
       <Route path="/mountains/:id" element={<LazyPage><MountainDetail /></LazyPage>} />
       <Route path="/trails/:trailId" element={<LazyPage><TrailDetailPage /></LazyPage>} />
