@@ -108,6 +108,7 @@ export function useHikingJournals() {
       query = query.eq("visibility", "public");
     }
 
+    const { data: journals } = await query;
     if (!journals || journals.length === 0) return [];
 
     // Get profiles
