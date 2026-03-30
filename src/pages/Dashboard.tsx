@@ -434,9 +434,9 @@ const Dashboard = () => {
             </section>
           )}
 
-          {/* ── Recent Hiking Journals ── */}
+          {/* ── Community Feed ── */}
           <section>
-            <SectionHeader title="최근 등산 기록" linkTo="/feed" linkLabel="전체 보기" />
+            <SectionHeader title="커뮤니티" linkTo="/feed" linkLabel="전체 보기" />
             {!user ? (
               <EmptyState icon={BookOpen} message="로그인하면 등산 기록을 볼 수 있습니다" linkTo="/auth" linkLabel="로그인" />
             ) : recentJournals.length === 0 ? (
