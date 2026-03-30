@@ -511,6 +511,13 @@ const Dashboard = () => {
               <AnnouncementSection />
             </div>
           </section>
+
+          {/* ── Privacy Policy ── */}
+          <div className="mt-8 text-center">
+            <Link to="/privacy" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+              개인정보처리방침
+            </Link>
+          </div>
         </div>
       </div>
     </ErrorBoundary>
