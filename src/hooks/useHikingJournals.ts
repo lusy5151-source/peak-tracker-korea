@@ -94,15 +94,19 @@ export function useHikingJournals() {
     return (data as any[] || []) as HikingJournal[];
   }, [user]);
 
-  const fetchFeed = useCallback(async (): Promise<HikingJournal[]> => {
+  const fetchFeed = useCallback(async (publicOnly: boolean = false): Promise<HikingJournal[]> => {
     if (!user) return [];
-    // Fetch public + friends-only journals (RLS handles visibility)
-    const { data: journals } = await supabase
+    // Fetch journals (RLS handles visibility)
+    let query = supabase
       .from("hiking_journals")
       .select("*")
       .neq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50);
+    
+    if (publicOnly) {
+      query = query.eq("visibility", "public");
+    }
 
     if (!journals || journals.length === 0) return [];
 
