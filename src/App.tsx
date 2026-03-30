@@ -12,10 +12,14 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import MagazinePopup from "@/components/MagazinePopup";
 import NotFound from "./pages/NotFound";
 import { useState, useCallback, lazy, Suspense } from "react";
+import PageSkeleton from "@/components/PageSkeleton";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 
-// Eagerly loaded (main entry)
-import Dashboard from "@/pages/Dashboard";
+// Eagerly loaded (auth only)
 import AuthPage from "@/pages/AuthPage";
+
+// Lazy loaded pages
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
 
 // Lazy loaded pages
 const MountainList = lazy(() => import("@/pages/MountainList"));
@@ -48,7 +52,8 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000,
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     },
     mutations: {
       retry: 0,
@@ -63,8 +68,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const LazyPage = ({ children }: { children: React.ReactNode }) => (
-  <Suspense fallback={<LoadingSpinner />}>
+const LazyPage = ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => (
+  <Suspense fallback={fallback || <PageSkeleton />}>
     {children}
   </Suspense>
 );
@@ -76,7 +81,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/auth" element={user && !loading ? <Navigate to="/" replace /> : <AuthPage />} />
       <Route path="/kakao/callback" element={<LazyPage><KakaoCallback /></LazyPage>} />
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<LazyPage fallback={<DashboardSkeleton />}><Dashboard /></LazyPage>} />
       <Route path="/mountains" element={<LazyPage><MountainList /></LazyPage>} />
       <Route path="/mountains/:id" element={<LazyPage><MountainDetail /></LazyPage>} />
       <Route path="/trails/:trailId" element={<LazyPage><TrailDetailPage /></LazyPage>} />
