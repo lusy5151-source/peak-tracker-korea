@@ -471,9 +471,9 @@ const Dashboard = () => {
           <section>
             <SectionHeader title="커뮤니티" linkTo="/feed" linkLabel="전체 보기" />
             {!user ? (
-              <EmptyState icon={BookOpen} message="로그인하면 등산 기록을 볼 수 있습니다" linkTo="/auth" linkLabel="로그인" />
+              <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
             ) : recentJournals.length === 0 ? (
-              <EmptyState icon={BookOpen} message="아직 등산 기록이 없습니다" linkTo="/records" linkLabel="기록 남기기" />
+              <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
             ) : (
               <div className="space-y-3">
                 {recentJournals.map((j) => {
