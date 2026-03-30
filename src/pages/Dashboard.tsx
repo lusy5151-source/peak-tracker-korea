@@ -577,6 +577,37 @@ function EmptyState({ icon: Icon, message, linkTo, linkLabel }: { icon: any; mes
   );
 }
 
+function CommunityFeedPreview({ journals }: { journals: DemoJournal[] }) {
+  return (
+    <div className="space-y-3">
+      {journals.map((j) => {
+        const mt = mountains.find((m) => m.id === j.mountain_id);
+        return (
+          <div key={j.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+            <div className="flex gap-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-nature-50 shrink-0">
+                <Mountain className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm text-foreground truncate">{mt?.nameKo || "산"}</p>
+                  <span className="text-[10px] text-muted-foreground">by {j.profile.nickname}</span>
+                </div>
+                {j.notes && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{j.notes}</p>}
+                <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-0.5"><Heart className="h-3 w-3 text-coral" /> {j.like_count}</span>
+                  <span className="flex items-center gap-0.5"><MessageCircle className="h-3 w-3" /> {j.comment_count}</span>
+                  <span>{new Date(j.hiked_at).toLocaleDateString("ko-KR")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function getTimeAgo(dateStr: string): string {
   const now = Date.now();
   const diff = now - new Date(dateStr).getTime();
