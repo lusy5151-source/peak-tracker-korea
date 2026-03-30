@@ -12,10 +12,14 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import MagazinePopup from "@/components/MagazinePopup";
 import NotFound from "./pages/NotFound";
 import { useState, useCallback, lazy, Suspense } from "react";
+import PageSkeleton from "@/components/PageSkeleton";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 
-// Eagerly loaded (main entry)
-import Dashboard from "@/pages/Dashboard";
+// Eagerly loaded (auth only)
 import AuthPage from "@/pages/AuthPage";
+
+// Lazy loaded pages
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
 
 // Lazy loaded pages
 const MountainList = lazy(() => import("@/pages/MountainList"));
