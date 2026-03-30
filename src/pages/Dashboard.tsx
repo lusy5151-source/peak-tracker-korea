@@ -1,5 +1,6 @@
 import { useStore } from "@/context/StoreContext";
 import { mountains, baekduMountains } from "@/data/mountains";
+import { demoJournals, type DemoJournal } from "@/data/demoFeed";
 import { badges } from "@/data/badges";
 import { useWeather } from "@/hooks/useWeather";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,7 +29,8 @@ import {
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const conditionIcons: Record<string, any> = {
   "맑음": Sun, "구름": CloudSun, "흐림": Cloud, "비": CloudRain, "눈": CloudSnow,
@@ -96,10 +98,41 @@ const Dashboard = () => {
     return Math.round(totalPct / activeChallenges.length);
   }, [activeChallenges]);
 
+  const fetchPublicFeed = useCallback(async () => {
+    const { data: journals } = await supabase
+      .from("hiking_journals")
+      .select("*")
+      .eq("visibility", "public")
+      .order("created_at", { ascending: false })
+      .limit(3);
+    if (!journals || journals.length === 0) return [];
+    const userIds = [...new Set((journals as any[]).map((j) => j.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, nickname, avatar_url")
+      .in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    const journalIds = (journals as any[]).map((j) => j.id);
+    const [{ data: likes }, { data: comments }] = await Promise.all([
+      supabase.from("journal_likes").select("journal_id, user_id").in("journal_id", journalIds),
+      supabase.from("journal_comments").select("journal_id").in("journal_id", journalIds),
+    ]);
+    const likeCounts = new Map<string, number>();
+    (likes || []).forEach((l: any) => likeCounts.set(l.journal_id, (likeCounts.get(l.journal_id) || 0) + 1));
+    const commentCounts = new Map<string, number>();
+    (comments || []).forEach((c: any) => commentCounts.set(c.journal_id, (commentCounts.get(c.journal_id) || 0) + 1));
+    return (journals as any[]).map((j) => ({
+      ...j,
+      profile: profileMap.get(j.user_id) || null,
+      like_count: likeCounts.get(j.id) || 0,
+      comment_count: commentCounts.get(j.id) || 0,
+    })) as HikingJournal[];
+  }, [user]);
+
   useEffect(() => {
     if (user) {
-      fetchFeed()
-        .then((journals) => setRecentJournals(journals.slice(0, 3)))
+      fetchPublicFeed()
+        .then((journals) => setRecentJournals(journals))
         .catch(() => setRecentJournals([]));
       fetchSharedCompletions()
         .then((scs) => setRecentSharedCompletions(scs.slice(0, 3)))
@@ -434,13 +467,13 @@ const Dashboard = () => {
             </section>
           )}
 
-          {/* ── Recent Hiking Journals ── */}
+          {/* ── Community Feed ── */}
           <section>
-            <SectionHeader title="최근 등산 기록" linkTo="/feed" linkLabel="전체 보기" />
+            <SectionHeader title="커뮤니티" linkTo="/feed" linkLabel="전체 보기" />
             {!user ? (
-              <EmptyState icon={BookOpen} message="로그인하면 등산 기록을 볼 수 있습니다" linkTo="/auth" linkLabel="로그인" />
+              <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
             ) : recentJournals.length === 0 ? (
-              <EmptyState icon={BookOpen} message="아직 등산 기록이 없습니다" linkTo="/records" linkLabel="기록 남기기" />
+              <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
             ) : (
               <div className="space-y-3">
                 {recentJournals.map((j) => {
@@ -540,6 +573,37 @@ function EmptyState({ icon: Icon, message, linkTo, linkLabel }: { icon: any; mes
       <Icon className="mx-auto h-8 w-8 text-muted-foreground/30" />
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
       <Link to={linkTo} className="mt-1 inline-block text-xs font-semibold text-primary hover:underline">{linkLabel}</Link>
+    </div>
+  );
+}
+
+function CommunityFeedPreview({ journals }: { journals: DemoJournal[] }) {
+  return (
+    <div className="space-y-3">
+      {journals.map((j) => {
+        const mt = mountains.find((m) => m.id === j.mountain_id);
+        return (
+          <div key={j.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+            <div className="flex gap-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-nature-50 shrink-0">
+                <Mountain className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm text-foreground truncate">{mt?.nameKo || "산"}</p>
+                  <span className="text-[10px] text-muted-foreground">by {j.profile.nickname}</span>
+                </div>
+                {j.notes && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{j.notes}</p>}
+                <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-0.5"><Heart className="h-3 w-3 text-coral" /> {j.like_count}</span>
+                  <span className="flex items-center gap-0.5"><MessageCircle className="h-3 w-3" /> {j.comment_count}</span>
+                  <span>{new Date(j.hiked_at).toLocaleDateString("ko-KR")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -344,6 +344,14 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
                 );
               })}
             </div>
+            {visibility === "public" && (
+              <div className="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 px-3 py-2">
+                <Globe className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                <p className="text-[11px] text-amber-700 dark:text-amber-300">
+                  이 게시물은 앱의 모든 사용자에게 공개됩니다. 커뮤니티 피드에도 표시됩니다.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Tag Friends */}
