@@ -96,10 +96,41 @@ const Dashboard = () => {
     return Math.round(totalPct / activeChallenges.length);
   }, [activeChallenges]);
 
+  const fetchPublicFeed = useCallback(async () => {
+    const { data: journals } = await supabase
+      .from("hiking_journals")
+      .select("*")
+      .eq("visibility", "public")
+      .order("created_at", { ascending: false })
+      .limit(3);
+    if (!journals || journals.length === 0) return [];
+    const userIds = [...new Set((journals as any[]).map((j) => j.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, nickname, avatar_url")
+      .in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    const journalIds = (journals as any[]).map((j) => j.id);
+    const [{ data: likes }, { data: comments }] = await Promise.all([
+      supabase.from("journal_likes").select("journal_id, user_id").in("journal_id", journalIds),
+      supabase.from("journal_comments").select("journal_id").in("journal_id", journalIds),
+    ]);
+    const likeCounts = new Map<string, number>();
+    (likes || []).forEach((l: any) => likeCounts.set(l.journal_id, (likeCounts.get(l.journal_id) || 0) + 1));
+    const commentCounts = new Map<string, number>();
+    (comments || []).forEach((c: any) => commentCounts.set(c.journal_id, (commentCounts.get(c.journal_id) || 0) + 1));
+    return (journals as any[]).map((j) => ({
+      ...j,
+      profile: profileMap.get(j.user_id) || null,
+      like_count: likeCounts.get(j.id) || 0,
+      comment_count: commentCounts.get(j.id) || 0,
+    })) as HikingJournal[];
+  }, [user]);
+
   useEffect(() => {
     if (user) {
-      fetchFeed()
-        .then((journals) => setRecentJournals(journals.slice(0, 3)))
+      fetchPublicFeed()
+        .then((journals) => setRecentJournals(journals))
         .catch(() => setRecentJournals([]));
       fetchSharedCompletions()
         .then((scs) => setRecentSharedCompletions(scs.slice(0, 3)))
