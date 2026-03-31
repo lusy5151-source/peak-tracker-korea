@@ -97,15 +97,7 @@ const SocialPage = () => {
   };
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <Users className="h-12 w-12 text-muted-foreground/30 mb-4" />
-        <p className="text-muted-foreground">로그인 후 이용할 수 있습니다.</p>
-        <Link to="/auth" className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          로그인하기
-        </Link>
-      </div>
-    );
+    return <DemoSocialView />;
   }
 
   return (
