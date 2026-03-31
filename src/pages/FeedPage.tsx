@@ -7,8 +7,9 @@ import { useSharedCompletions, type SharedCompletion } from "@/hooks/useSharedCo
 import { JournalCard } from "@/components/JournalCard";
 import { SharedCompletionCard } from "@/components/SharedCompletionCard";
 import { StackedAvatars } from "@/components/StackedAvatars";
+import { demoJournals, demoActivityFeed, type DemoJournal } from "@/data/demoFeed";
 import { mountains } from "@/data/mountains";
-import { Mountain, Compass, Users, Newspaper, ChevronRight } from "lucide-react";
+import { Mountain, Compass, Users, Newspaper, ChevronRight, Heart, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -23,6 +24,8 @@ const FeedPage = () => {
   const [sharedCompletions, setSharedCompletions] = useState<SharedCompletion[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+
+  const isDemo = !user;
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
@@ -40,14 +43,8 @@ const FeedPage = () => {
     });
   }, [user]);
 
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <Compass className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">로그인하면 친구들의 등산 일지를 볼 수 있습니다</p>
-        <Link to="/auth" className="text-sm text-primary hover:underline">로그인</Link>
-      </div>
-    );
+  if (isDemo) {
+    return <DemoFeedView />;
   }
 
   return (
@@ -69,7 +66,6 @@ const FeedPage = () => {
             <LoadingState />
           ) : (
             <>
-              {/* Shared completions highlight */}
               {sharedCompletions.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
@@ -80,8 +76,6 @@ const FeedPage = () => {
                   ))}
                 </div>
               )}
-
-              {/* Activity feed */}
               {activityItems.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold text-foreground">활동 피드</h3>
@@ -90,8 +84,6 @@ const FeedPage = () => {
                   ))}
                 </div>
               )}
-
-              {/* Journal feed */}
               {journals.length > 0 ? (
                 <div className="space-y-4">
                   {journals.map((j) => (
@@ -151,6 +143,68 @@ const FeedPage = () => {
     </div>
   );
 };
+
+/* ── Demo Feed View for non-logged-in users ── */
+function DemoFeedView() {
+  return (
+    <div className="space-y-5 pb-24 max-w-lg mx-auto">
+      <h1 className="text-xl font-bold text-foreground">피드</h1>
+
+      {/* Demo activity */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold text-foreground">활동 피드</h3>
+        {demoActivityFeed.slice(0, 4).map((item) => (
+          <div key={item.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 bg-primary/10">
+                <Mountain className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground">{item.message}</p>
+                <span className="text-[10px] text-muted-foreground mt-1 block">
+                  {new Date(item.created_at).toLocaleDateString("ko-KR")}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Demo journals */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-foreground">커뮤니티 기록</h3>
+        {demoJournals.slice(0, 3).map((j) => {
+          const mt = mountains.find((m) => m.id === j.mountain_id);
+          return (
+            <div key={j.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+              {j.photos.length > 0 && (
+                <img src={j.photos[0]} alt="" className="w-full h-44 rounded-xl object-cover mb-3" loading="lazy" />
+              )}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  {j.profile.nickname.charAt(0)}
+                </div>
+                <span className="text-xs font-medium text-foreground">{j.profile.nickname}</span>
+                <span className="text-[10px] text-muted-foreground">{new Date(j.hiked_at).toLocaleDateString("ko-KR")}</span>
+              </div>
+              <p className="font-semibold text-sm text-foreground">{mt?.nameKo || "산"}</p>
+              {j.notes && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{j.notes}</p>}
+              <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-0.5"><Heart className="h-3 w-3 text-coral" /> {j.like_count}</span>
+                <span className="flex items-center gap-0.5"><MessageCircle className="h-3 w-3" /> {j.comment_count}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Link to="/auth" className="block rounded-2xl bg-primary/10 p-5 text-center">
+        <p className="text-sm font-bold text-primary">로그인하고 피드에 참여하세요</p>
+        <p className="text-xs text-muted-foreground mt-1">친구들의 등산 기록을 확인하세요</p>
+      </Link>
+    </div>
+  );
+}
 
 function ActivityCard({ item }: { item: ActivityFeedItem }) {
   const mt = item.mountain_id ? mountains.find((m) => m.id === item.mountain_id) : null;

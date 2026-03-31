@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { mountains } from "@/data/mountains";
+import { demoJournals, type DemoJournal } from "@/data/demoFeed";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
 import { useAuth } from "@/contexts/AuthContext";
 import { JournalForm } from "@/components/JournalForm";
@@ -10,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Mountain, Plus, Pencil, Trash2, MoreVertical,
+  Mountain, Plus, Pencil, Trash2, MoreVertical, Heart, MessageCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -88,13 +89,7 @@ const Records = () => {
   };
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <Mountain className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">로그인이 필요합니다</p>
-        <Button asChild><Link to="/auth">로그인</Link></Button>
-      </div>
-    );
+    return <DemoRecordsView />;
   }
 
   // Combined feed: my journals + friends' journals, sorted by newest
@@ -280,6 +275,59 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
       <Button variant="outline" size="sm" className="mt-3 rounded-xl" onClick={onAdd}>
         기록 작성하기
       </Button>
+    </div>
+  );
+}
+
+function DemoRecordsView() {
+  return (
+    <div className="space-y-5 pb-24 max-w-lg mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">기록</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">등산 커뮤니티의 최근 기록</p>
+        </div>
+        <Link to="/auth">
+          <Button size="sm" className="rounded-xl gap-1.5">
+            <Plus className="h-4 w-4" /> 기록 작성
+          </Button>
+        </Link>
+      </div>
+
+      <div className="space-y-4">
+        {demoJournals.map((j) => {
+          const mt = mountains.find((m) => m.id === j.mountain_id);
+          return (
+            <div key={j.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+              {j.photos.length > 0 && (
+                <img src={j.photos[0]} alt="" className="w-full h-48 rounded-xl object-cover mb-3" loading="lazy" />
+              )}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm">
+                  {j.profile.nickname.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{j.profile.nickname}</p>
+                  <p className="text-[10px] text-muted-foreground">{new Date(j.hiked_at).toLocaleDateString("ko-KR")}</p>
+                </div>
+              </div>
+              <p className="font-bold text-foreground">{mt?.nameKo || "산"}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{j.course_name} · {j.duration} · {j.difficulty}</p>
+              {j.notes && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{j.notes}</p>}
+              <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5 text-coral" /> {j.like_count}</span>
+                <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" /> {j.comment_count}</span>
+                <span>{j.weather}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Link to="/auth" className="block rounded-2xl bg-primary/10 p-5 text-center">
+        <p className="text-sm font-bold text-primary">로그인하고 나만의 기록을 작성하세요</p>
+        <p className="text-xs text-muted-foreground mt-1">사진, 코스, 난이도 등을 기록할 수 있어요</p>
+      </Link>
     </div>
   );
 }

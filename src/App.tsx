@@ -94,14 +94,14 @@ const AppRoutes = () => {
       <Route path="/plans/:id" element={<ProtectedRoute><LazyPage><PlanDetailPage /></LazyPage></ProtectedRoute>} />
       <Route path="/challenges" element={<ProtectedRoute><LazyPage><ChallengePage /></LazyPage></ProtectedRoute>} />
       <Route path="/achievements" element={<LazyPage><AchievementsPage /></LazyPage>} />
-      <Route path="/feed" element={<ProtectedRoute><LazyPage><FeedPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/feed" element={<LazyPage><FeedPage /></LazyPage>} />
       <Route path="/shared-completions" element={<ProtectedRoute><LazyPage><SharedCompletionPage /></LazyPage></ProtectedRoute>} />
       <Route path="/groups" element={<Navigate to="/social" replace />} />
       <Route path="/groups/:id" element={<ProtectedRoute><LazyPage><GroupDetailPage /></LazyPage></ProtectedRoute>} />
       <Route path="/profile/:userId" element={<ProtectedRoute><LazyPage><FriendProfilePage /></LazyPage></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><LazyPage><ProfilePage /></LazyPage></ProtectedRoute>} />
       <Route path="/admin/announcements" element={<ProtectedRoute><LazyPage><AdminAnnouncementsPage /></LazyPage></ProtectedRoute>} />
-      <Route path="/leaderboard" element={<ProtectedRoute><LazyPage><LeaderboardPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/leaderboard" element={<LazyPage><LeaderboardPage /></LazyPage>} />
       <Route path="/magazine" element={<LazyPage><MagazinePage /></LazyPage>} />
       <Route path="/summit-claim" element={<ProtectedRoute><LazyPage><SummitClaimPage /></LazyPage></ProtectedRoute>} />
       <Route path="/admin/magazine" element={<ProtectedRoute><LazyPage><AdminMagazinePage /></LazyPage></ProtectedRoute>} />
