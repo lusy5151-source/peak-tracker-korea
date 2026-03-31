@@ -415,4 +415,60 @@ function ClubCard({ group, isMember, onJoin }: { group: HikingGroup; isMember: b
   );
 }
 
+function DemoSocialView() {
+  return (
+    <div className="mx-auto max-w-3xl space-y-5 pb-24">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">함께 걷기</h1>
+        <p className="mt-1 text-sm text-muted-foreground">등산 친구와 산악회를 만나보세요</p>
+      </div>
+
+      {/* Demo Friends */}
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">활발한 등산러</h2>
+        <div className="space-y-2.5">
+          {demoFriends.map((f) => (
+            <div key={f.nickname} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+                {f.nickname.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground">{f.nickname}</p>
+                <p className="text-xs text-muted-foreground truncate">{f.bio}</p>
+              </div>
+              <span className="text-xs text-muted-foreground">{f.completedCount}좌 완등</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Demo Clubs */}
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">인기 산악회</h2>
+        <div className="space-y-3">
+          {demoGroups.map((g) => (
+            <div key={g.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-foreground">{g.name}</h3>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{g.description}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{g.member_count}명</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Link to="/auth" className="block rounded-2xl bg-primary/10 p-5 text-center">
+        <p className="text-sm font-bold text-primary">로그인하고 친구를 추가하세요</p>
+        <p className="text-xs text-muted-foreground mt-1">함께 등산하면 더 즐거워요!</p>
+      </Link>
+    </div>
+  );
+}
+
 export default SocialPage;
