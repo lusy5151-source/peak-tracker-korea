@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { mountains } from "@/data/mountains";
+import { demoJournals, type DemoJournal } from "@/data/demoFeed";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
 import { useAuth } from "@/contexts/AuthContext";
 import { JournalForm } from "@/components/JournalForm";
@@ -10,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Mountain, Plus, Pencil, Trash2, MoreVertical,
+  Mountain, Plus, Pencil, Trash2, MoreVertical, Heart, MessageCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -88,13 +89,7 @@ const Records = () => {
   };
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <Mountain className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">로그인이 필요합니다</p>
-        <Button asChild><Link to="/auth">로그인</Link></Button>
-      </div>
-    );
+    return <DemoRecordsView />;
   }
 
   // Combined feed: my journals + friends' journals, sorted by newest
