@@ -1,4 +1,6 @@
 import { useLeaderboard } from "@/hooks/useSummits";
+import { useAuth } from "@/contexts/AuthContext";
+import { demoLeaderboard, demoGroups } from "@/data/demoFeed";
 import { mountains } from "@/data/mountains";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +9,14 @@ import { Crown, Flag, Users, Mountain, Loader2, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const LeaderboardPage = () => {
+  const { user } = useAuth();
   const { topClaimers, mountainLeaders, clubRankings, loading } = useLeaderboard();
 
-  if (loading) {
+  const isDemo = !user;
+
+  const displayClaimers = isDemo ? demoLeaderboard : topClaimers;
+
+  if (!isDemo && loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -44,10 +51,10 @@ const LeaderboardPage = () => {
 
         {/* Individual rankings */}
         <TabsContent value="individual" className="mt-4 space-y-2">
-          {topClaimers.length === 0 ? (
+          {displayClaimers.length === 0 ? (
             <EmptyState text="아직 정상 인증 기록이 없습니다" />
           ) : (
-            topClaimers.map((claimer, idx) => (
+            displayClaimers.map((claimer: any, idx: number) => (
               <div
                 key={claimer.user_id}
                 className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm"
@@ -72,8 +79,33 @@ const LeaderboardPage = () => {
 
         {/* Mountain leaders */}
         <TabsContent value="leaders" className="mt-4 space-y-2">
-          {mountainLeaders.length === 0 ? (
+          {!isDemo && mountainLeaders.length === 0 ? (
             <EmptyState text="아직 산 대장이 없습니다" />
+          ) : isDemo ? (
+            /* Demo mountain leaders from the leaderboard data */
+            demoLeaderboard.slice(0, 2).map((leader, idx) => {
+              const mtIds = [1, 6];
+              const mt = mountains.find((m) => m.id === mtIds[idx]);
+              return (
+                <div key={idx} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                    <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground">{mt?.nameKo || "산"} 대장</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <Avatar className="h-4 w-4">
+                        <AvatarFallback className="text-[7px]">{leader.nickname.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-muted-foreground">{leader.nickname}</span>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px] gap-0.5">
+                    {leader.count}회
+                  </Badge>
+                </div>
+              );
+            })
           ) : (
             mountainLeaders.map((leader) => {
               const mt = mountains.find((m) => m.id === leader.mountain_id);
@@ -107,7 +139,22 @@ const LeaderboardPage = () => {
 
         {/* Club rankings */}
         <TabsContent value="clubs" className="mt-4 space-y-2">
-          {clubRankings.length === 0 ? (
+          {isDemo ? (
+            demoGroups.map((club, idx) => (
+              <div key={club.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
+                <RankBadge rank={idx + 1} />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Users className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium text-foreground truncate block">{club.name}</span>
+                </div>
+                <Badge variant="secondary" className="text-xs gap-1">
+                  <Mountain className="h-3 w-3" /> {club.member_count}명
+                </Badge>
+              </div>
+            ))
+          ) : clubRankings.length === 0 ? (
             <EmptyState text="아직 산악회 기록이 없습니다" />
           ) : (
             clubRankings.map((club, idx) => (
@@ -133,6 +180,13 @@ const LeaderboardPage = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {isDemo && (
+        <Link to="/auth" className="block rounded-2xl bg-primary/10 p-5 text-center">
+          <p className="text-sm font-bold text-primary">로그인하고 순위에 참여하세요</p>
+          <p className="text-xs text-muted-foreground mt-1">정상을 정복하고 리더보드에 이름을 올리세요!</p>
+        </Link>
+      )}
     </div>
   );
 };
