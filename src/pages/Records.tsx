@@ -279,4 +279,57 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
   );
 }
 
+function DemoRecordsView() {
+  return (
+    <div className="space-y-5 pb-24 max-w-lg mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">기록</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">등산 커뮤니티의 최근 기록</p>
+        </div>
+        <Link to="/auth">
+          <Button size="sm" className="rounded-xl gap-1.5">
+            <Plus className="h-4 w-4" /> 기록 작성
+          </Button>
+        </Link>
+      </div>
+
+      <div className="space-y-4">
+        {demoJournals.map((j) => {
+          const mt = mountains.find((m) => m.id === j.mountain_id);
+          return (
+            <div key={j.id} className="rounded-2xl bg-card border border-border p-4 shadow-sm">
+              {j.photos.length > 0 && (
+                <img src={j.photos[0]} alt="" className="w-full h-48 rounded-xl object-cover mb-3" loading="lazy" />
+              )}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm">
+                  {j.profile.nickname.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{j.profile.nickname}</p>
+                  <p className="text-[10px] text-muted-foreground">{new Date(j.hiked_at).toLocaleDateString("ko-KR")}</p>
+                </div>
+              </div>
+              <p className="font-bold text-foreground">{mt?.nameKo || "산"}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{j.course_name} · {j.duration} · {j.difficulty}</p>
+              {j.notes && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{j.notes}</p>}
+              <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5 text-coral" /> {j.like_count}</span>
+                <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" /> {j.comment_count}</span>
+                <span>{j.weather}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Link to="/auth" className="block rounded-2xl bg-primary/10 p-5 text-center">
+        <p className="text-sm font-bold text-primary">로그인하고 나만의 기록을 작성하세요</p>
+        <p className="text-xs text-muted-foreground mt-1">사진, 코스, 난이도 등을 기록할 수 있어요</p>
+      </Link>
+    </div>
+  );
+}
+
 export default Records;
