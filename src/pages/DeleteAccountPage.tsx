@@ -168,10 +168,10 @@ const DeleteAccountPage = () => {
           <div className="rounded-lg bg-muted/50 px-4 py-3">
             <p className="text-xs text-muted-foreground mb-1">요청 이메일</p>
             <a
-              href="mailto:privacy@wandeung.com"
+              href="mailto:lusy5151@gmail.com"
               className="text-sm font-semibold text-primary hover:underline"
             >
-              privacy@wandeung.com
+              lusy5151@gmail.com
             </a>
           </div>
           <div className="rounded-lg border border-border p-4 space-y-1">
