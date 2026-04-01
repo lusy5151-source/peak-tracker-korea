@@ -8,7 +8,7 @@ const friendlyError = (msg: string) => {
   if (/invalid login credentials/i.test(msg)) return "이메일 또는 비밀번호가 올바르지 않습니다.";
   if (/email not confirmed/i.test(msg)) return "이메일 인증이 완료되지 않았습니다. 메일함을 확인해주세요.";
   if (/user already registered|already.*registered|database error saving new user/i.test(msg)) return "이미 가입된 이메일입니다. 로그인을 시도해주세요.";
-  if (/password.*characters/i.test(msg)) return "비밀번호는 최소 6자 이상이어야 합니다.";
+  if (/password.*characters/i.test(msg)) return "비밀번호는 최소 8자 이상이어야 합니다.";
   if (/rate limit/i.test(msg)) return "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
   if (/network/i.test(msg)) return "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.";
   return msg || "오류가 발생했습니다.";
