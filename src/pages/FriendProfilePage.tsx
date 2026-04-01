@@ -11,8 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, User, MapPin, Mountain, BookOpen, Trophy,
-  Calendar, Users, ChevronRight, Flag, Crown,
+  Calendar, Users, ChevronRight, Flag, Crown, Ban, MoreVertical,
 } from "lucide-react";
+import { ContentMenu } from "@/components/ContentMenu";
+import { useUserBlocks } from "@/hooks/useUserBlocks";
+import { Button } from "@/components/ui/button";
 
 const HIKING_STYLES = [
   { id: "solo", label: "솔로 등산", emoji: "🧍" },
