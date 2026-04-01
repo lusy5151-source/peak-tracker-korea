@@ -46,6 +46,7 @@ const MagazinePage = lazy(() => import("@/pages/MagazinePage"));
 const AdminMagazinePage = lazy(() => import("@/pages/AdminMagazinePage"));
 const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
+const DeleteAccountPage = lazy(() => import("@/pages/DeleteAccountPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,7 @@ const AppRoutes = () => {
       <Route path="/summit-claim" element={<ProtectedRoute><LazyPage><SummitClaimPage /></LazyPage></ProtectedRoute>} />
       <Route path="/admin/magazine" element={<ProtectedRoute><LazyPage><AdminMagazinePage /></LazyPage></ProtectedRoute>} />
       <Route path="/privacy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
+      <Route path="/delete-account" element={<LazyPage><DeleteAccountPage /></LazyPage>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
