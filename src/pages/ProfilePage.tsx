@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { BlockedUsersList } from "@/components/BlockedUsersList";
-import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
+import { Separator } from "@/components/ui/separator";
 
 const HIKING_STYLES = [
   { id: "solo", label: "솔로 등산", emoji: "🧍" },
