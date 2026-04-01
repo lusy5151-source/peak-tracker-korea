@@ -10,6 +10,7 @@ import {
   Heart, MessageCircle, Mountain, Calendar, Clock, Route, Flag,
   Globe, Users, Lock, ChevronDown, Send, Trash2, X,
 } from "lucide-react";
+import { ContentMenu } from "@/components/ContentMenu";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
