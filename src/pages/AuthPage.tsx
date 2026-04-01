@@ -58,23 +58,17 @@ const AuthPage = () => {
           },
         });
 
-        if (error) {
-          alert('SIGNUP ERROR: ' + error.message);
-          throw error;
-        }
+        if (error) throw error;
 
-        if (data.user) {
-          alert('SUCCESS: User created with ID: ' + data.user.id);
-          await supabase
-            .from("profiles")
-            .update({ nickname: name.trim() })
-            .eq("user_id", data.user.id);
-        } else {
-          alert('NO USER RETURNED - check email confirmation settings');
-        }
-
-        // Auto-confirm is enabled, so user is logged in immediately
+        // Auto-confirm is enabled, so session should be returned immediately
         if (data.session) {
+          // Profile is auto-created by DB trigger, but update nickname just in case
+          if (data.user) {
+            await supabase
+              .from("profiles")
+              .update({ nickname: name.trim() })
+              .eq("user_id", data.user.id);
+          }
           navigate("/");
         } else {
           toast({
