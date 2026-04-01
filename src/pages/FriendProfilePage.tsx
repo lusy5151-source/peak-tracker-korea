@@ -38,6 +38,7 @@ const FriendProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   const { fetchUserJournals } = useHikingJournals();
+  const { isBlocked, blockUser, unblockUser } = useUserBlocks();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [journals, setJournals] = useState<HikingJournal[]>([]);
