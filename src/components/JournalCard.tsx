@@ -117,9 +117,17 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
               {format(new Date(journal.hiked_at), "M월 d일", { locale: ko })}
             </p>
           </div>
-          <div className={cn("flex items-center gap-1 text-[10px]", vis.color)}>
-            <VisIcon className="h-3 w-3" />
-            <span>{vis.label}</span>
+          <div className="flex items-center gap-1.5">
+            <div className={cn("flex items-center gap-1 text-[10px]", vis.color)}>
+              <VisIcon className="h-3 w-3" />
+              <span>{vis.label}</span>
+            </div>
+            <ContentMenu
+              targetType="journal"
+              targetId={journal.id}
+              authorId={journal.user_id}
+              authorName={journal.profile?.nickname || undefined}
+            />
           </div>
         </div>
       )}
