@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { BlockedUsersList } from "@/components/BlockedUsersList";
-import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
+import { Separator } from "@/components/ui/separator";
 
 const HIKING_STYLES = [
   { id: "solo", label: "솔로 등산", emoji: "🧍" },
@@ -660,8 +660,6 @@ const ProfilePage = () => {
 
         <BlockedUsersList />
 
-        <DeleteAccountDialog />
-
         <button
           onClick={signOut}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10"
@@ -669,6 +667,17 @@ const ProfilePage = () => {
           <LogOut className="h-4 w-4" />
           로그아웃
         </button>
+
+        <Separator className="my-2" />
+
+        <Link
+          to="/delete-account"
+          className="flex w-full items-center justify-center gap-2 p-3 text-sm font-medium transition-colors hover:opacity-80"
+          style={{ color: '#FF696C' }}
+        >
+          <Trash2 className="h-4 w-4" />
+          계정 삭제
+        </Link>
       </div>
     </div>
   );
