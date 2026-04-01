@@ -93,13 +93,12 @@ const AuthPage = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: "https://peak-tracker-korea.lovable.app",
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
-      if (error) throw error;
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      navigate("/");
     } catch (err: any) {
       toast({
         title: "오류",
