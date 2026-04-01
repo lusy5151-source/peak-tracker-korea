@@ -17,7 +17,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BlockedUsersList } from "@/components/BlockedUsersList";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
