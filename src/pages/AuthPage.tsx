@@ -54,7 +54,7 @@ const AuthPage = () => {
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: "https://peak-tracker-korea.lovable.app",
             data: { full_name: name.trim() },
           },
         });
@@ -88,7 +88,7 @@ const AuthPage = () => {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: "https://peak-tracker-korea.lovable.app",
       });
       if (result.error) throw result.error;
     } catch (err: any) {
