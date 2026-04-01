@@ -30,7 +30,7 @@ const AuthPage = () => {
     if (!isLogin && !name.trim()) errors.name = "이름을 입력해주세요.";
     if (!email.trim()) errors.email = "이메일을 입력해주세요.";
     if (!password) errors.password = "비밀번호를 입력해주세요.";
-    else if (password.length < 6) errors.password = "비밀번호는 최소 6자 이상이어야 합니다.";
+    else if (password.length < 8) errors.password = "비밀번호는 최소 8자 이상이어야 합니다.";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
