@@ -44,6 +44,7 @@ const AdminAnnouncementsPage = lazy(() => import("@/pages/AdminAnnouncementsPage
 const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage"));
 const MagazinePage = lazy(() => import("@/pages/MagazinePage"));
 const AdminMagazinePage = lazy(() => import("@/pages/AdminMagazinePage"));
+const AdminReportsPage = lazy(() => import("@/pages/AdminReportsPage"));
 const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const DeleteAccountPage = lazy(() => import("@/pages/DeleteAccountPage"));
