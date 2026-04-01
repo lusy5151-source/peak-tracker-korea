@@ -11,8 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, User, MapPin, Mountain, BookOpen, Trophy,
-  Calendar, Users, ChevronRight, Flag, Crown,
+  Calendar, Users, ChevronRight, Flag, Crown, Ban, MoreVertical,
 } from "lucide-react";
+import { ContentMenu } from "@/components/ContentMenu";
+import { useUserBlocks } from "@/hooks/useUserBlocks";
+import { Button } from "@/components/ui/button";
 
 const HIKING_STYLES = [
   { id: "solo", label: "솔로 등산", emoji: "🧍" },
@@ -35,6 +38,7 @@ const FriendProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   const { fetchUserJournals } = useHikingJournals();
+  const { isBlocked, blockUser, unblockUser } = useUserBlocks();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [journals, setJournals] = useState<HikingJournal[]>([]);
@@ -196,14 +200,38 @@ const FriendProfilePage = () => {
   return (
     <div className="space-y-5 pb-24 max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link to="/social" className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-lg font-bold text-foreground">{profile.nickname || "사용자"}</h1>
-        {isFriend && (
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">친구</span>
-        )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link to="/social" className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-lg font-bold text-foreground">{profile.nickname || "사용자"}</h1>
+          {isFriend && (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">친구</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {userId && isBlocked(userId) ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8"
+              onClick={() => unblockUser.mutate(userId)}
+            >
+              차단 해제
+            </Button>
+          ) : userId ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-8 text-destructive hover:text-destructive"
+              onClick={() => blockUser.mutate(userId)}
+            >
+              <Ban className="h-3.5 w-3.5 mr-1" />
+              차단
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {/* Profile Card */}

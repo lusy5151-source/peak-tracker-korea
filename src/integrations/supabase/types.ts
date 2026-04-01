@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          completed_at: string | null
+          id: string
+          reason: string | null
+          requested_at: string
+          scheduled_deletion_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          reason?: string | null
+          requested_at?: string
+          scheduled_deletion_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          reason?: string | null
+          requested_at?: string
+          scheduled_deletion_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       activity_feed: {
         Row: {
           created_at: string
@@ -915,6 +945,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
       shared_completion_participants: {
         Row: {
           id: string
@@ -1163,6 +1226,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_challenges: {
         Row: {
           challenge_id: string
@@ -1229,6 +1313,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_blocked: {
+        Args: { checker_id: string; target_id: string }
         Returns: boolean
       }
       is_plan_participant: {
