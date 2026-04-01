@@ -310,11 +310,20 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
                     {format(new Date(c.created_at), "M/d HH:mm", { locale: ko })}
                   </p>
                 </div>
-                {c.user_id === user?.id && (
-                  <button onClick={() => handleDeleteComment(c.id)} className="text-muted-foreground hover:text-destructive">
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                )}
+                <div className="flex items-center gap-0.5">
+                  {c.user_id === user?.id ? (
+                    <button onClick={() => handleDeleteComment(c.id)} className="text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  ) : (
+                    <ContentMenu
+                      targetType="comment"
+                      targetId={c.id}
+                      authorId={c.user_id}
+                      authorName={c.profile?.nickname || undefined}
+                    />
+                  )}
+                </div>
               </div>
             ))}
 
