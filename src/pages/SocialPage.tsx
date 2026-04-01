@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Users, Mountain, Search, UserPlus, Check, X, ChevronRight, Bell, Trash2,
-  Plus, Globe, Lock,
+  Plus, Globe, Lock, Ban,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { BlockedUsersList } from "@/components/BlockedUsersList";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
