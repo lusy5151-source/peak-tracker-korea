@@ -106,10 +106,34 @@ const SocialPage = () => {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-24">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">함께 걷기</h1>
-        <p className="mt-1 text-sm text-muted-foreground">친구와 산악회를 관리하세요</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">함께 걷기</h1>
+          <p className="mt-1 text-sm text-muted-foreground">친구와 산악회를 관리하세요</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs h-8 text-muted-foreground"
+          onClick={() => setShowBlockedUsers(true)}
+        >
+          <Ban className="h-3.5 w-3.5 mr-1" />
+          차단 관리
+        </Button>
       </div>
+
+      {/* Blocked Users Modal */}
+      <Dialog open={showBlockedUsers} onOpenChange={setShowBlockedUsers}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ban className="h-4 w-4 text-destructive" />
+              차단 관리
+            </DialogTitle>
+          </DialogHeader>
+          <BlockedUsersList />
+        </DialogContent>
+      </Dialog>
 
       {/* Main Tabs: Friends | Clubs */}
       <div className="flex gap-2">

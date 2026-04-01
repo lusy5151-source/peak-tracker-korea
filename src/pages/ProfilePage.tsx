@@ -657,8 +657,6 @@ const ProfilePage = () => {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
 
-        <BlockedUsersList />
-
         <button
           onClick={signOut}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10"
