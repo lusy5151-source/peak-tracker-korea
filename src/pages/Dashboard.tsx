@@ -588,9 +588,13 @@ const Dashboard = () => {
           )}
 
           {/* ── Privacy Policy ── */}
-          <div className="mt-8 text-center">
+          <div className="mt-8 flex items-center justify-center gap-2">
             <Link to="/privacy" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
               개인정보처리방침
+            </Link>
+            <span className="text-[11px] text-muted-foreground/30">|</span>
+            <Link to="/delete-account" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+              계정 삭제
             </Link>
           </div>
         </div>
