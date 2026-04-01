@@ -68,10 +68,16 @@ const AuthPage = () => {
             .eq("user_id", data.user.id);
         }
 
-        toast({
-          title: "회원가입 완료",
-          description: "이메일을 확인하여 계정을 인증해주세요.",
-        });
+        // Auto-confirm is enabled, so user is logged in immediately
+        if (data.session) {
+          navigate("/");
+        } else {
+          toast({
+            title: "회원가입 완료",
+            description: "로그인해주세요.",
+          });
+          setIsLogin(true);
+        }
       }
     } catch (err: any) {
       toast({
