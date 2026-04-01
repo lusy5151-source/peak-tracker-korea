@@ -14,7 +14,7 @@ import { JournalCard, JournalGridCard } from "@/components/JournalCard";
 import { Link } from "react-router-dom";
 import {
   User, Trophy, Mountain, ChevronRight, Star, Camera, MapPin,
-  Settings, LogOut, Shield, Edit3, BookOpen, Users, Heart, Globe, Lock, Eye, Trash2,
+  Settings, LogOut, Shield, Edit3, BookOpen, Users, Heart, Globe, Lock, Eye, Trash2, Flag,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useMemo, useState, useRef, useEffect } from "react";
@@ -629,6 +629,19 @@ const ProfilePage = () => {
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-primary" />
               매거진 관리
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </Link>
+        )}
+
+        {isAdmin && (
+          <Link
+            to="/admin/reports"
+            className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
+          >
+            <div className="flex items-center gap-2">
+              <Flag className="h-4 w-4 text-destructive" />
+              신고 관리
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </Link>

@@ -44,6 +44,7 @@ const AdminAnnouncementsPage = lazy(() => import("@/pages/AdminAnnouncementsPage
 const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage"));
 const MagazinePage = lazy(() => import("@/pages/MagazinePage"));
 const AdminMagazinePage = lazy(() => import("@/pages/AdminMagazinePage"));
+const AdminReportsPage = lazy(() => import("@/pages/AdminReportsPage"));
 const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const DeleteAccountPage = lazy(() => import("@/pages/DeleteAccountPage"));
@@ -106,6 +107,7 @@ const AppRoutes = () => {
       <Route path="/magazine" element={<LazyPage><MagazinePage /></LazyPage>} />
       <Route path="/summit-claim" element={<ProtectedRoute><LazyPage><SummitClaimPage /></LazyPage></ProtectedRoute>} />
       <Route path="/admin/magazine" element={<ProtectedRoute><LazyPage><AdminMagazinePage /></LazyPage></ProtectedRoute>} />
+      <Route path="/admin/reports" element={<ProtectedRoute><LazyPage><AdminReportsPage /></LazyPage></ProtectedRoute>} />
       <Route path="/privacy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
       <Route path="/delete-account" element={<LazyPage><DeleteAccountPage /></LazyPage>} />
       <Route path="*" element={<NotFound />} />
