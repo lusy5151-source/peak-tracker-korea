@@ -54,7 +54,7 @@ const AuthPage = () => {
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: "https://peak-tracker-korea.lovable.app",
             data: { full_name: name.trim() },
           },
         });
