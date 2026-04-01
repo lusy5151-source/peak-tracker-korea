@@ -643,16 +643,9 @@ const ProfilePage = () => {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
 
-        <Link
-          to="/delete-account"
-          className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
-        >
-          <div className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4 text-destructive" />
-            계정 삭제 요청
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </Link>
+        <BlockedUsersList />
+
+        <DeleteAccountDialog />
 
         <button
           onClick={signOut}
