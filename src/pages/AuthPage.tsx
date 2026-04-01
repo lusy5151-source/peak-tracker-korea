@@ -57,14 +57,20 @@ const AuthPage = () => {
             data: { full_name: name.trim() },
           },
         });
-        if (error) throw error;
 
-        // Update profile nickname if user was created
+        if (error) {
+          alert('SIGNUP ERROR: ' + error.message);
+          throw error;
+        }
+
         if (data.user) {
+          alert('SUCCESS: User created with ID: ' + data.user.id);
           await supabase
             .from("profiles")
             .update({ nickname: name.trim() })
             .eq("user_id", data.user.id);
+        } else {
+          alert('NO USER RETURNED - check email confirmation settings');
         }
 
         // Auto-confirm is enabled, so user is logged in immediately
