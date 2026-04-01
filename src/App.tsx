@@ -46,6 +46,7 @@ const MagazinePage = lazy(() => import("@/pages/MagazinePage"));
 const AdminMagazinePage = lazy(() => import("@/pages/AdminMagazinePage"));
 const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
+const DeleteAccountPage = lazy(() => import("@/pages/DeleteAccountPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
