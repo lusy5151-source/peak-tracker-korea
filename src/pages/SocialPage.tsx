@@ -48,6 +48,7 @@ const SocialPage = () => {
   const [clubDesc, setClubDesc] = useState("");
   const [clubPublic, setClubPublic] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showBlockedUsers, setShowBlockedUsers] = useState(false);
 
   useEffect(() => {
     if (mainTab === "clubs") {
