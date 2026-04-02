@@ -206,7 +206,7 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming schedule card */}
-            <div className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
+            <div data-onboarding="upcoming-schedule" className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
               <p className="text-xs font-semibold text-muted-foreground mb-2">다가오는 일정</p>
               {isDemo ? (
                 /* Demo upcoming plan */
@@ -543,7 +543,7 @@ const Dashboard = () => {
           </section>
 
           {/* ── Badge Gallery ── */}
-          <section>
+          <section data-onboarding="badge-gallery">
             <SectionHeader title="업적 갤러리" linkTo="/achievements" linkLabel="전체 보기" />
             <div className="rounded-3xl bg-purple-light border border-border p-5 shadow-sm">
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
