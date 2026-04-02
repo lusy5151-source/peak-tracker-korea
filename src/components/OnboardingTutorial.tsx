@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
-
-const ONBOARDING_KEY = "onboarding_completed";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 
 interface OnboardingStep {
   targetSelector: string;
