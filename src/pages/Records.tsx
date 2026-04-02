@@ -109,11 +109,8 @@ const Records = () => {
         </Button>
       </div>
 
-      {/* Feed area */}
-      <div data-onboarding="journal-feed">
-
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedJournal(null); }}>
+      <Tabs data-onboarding="journal-feed" value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedJournal(null); }}>
         <TabsList className="w-full bg-secondary/50 rounded-xl">
           <TabsTrigger value="feed" className="flex-1 rounded-lg text-xs">전체 피드</TabsTrigger>
           <TabsTrigger value="mine" className="flex-1 rounded-lg text-xs">내 기록</TabsTrigger>
