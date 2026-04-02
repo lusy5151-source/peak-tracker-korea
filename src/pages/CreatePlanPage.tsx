@@ -77,6 +77,7 @@ const CreatePlanPage = () => {
       notes: notes || undefined,
       meeting_location: meetingLocation || undefined,
       is_public: isPublic,
+      max_participants: isPublic ? maxParticipants : 10,
     } as any);
     setSubmitting(false);
 
