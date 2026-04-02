@@ -54,6 +54,8 @@ const ProfilePage = () => {
   const [journals, setJournals] = useState<HikingJournal[]>([]);
   const [selectedJournal, setSelectedJournal] = useState<HikingJournal | null>(null);
   const [activeTab, setActiveTab] = useState<"posts" | "stats">("posts");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const percentage = Math.round((completedCount / mountains.length) * 100);
