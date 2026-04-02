@@ -364,4 +364,69 @@ const PlansPage = () => {
 
 };
 
+function DemoPlansView() {
+  const daysFromNow = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return d;
+  };
+
+  const demoPlans = [
+    { id: "demo-1", mountainName: "북한산", date: daysFromNow(3), time: "08:00", trail: "백운대 코스" },
+    { id: "demo-2", mountainName: "관악산", date: daysFromNow(7), time: "09:30", trail: "관악문 코스" },
+    { id: "demo-3", mountainName: "도봉산", date: daysFromNow(14), time: "07:00", trail: "신선대 코스" },
+  ];
+
+  return (
+    <div className="space-y-5 pb-24">
+      <div className="flex items-center justify-between">
+        <h1 className="font-bold text-foreground text-base">등산 계획</h1>
+        <div className="flex gap-2">
+          <Link to="/auth">
+            <Button data-onboarding="plan-create" size="sm">
+              <Plus className="h-4 w-4 mr-1" /> 새 계획
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <section>
+        <p className="text-sm font-medium text-muted-foreground mb-2">다가오는 계획 ({demoPlans.length})</p>
+        <div className="space-y-2.5">
+          {demoPlans.map((plan) => (
+            <div
+              key={plan.id}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                <Mountain className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground">{plan.mountainName}</p>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {format(plan.date, "M/d (EEE)", { locale: ko })}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {plan.time}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">🥾 {plan.trail}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Link to="/auth" className="block rounded-2xl bg-primary/10 p-5 text-center">
+        <p className="text-sm font-bold text-primary">로그인하고 등산 계획을 세워보세요</p>
+        <p className="text-xs text-muted-foreground mt-1">친구들과 함께 일정을 공유할 수 있어요</p>
+      </Link>
+    </div>
+  );
+}
+
 export default PlansPage;
