@@ -450,7 +450,12 @@ function DemoSocialView() {
         <p className="mt-1 text-sm text-muted-foreground">등산 친구와 산악회를 만나보세요</p>
       </div>
 
-      {/* Demo Friends */}
+      {/* Demo Friends + Clubs tabs area */}
+      <div data-onboarding="social-tabs" className="flex gap-2 mb-3">
+        <div className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-center bg-primary text-primary-foreground">친구</div>
+        <div className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-center bg-secondary text-muted-foreground">산악회</div>
+      </div>
+
       <section>
         <h2 className="text-sm font-semibold text-muted-foreground mb-3">활발한 등산러</h2>
         <div className="space-y-2.5">
