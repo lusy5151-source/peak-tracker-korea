@@ -32,6 +32,7 @@ import { AnnouncementSection } from "@/components/AnnouncementSystem";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const conditionIcons: Record<string, any> = {
   "맑음": Sun, "구름": CloudSun, "흐림": Cloud, "비": CloudRain, "눈": CloudSnow,
@@ -61,7 +62,8 @@ const Dashboard = () => {
   });
   const [showGoalEdit, setShowGoalEdit] = useState(false);
 
-  const isDemo = !user;
+  const { isOnboarding } = useOnboarding();
+  const isDemo = !user || isOnboarding;
 
   const baekduCount = baekduMountains.length;
   const baekduCompleted = isDemo ? demoProgress.baekduCompleted : baekduMountains.filter((m) => isCompleted(m.id)).length;

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { StoreProvider } from "@/context/StoreContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Layout from "@/components/Layout";
 import SplashScreen from "@/components/SplashScreen";
@@ -92,7 +93,7 @@ const AppRoutes = () => {
       <Route path="/records" element={<LazyPage><Records /></LazyPage>} />
       <Route path="/gear" element={<LazyPage><GearPage /></LazyPage>} />
       <Route path="/social" element={<LazyPage><SocialPage /></LazyPage>} />
-      <Route path="/plans" element={<ProtectedRoute><LazyPage><PlansPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/plans" element={<LazyPage><PlansPage /></LazyPage>} />
       <Route path="/plans/create" element={<ProtectedRoute><LazyPage><CreatePlanPage /></LazyPage></ProtectedRoute>} />
       <Route path="/plans/:id" element={<ProtectedRoute><LazyPage><PlanDetailPage /></LazyPage></ProtectedRoute>} />
       <Route path="/challenges" element={<ProtectedRoute><LazyPage><ChallengePage /></LazyPage></ProtectedRoute>} />
@@ -127,6 +128,7 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <AuthProvider>
+            <OnboardingProvider>
             <StoreProvider>
               <Toaster />
               <Sonner />
@@ -140,6 +142,7 @@ const App = () => {
                 </Layout>
               </BrowserRouter>
             </StoreProvider>
+            </OnboardingProvider>
           </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>

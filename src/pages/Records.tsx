@@ -3,6 +3,7 @@ import { mountains } from "@/data/mountains";
 import { demoJournals, type DemoJournal } from "@/data/demoFeed";
 import { useHikingJournals, type HikingJournal } from "@/hooks/useHikingJournals";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import { JournalForm } from "@/components/JournalForm";
 import { JournalCard, JournalGridCard } from "@/components/JournalCard";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,9 @@ const Records = () => {
     setEditingJournal(null);
   };
 
-  if (!user) {
+  const { isOnboarding } = useOnboarding();
+
+  if (!user || isOnboarding) {
     return <DemoRecordsView />;
   }
 
