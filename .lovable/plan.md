@@ -1,40 +1,30 @@
 
 
-## Findings
+## Plan: Replace hardcoded URLs with wandeung.com
 
-**Signup is actually working.** The database shows recent signups (test1@wandeung.com, test2@wandeung.com) created today with auto-confirmed emails and active sessions. No code fix needed for signup — it's functioning correctly.
+### Findings
 
-**Google OAuth** currently uses `lovable.auth.signInWithOAuth` which needs to be reverted to direct Supabase.
+Only one file contains `peak-tracker-korea.lovable.app`: **`src/pages/AuthPage.tsx`**. The same file also uses `window.location.origin` for Google OAuth redirect. No other files reference the old domain.
 
-## Plan
-
-### Step 1: Fix AuthPage.tsx — Use direct Supabase OAuth
+### Changes
 
 **File: `src/pages/AuthPage.tsx`**
 
-1. Remove `import { lovable }` (line 3)
-2. Replace `handleGoogleLogin` to use:
-   ```typescript
-   const { error } = await supabase.auth.signInWithOAuth({
-     provider: 'google',
-     options: {
-       redirectTo: window.location.origin,
-     },
-   });
-   if (error) throw error;
-   ```
+1. **Line 57** — Change `emailRedirectTo` in `signUp()`:
+   - From: `"https://peak-tracker-korea.lovable.app"`
+   - To: `"https://wandeung.com"`
 
-This is the standard Supabase approach. It will work once you configure Google credentials in Supabase Dashboard → Authentication → Providers → Google.
+2. **Line 99** — Change `redirectTo` in Google OAuth:
+   - From: `window.location.origin`
+   - To: `"https://wandeung.com"`
 
-### Step 2 (yours): Configure Google provider in Supabase Dashboard
+### Note on Supabase redirect URL allowlist
 
-You'll enter your Google Client ID and Secret in **Supabase Dashboard → Authentication → Providers → Google**.
+The redirect URL allowlist (`https://wandeung.com` and `https://wandeung.com/**`) must be configured in the backend auth settings. This is a dashboard-level setting, not a client code change. I will configure this using the auth configuration tool after implementing the code changes.
 
-### Step 3: Signup verification — No fix needed
+### No other files affected
 
-The query confirms `supabase.auth.signUp()` is creating users correctly. The most recent signups have `email_confirmed_at` set (auto-confirm working) and `last_sign_in_at` populated (immediate login working). The current code is correct.
-
-### Summary
-
-Only one code change: revert `handleGoogleLogin` in AuthPage.tsx from `lovable.auth` to `supabase.auth.signInWithOAuth`.
+- `src/integrations/supabase/client.ts` — auto-generated, uses env vars, no hardcoded URLs
+- `supabase/functions/kakao-auth/index.ts` — uses dynamic `redirect_uri` from request body
+- All other files — no references found
 
