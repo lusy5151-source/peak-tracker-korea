@@ -297,15 +297,40 @@ const CreatePlanPage = () => {
       </div>
 
       {/* Public toggle */}
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
-        <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <Label className="text-sm font-medium">공개 일정</Label>
-            <p className="text-[10px] text-muted-foreground">다른 사용자도 참여할 수 있습니다</p>
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <div>
+              <Label className="text-sm font-medium">공개 일정</Label>
+              <p className="text-[10px] text-muted-foreground">다른 사용자도 참여할 수 있습니다</p>
+            </div>
           </div>
+          <Switch checked={isPublic} onCheckedChange={setIsPublic} />
         </div>
-        <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+
+        {isPublic && (
+          <>
+            <div className="space-y-2 border-t border-border pt-3">
+              <Label className="text-xs">최대 참가 인원</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="number"
+                  min={2}
+                  max={50}
+                  value={maxParticipants}
+                  onChange={(e) => setMaxParticipants(Math.min(50, Math.max(2, Number(e.target.value))))}
+                  className="w-24 text-center"
+                />
+                <span className="text-xs text-muted-foreground">명 (2~50명)</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-primary flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              공개 일정은 모든 이용자가 볼 수 있어요
+            </p>
+          </>
+        )}
       </div>
 
       <Button
