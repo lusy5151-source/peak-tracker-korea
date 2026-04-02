@@ -62,7 +62,8 @@ const Dashboard = () => {
   });
   const [showGoalEdit, setShowGoalEdit] = useState(false);
 
-  const isDemo = !user;
+  const { isOnboarding } = useOnboarding();
+  const isDemo = !user || isOnboarding;
 
   const baekduCount = baekduMountains.length;
   const baekduCompleted = isDemo ? demoProgress.baekduCompleted : baekduMountains.filter((m) => isCompleted(m.id)).length;

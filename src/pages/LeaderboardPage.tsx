@@ -13,7 +13,8 @@ const LeaderboardPage = () => {
   const { user } = useAuth();
   const { topClaimers, mountainLeaders, clubRankings, loading } = useLeaderboard();
 
-  const isDemo = !user;
+  const { isOnboarding } = useOnboarding();
+  const isDemo = !user || isOnboarding;
 
   const displayClaimers = isDemo ? demoLeaderboard : topClaimers;
 

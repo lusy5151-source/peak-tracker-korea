@@ -89,7 +89,9 @@ const Records = () => {
     setEditingJournal(null);
   };
 
-  if (!user) {
+  const { isOnboarding } = useOnboarding();
+
+  if (!user || isOnboarding) {
     return <DemoRecordsView />;
   }
 
