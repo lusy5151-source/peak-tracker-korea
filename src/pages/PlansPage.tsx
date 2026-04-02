@@ -137,14 +137,12 @@ const PlansPage = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <Mountain className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">로그인이 필요합니다</p>
-        <Button data-onboarding="plan-create" onClick={() => navigate("/auth")}>로그인</Button>
-      </div>);
+  const { isOnboarding } = useOnboarding();
 
+  if (!user || isOnboarding) {
+    return (
+      <DemoPlansView />
+    );
   }
 
   const upcoming = plans.filter((p) => p.status === "upcoming" && new Date(p.planned_date) >= new Date());
