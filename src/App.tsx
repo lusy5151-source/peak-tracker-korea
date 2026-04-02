@@ -93,7 +93,7 @@ const AppRoutes = () => {
       <Route path="/records" element={<LazyPage><Records /></LazyPage>} />
       <Route path="/gear" element={<LazyPage><GearPage /></LazyPage>} />
       <Route path="/social" element={<LazyPage><SocialPage /></LazyPage>} />
-      <Route path="/plans" element={<ProtectedRoute><LazyPage><PlansPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/plans" element={<LazyPage><PlansPage /></LazyPage>} />
       <Route path="/plans/create" element={<ProtectedRoute><LazyPage><CreatePlanPage /></LazyPage></ProtectedRoute>} />
       <Route path="/plans/:id" element={<ProtectedRoute><LazyPage><PlanDetailPage /></LazyPage></ProtectedRoute>} />
       <Route path="/challenges" element={<ProtectedRoute><LazyPage><ChallengePage /></LazyPage></ProtectedRoute>} />
