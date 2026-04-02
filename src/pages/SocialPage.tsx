@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useFriends } from "@/hooks/useFriends";
 import { useHikingGroups, type HikingGroup } from "@/hooks/useHikingGroups";
 import { demoFriends, demoGroups } from "@/data/demoFeed";
