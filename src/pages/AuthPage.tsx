@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-
-import { Mountain, Mail, Lock, Eye, EyeOff, ArrowRight, User } from "lucide-react";
+import { Mountain, Mail, Lock, Eye, EyeOff, ArrowRight, User, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const friendlyError = (msg: string) => {
   if (/invalid login credentials/i.test(msg)) return "이메일 또는 비밀번호가 올바르지 않습니다.";
-  if (/email not confirmed/i.test(msg)) return "이메일 인증이 완료되지 않았습니다. 메일함을 확인해주세요.";
+  if (/email not confirmed/i.test(msg)) return "이메일 인증 후 로그인할 수 있습니다.\n인증 메일을 확인해주세요.";
   if (/user already registered|already.*registered|database error saving new user/i.test(msg)) return "이미 가입된 이메일입니다. 로그인을 시도해주세요.";
   if (/password.*characters/i.test(msg)) return "비밀번호는 최소 8자 이상이어야 합니다.";
   if (/rate limit/i.test(msg)) return "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
@@ -24,8 +23,17 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const [signupEmail, setSignupEmail] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const validate = () => {
     const errors: Record<string, string> = {};
@@ -36,6 +44,25 @@ const AuthPage = () => {
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
+  const handleResendEmail = useCallback(async () => {
+    if (resendCooldown > 0 || !signupEmail) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: signupEmail,
+        options: { emailRedirectTo: "https://wandeung.com" },
+      });
+      if (error) throw error;
+      setResendCooldown(60);
+      toast({ title: "인증 메일을 재발송했습니다." });
+    } catch (err: any) {
+      toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [resendCooldown, signupEmail, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,9 +89,8 @@ const AuthPage = () => {
 
         if (error) throw error;
 
-        // Auto-confirm is enabled, so session should be returned immediately
         if (data.session) {
-          // Profile is auto-created by DB trigger, but update nickname just in case
+          // Auto-confirm enabled — direct login
           if (data.user) {
             await supabase
               .from("profiles")
@@ -73,19 +99,14 @@ const AuthPage = () => {
           }
           navigate("/");
         } else {
-          toast({
-            title: "회원가입 완료",
-            description: "로그인해주세요.",
-          });
-          setIsLogin(true);
+          // Email confirmation required
+          setSignupEmail(email.trim());
+          setSignupSuccess(true);
+          setResendCooldown(60);
         }
       }
     } catch (err: any) {
-      toast({
-        title: "오류",
-        description: friendlyError(err.message),
-        variant: "destructive",
-      });
+      toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -97,23 +118,11 @@ const AuthPage = () => {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: "https://wandeung.com",
       });
-
-      if (result.error) {
-        throw result.error;
-      }
-
-      if (result.redirected) {
-        return;
-      }
-
-      // Session is set automatically, navigate to home
+      if (result.error) throw result.error;
+      if (result.redirected) return;
       navigate("/");
     } catch (err: any) {
-      toast({
-        title: "오류",
-        description: friendlyError(err.message),
-        variant: "destructive",
-      });
+      toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -125,6 +134,48 @@ const AuthPage = () => {
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
     window.location.href = kakaoAuthUrl;
   };
+
+  // Signup success screen
+  if (signupSuccess) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center pb-24">
+        <div className="w-full max-w-sm space-y-6 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <Mail className="h-8 w-8 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-bold text-foreground">인증 메일을 발송했습니다 📧</h1>
+            <p className="text-sm text-muted-foreground">
+              이메일을 확인하고 인증 버튼을 눌러주세요.
+            </p>
+            <p className="text-xs text-muted-foreground/70">{signupEmail}</p>
+          </div>
+
+          <button
+            onClick={handleResendEmail}
+            disabled={loading || resendCooldown > 0}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary/50 disabled:opacity-50"
+          >
+            <RefreshCw className="h-4 w-4" />
+            {resendCooldown > 0
+              ? `인증 메일 재발송 (${resendCooldown}초)`
+              : "인증 메일 재발송"}
+          </button>
+
+          <button
+            onClick={() => {
+              setSignupSuccess(false);
+              setIsLogin(true);
+              setFieldErrors({});
+            }}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            로그인으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center pb-24">
@@ -175,7 +226,6 @@ const AuthPage = () => {
 
         {/* Email form */}
         <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Name field - signup only */}
           {!isLogin && (
             <div>
               <div className="relative">
