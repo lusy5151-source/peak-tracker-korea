@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 import { Mountain, Mail, Lock, Eye, EyeOff, ArrowRight, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -93,13 +94,20 @@ const AuthPage = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: "https://wandeung.com",
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: "https://wandeung.com",
       });
-      if (error) throw error;
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (result.redirected) {
+        return;
+      }
+
+      // Session is set automatically, navigate to home
+      navigate("/");
     } catch (err: any) {
       toast({
         title: "오류",
