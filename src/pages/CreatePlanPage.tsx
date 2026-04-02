@@ -37,6 +37,7 @@ const CreatePlanPage = () => {
   const [notes, setNotes] = useState("");
   const [meetingLocation, setMeetingLocation] = useState("");
   const [isPublic, setIsPublic] = useState(false);
+  const [maxParticipants, setMaxParticipants] = useState(10);
   const [submitting, setSubmitting] = useState(false);
   const [mountainSearch, setMountainSearch] = useState("");
   const [showMountainList, setShowMountainList] = useState(false);
