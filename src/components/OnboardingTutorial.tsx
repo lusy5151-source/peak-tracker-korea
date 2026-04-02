@@ -203,10 +203,12 @@ const OnboardingTutorial = () => {
 
   return (
     <>
-      {/* Overlay */}
-      <div className="fixed inset-0 z-[9998]" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} />
+      {/* Overlay - only show when no spotlight (final screen or waiting) */}
+      {(!rect || isFinal) && (
+        <div className="fixed inset-0 z-[9998]" style={{ backgroundColor: "rgba(0,0,0,0.25)" }} />
+      )}
 
-      {/* Spotlight */}
+      {/* Spotlight - box-shadow provides the only dimming layer */}
       {rect && !isFinal && (
         <div
           className="fixed z-[9999] rounded-2xl transition-all duration-300 ease-out"
@@ -216,7 +218,7 @@ const OnboardingTutorial = () => {
             width: rect.width,
             height: rect.height,
             border: "3px solid #C7D66D",
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.3), 0 0 20px rgba(199,214,109,0.3)",
+            boxShadow: "0 0 0 9999px rgba(0,0,0,0.25), 0 0 30px rgba(199,214,109,0.5)",
             backgroundColor: "transparent",
             pointerEvents: "none",
           }}
