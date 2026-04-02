@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Plus, Mountain, Calendar, Clock, Users, Bell, ChevronRight, Link2, UserCheck, UserX, Mail, Globe, MapPin } from
 "lucide-react";
+import PublicPlansList from "@/components/PublicPlansList";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -170,7 +172,6 @@ const PlansPage = () => {
           onChange={(e) => setInviteCode(e.target.value)}
           placeholder="초대 코드 입력..."
           className="font-mono tracking-widest" />
-        
           <Button onClick={handleJoinByCode} disabled={joining}>
             {joining ? "참여 중..." : "참여"}
           </Button>
@@ -191,7 +192,6 @@ const PlansPage = () => {
             markNotificationRead(n.id);
             navigate(`/plans/${n.plan_id}`);
           }}>
-          
               <Bell className="h-4 w-4 text-primary shrink-0" />
               <p className="flex-1 text-sm text-foreground">{n.message}</p>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -200,166 +200,171 @@ const PlansPage = () => {
         </div>
       }
 
-      {/* Pending Invitations */}
-      {invitationsLoading ?
-      <section className="space-y-2">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-24 w-full rounded-xl" />
-        </section> :
-      invitations.length > 0 &&
-      <section>
-          <p className="text-sm font-medium text-foreground flex items-center gap-1 mb-2">
-            <Mail className="h-4 w-4 text-primary" /> 받은 초대 ({invitations.length})
-          </p>
-          <div className="space-y-2.5">
-            {invitations.map((inv) => {
-            const mountain = mountains.find((m) => m.id === inv.plan.mountain_id);
-            const isResponding = respondingId === inv.id;
-            return (
-              <div
-                key={inv.id}
-                className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-                
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                      <Mountain className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground">
-                        {mountain?.nameKo || "알 수 없는 산"}
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+      {/* Tabs: 내 계획 / 공개 일정 */}
+      <Tabs defaultValue="my" className="w-full">
+        <TabsList className="w-full grid grid-cols-2">
+          <TabsTrigger value="my">내 계획</TabsTrigger>
+          <TabsTrigger value="public">공개 일정</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="my" className="space-y-5 mt-4">
+          {/* Pending Invitations */}
+          {invitationsLoading ?
+          <section className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+            </section> :
+          invitations.length > 0 &&
+          <section>
+              <p className="text-sm font-medium text-foreground flex items-center gap-1 mb-2">
+                <Mail className="h-4 w-4 text-primary" /> 받은 초대 ({invitations.length})
+              </p>
+              <div className="space-y-2.5">
+                {invitations.map((inv) => {
+                const mountain = mountains.find((m) => m.id === inv.plan.mountain_id);
+                const isResponding = respondingId === inv.id;
+                return (
+                  <div
+                    key={inv.id}
+                    className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                          <Mountain className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground">
+                            {mountain?.nameKo || "알 수 없는 산"}
+                          </p>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(inv.plan.planned_date), "M/d (EEE)", { locale: ko })}
+                            </span>
+                            {inv.plan.start_time &&
+                          <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {inv.plan.start_time.slice(0, 5)}
+                              </span>
+                          }
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            <Users className="h-3 w-3 inline mr-1" />
+                            {inv.inviterName}님의 초대
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleAccept(inv)}
+                        disabled={isResponding}>
+                          <UserCheck className="h-4 w-4 mr-1" />
+                          {isResponding ? "처리 중..." : "수락"}
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleDecline(inv)}
+                        disabled={isResponding}>
+                          <UserX className="h-4 w-4 mr-1" />
+                          거절
+                        </Button>
+                      </div>
+                    </div>);
+              })}
+              </div>
+            </section>
+          }
+
+          {/* Upcoming Plans */}
+          <section>
+            <p className="text-sm font-medium text-muted-foreground mb-2">다가오는 계획 ({upcoming.length})</p>
+            {upcoming.length === 0 ?
+            <div className="rounded-xl border border-border bg-card p-8 text-center">
+                <Mountain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">아직 계획이 없습니다</p>
+                <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate("/plans/create")}>
+                  첫 계획 만들기
+                </Button>
+              </div> :
+            <div className="space-y-2.5">
+                {upcoming.map((plan) => {
+                const mountain = mountains.find((m) => m.id === plan.mountain_id);
+                if (!mountain) return null;
+                return (
+                  <Link
+                    key={plan.id}
+                    to={`/plans/${plan.id}`}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm hover:bg-secondary/50 transition-colors">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                        <Mountain className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground">{mountain.nameKo}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {format(new Date(plan.planned_date), "M/d (EEE)", { locale: ko })}
+                          </span>
+                          {plan.start_time &&
                         <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(inv.plan.planned_date), "M/d (EEE)", { locale: ko })}
-                        </span>
-                        {inv.plan.start_time &&
-                      <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {inv.plan.start_time.slice(0, 5)}
+                              <Clock className="h-3 w-3" />
+                              {plan.start_time.slice(0, 5)}
+                            </span>
+                        }
+                        </div>
+                        {plan.trail_name &&
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5">🥾 {plan.trail_name}</p>
+                      }
+                        {(plan as any).meeting_location &&
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-0.5">
+                            <MapPin className="h-2.5 w-2.5" /> {(plan as any).meeting_location}
+                          </p>
+                      }
+                        {(plan as any).is_public &&
+                      <span className="inline-flex items-center gap-0.5 text-[9px] text-primary mt-0.5">
+                            <Globe className="h-2.5 w-2.5" /> 공개
                           </span>
                       }
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        <Users className="h-3 w-3 inline mr-1" />
-                        {inv.inviterName}님의 초대
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => handleAccept(inv)}
-                    disabled={isResponding}>
-                    
-                      <UserCheck className="h-4 w-4 mr-1" />
-                      {isResponding ? "처리 중..." : "수락"}
-                    </Button>
-                    <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => handleDecline(inv)}
-                    disabled={isResponding}>
-                    
-                      <UserX className="h-4 w-4 mr-1" />
-                      거절
-                    </Button>
-                  </div>
-                </div>);
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                    </Link>);
+              })}
+              </div>
+            }
+          </section>
 
-          })}
-          </div>
-        </section>
-      }
-
-      {/* Upcoming Plans */}
-      <section>
-        <p className="text-sm font-medium text-muted-foreground mb-2">다가오는 계획 ({upcoming.length})</p>
-        {upcoming.length === 0 ?
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-            <Mountain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">아직 계획이 없습니다</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate("/plans/create")}>
-              첫 계획 만들기
-            </Button>
-          </div> :
-
-        <div className="space-y-2.5">
-            {upcoming.map((plan) => {
-            const mountain = mountains.find((m) => m.id === plan.mountain_id);
-            if (!mountain) return null;
-            return (
-              <Link
-                key={plan.id}
-                to={`/plans/${plan.id}`}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm hover:bg-secondary/50 transition-colors">
-                
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                    <Mountain className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground">{mountain.nameKo}</p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(plan.planned_date), "M/d (EEE)", { locale: ko })}
+          {/* Past Plans */}
+          {past.length > 0 &&
+          <section>
+              <p className="text-sm font-medium text-muted-foreground mb-2">지난 계획 ({past.length})</p>
+              <div className="space-y-2 opacity-60">
+                {past.map((plan) => {
+                const mountain = mountains.find((m) => m.id === plan.mountain_id);
+                if (!mountain) return null;
+                return (
+                  <Link
+                    key={plan.id}
+                    to={`/plans/${plan.id}`}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-secondary/50 transition-colors">
+                      <Mountain className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-foreground flex-1">{mountain.nameKo}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(plan.planned_date), "M/d", { locale: ko })}
                       </span>
-                      {plan.start_time &&
-                    <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {plan.start_time.slice(0, 5)}
-                        </span>
-                    }
-                    </div>
-                    {plan.trail_name &&
-                  <p className="text-[10px] text-muted-foreground/70 mt-0.5">🥾 {plan.trail_name}</p>
-                  }
-                    {(plan as any).meeting_location &&
-                  <p className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-0.5">
-                        <MapPin className="h-2.5 w-2.5" /> {(plan as any).meeting_location}
-                      </p>
-                  }
-                    {(plan as any).is_public &&
-                  <span className="inline-flex items-center gap-0.5 text-[9px] text-primary mt-0.5">
-                        <Globe className="h-2.5 w-2.5" /> 공개
-                      </span>
-                  }
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                </Link>);
+                    </Link>);
+              })}
+              </div>
+            </section>
+          }
+        </TabsContent>
 
-          })}
-          </div>
-        }
-      </section>
-
-      {/* Past Plans */}
-      {past.length > 0 &&
-      <section>
-          <p className="text-sm font-medium text-muted-foreground mb-2">지난 계획 ({past.length})</p>
-          <div className="space-y-2 opacity-60">
-            {past.map((plan) => {
-            const mountain = mountains.find((m) => m.id === plan.mountain_id);
-            if (!mountain) return null;
-            return (
-              <Link
-                key={plan.id}
-                to={`/plans/${plan.id}`}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-secondary/50 transition-colors">
-                
-                  <Mountain className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-foreground flex-1">{mountain.nameKo}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(plan.planned_date), "M/d", { locale: ko })}
-                  </span>
-                </Link>);
-
-          })}
-          </div>
-        </section>
-      }
+        <TabsContent value="public" className="mt-4">
+          <PublicPlansList />
+        </TabsContent>
+      </Tabs>
     </div>);
 
 };

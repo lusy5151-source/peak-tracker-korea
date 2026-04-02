@@ -550,6 +550,7 @@ export type Database = {
           id: string
           invite_code: string
           is_public: boolean
+          max_participants: number | null
           meeting_location: string | null
           mountain_id: number
           notes: string | null
@@ -566,6 +567,7 @@ export type Database = {
           id?: string
           invite_code?: string
           is_public?: boolean
+          max_participants?: number | null
           meeting_location?: string | null
           mountain_id: number
           notes?: string | null
@@ -582,6 +584,7 @@ export type Database = {
           id?: string
           invite_code?: string
           is_public?: boolean
+          max_participants?: number | null
           meeting_location?: string | null
           mountain_id?: number
           notes?: string | null
@@ -849,6 +852,38 @@ export type Database = {
           },
         ]
       }
+      plan_applications: {
+        Row: {
+          created_at: string
+          id: string
+          plan_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_applications_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_edit_history: {
         Row: {
           created_at: string
@@ -880,6 +915,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "plan_edit_history_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hiking_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          plan_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          plan_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          plan_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_messages_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "hiking_plans"
@@ -1419,6 +1486,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_plan_chat: {
+        Args: { _plan_id: string; _user_id: string }
+        Returns: boolean
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
