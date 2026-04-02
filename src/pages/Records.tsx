@@ -104,10 +104,13 @@ const Records = () => {
           <h1 className="text-xl font-bold text-foreground">기록</h1>
           <p className="text-xs text-muted-foreground mt-0.5">나와 친구들의 등산 기록</p>
         </div>
-        <Button size="sm" className="rounded-xl gap-1.5" onClick={() => { setEditingJournal(null); setShowForm(true); }}>
+        <Button data-onboarding="journal-create" size="sm" className="rounded-xl gap-1.5" onClick={() => { setEditingJournal(null); setShowForm(true); }}>
           <Plus className="h-4 w-4" /> 기록 작성
         </Button>
       </div>
+
+      {/* Feed area */}
+      <div data-onboarding="journal-feed">
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedJournal(null); }}>

@@ -95,10 +95,12 @@ const MountainList = () => {
         </p>
       </div>
 
-      {/* Interactive Map */}
-      <Suspense fallback={<LoadingSpinner message="지도를 불러오는 중..." />}>
-        <MountainMapSection />
-      </Suspense>
+      {/* Interactive Map + filters area */}
+      <div data-onboarding="mountain-explore">
+        <Suspense fallback={<LoadingSpinner message="지도를 불러오는 중..." />}>
+          <MountainMapSection />
+        </Suspense>
+      </div>
 
       {/* Search */}
       <div className="relative">

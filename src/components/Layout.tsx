@@ -55,6 +55,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       <main className="container mx-auto px-5 py-7">{children}</main>
+      <OnboardingTutorial />
 
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card" style={{ borderTop: '0.5px solid hsl(210, 58%, 86%)' }}>

@@ -179,7 +179,7 @@ const Dashboard = () => {
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
       <div className="-mx-4 -mt-6 pb-24">
         {!isDemo && <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />}
-        <OnboardingTutorial />
+        {/* OnboardingTutorial is now in Layout */}
 
         {/* ── Hero: Mountain illustration + Upcoming Hike ── */}
         <section className="relative overflow-hidden px-5 pb-8 pt-6" style={{ background: "hsl(205, 50%, 88%)" }}>
