@@ -3,6 +3,7 @@ import { Mountain, BookOpen, Users, Home, Trophy, User, LogIn, Flag, FileText } 
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/NotificationCenter";
 import MountainMascot from "@/components/MountainMascot";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
