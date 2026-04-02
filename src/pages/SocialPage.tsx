@@ -136,7 +136,7 @@ const SocialPage = () => {
       </Dialog>
 
       {/* Main Tabs: Friends | Clubs */}
-      <div className="flex gap-2">
+      <div data-onboarding="social-tabs" className="flex gap-2">
         <button
           onClick={() => setMainTab("friends")}
           className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition-colors ${

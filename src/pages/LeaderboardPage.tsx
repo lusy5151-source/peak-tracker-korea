@@ -25,7 +25,7 @@ const LeaderboardPage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 pb-24">
+    <div data-onboarding="leaderboard" className="mx-auto max-w-lg space-y-6 pb-24">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
           <Trophy className="h-5 w-5 text-primary-foreground" />

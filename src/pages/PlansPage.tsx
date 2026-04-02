@@ -157,7 +157,7 @@ const PlansPage = () => {
           <Button variant="outline" size="sm" onClick={() => setShowJoin(!showJoin)}>
             <Link2 className="h-4 w-4 mr-1" /> 코드 참여
           </Button>
-          <Button size="sm" onClick={() => navigate("/plans/create")}>
+          <Button data-onboarding="plan-create" size="sm" onClick={() => navigate("/plans/create")}>
             <Plus className="h-4 w-4 mr-1" /> 새 계획
           </Button>
         </div>
