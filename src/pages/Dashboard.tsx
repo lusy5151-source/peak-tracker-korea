@@ -28,7 +28,7 @@ import {
   Users, Flag, Crown, Flame,
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
-import OnboardingTutorial from "@/components/OnboardingTutorial";
+// OnboardingTutorial moved to Layout
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
