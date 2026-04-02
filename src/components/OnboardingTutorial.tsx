@@ -186,26 +186,28 @@ const OnboardingTutorial = () => {
     }
   }, [location.pathname, visible, currentStep, isFinal, ready]);
 
-  // Measure when ready
+  // Measure when ready — poll until element appears (handles lazy routes)
   useEffect(() => {
     if (!ready || !visible || isFinal) {
       setRect(null);
       return;
     }
-    const el = document.querySelector(steps[currentStep].targetSelector);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(measure, 450);
-    } else {
-      const retryTimer = setTimeout(() => {
-        const el2 = document.querySelector(steps[currentStep].targetSelector);
-        if (el2) {
-          el2.scrollIntoView({ behavior: "smooth", block: "center" });
-          setTimeout(measure, 300);
-        }
-      }, 500);
-      return () => clearTimeout(retryTimer);
-    }
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 20; // up to ~4 seconds
+
+    const tryFind = () => {
+      if (cancelled) return;
+      const el = document.querySelector(steps[currentStep].targetSelector);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => { if (!cancelled) measure(); }, 450);
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        setTimeout(tryFind, 200);
+      }
+    };
+    tryFind();
 
     const onScroll = () => {
       cancelAnimationFrame(rafRef.current);
@@ -214,6 +216,7 @@ const OnboardingTutorial = () => {
     window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", onScroll);
     return () => {
+      cancelled = true;
       window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(rafRef.current);
