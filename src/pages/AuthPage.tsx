@@ -54,7 +54,7 @@ const AuthPage = () => {
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: "https://peak-tracker-korea.lovable.app",
+            emailRedirectTo: "https://wandeung.com",
             data: { full_name: name.trim() },
           },
         });
@@ -96,7 +96,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: "https://wandeung.com",
         },
       });
       if (error) throw error;
