@@ -500,7 +500,7 @@ const Dashboard = () => {
           )}
 
           {/* ── Community Feed ── */}
-          <section>
+          <section data-onboarding="community-feed">
             <SectionHeader title="커뮤니티" linkTo={isDemo ? "/auth" : "/feed"} linkLabel="전체 보기" />
             {isDemo || recentJournals.length === 0 ? (
               <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
