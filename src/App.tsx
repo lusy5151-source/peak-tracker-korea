@@ -111,6 +111,7 @@ const AppRoutes = () => {
       <Route path="/admin/reports" element={<ProtectedRoute><LazyPage><AdminReportsPage /></LazyPage></ProtectedRoute>} />
       <Route path="/privacy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
       <Route path="/privacy-policy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
+      <Route path="/terms-of-service" element={<LazyPage><TermsOfServicePage /></LazyPage>} />
       <Route path="/delete-account" element={<LazyPage><DeleteAccountPage /></LazyPage>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
