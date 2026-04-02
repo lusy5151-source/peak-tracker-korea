@@ -69,6 +69,7 @@ interface Rect {
 }
 
 const OnboardingTutorial = () => {
+  const { isOnboarding, finishOnboarding } = useOnboarding();
   const [visible, setVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
@@ -82,18 +83,17 @@ const OnboardingTutorial = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const done = localStorage.getItem(ONBOARDING_KEY);
-    if (!done) {
+    if (isOnboarding) {
       const t = setTimeout(() => setVisible(true), 1000);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [isOnboarding]);
 
   const dismiss = useCallback(() => {
     setVisible(false);
-    localStorage.setItem(ONBOARDING_KEY, "true");
+    finishOnboarding();
     navigate("/");
-  }, [navigate]);
+  }, [navigate, finishOnboarding]);
 
   const isFinal = currentStep >= steps.length;
 
