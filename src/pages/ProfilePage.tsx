@@ -54,6 +54,8 @@ const ProfilePage = () => {
   const [journals, setJournals] = useState<HikingJournal[]>([]);
   const [selectedJournal, setSelectedJournal] = useState<HikingJournal | null>(null);
   const [activeTab, setActiveTab] = useState<"posts" | "stats">("posts");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const percentage = Math.round((completedCount / mountains.length) * 100);
@@ -667,14 +669,54 @@ const ProfilePage = () => {
 
         <Separator className="my-2" />
 
-        <Link
-          to="/delete-account"
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
           className="flex w-full items-center justify-center gap-2 p-3 text-sm font-medium transition-colors hover:opacity-80"
           style={{ color: '#FF696C' }}
         >
           <Trash2 className="h-4 w-4" />
-          계정 삭제
-        </Link>
+          계정 탈퇴
+        </button>
+      </div>
+
+      {/* Account deletion confirmation */}
+      <div
+        className={cn(
+          "overflow-hidden transition-all duration-300 ease-in-out",
+          showDeleteConfirm ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+        )}
+      >
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 space-y-3">
+          <h3 className="text-sm font-semibold text-destructive">계정 탈퇴</h3>
+          <p className="text-xs text-muted-foreground">
+            탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary/50"
+            >
+              취소
+            </button>
+            <button
+              onClick={async () => {
+                setDeletingAccount(true);
+                try {
+                  const { error } = await supabase.rpc('delete_user_account' as any);
+                  if (error) throw error;
+                  await signOut();
+                } catch (err: any) {
+                  toast({ title: "탈퇴 실패", description: "다시 시도해주세요.", variant: "destructive" });
+                  setDeletingAccount(false);
+                }
+              }}
+              disabled={deletingAccount}
+              className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-50"
+            >
+              {deletingAccount ? "처리 중..." : "탈퇴하기"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
