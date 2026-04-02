@@ -27,32 +27,31 @@ export const EmailChangeEmail = ({
   newEmail,
   confirmationUrl,
 }: EmailChangeEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="ko" dir="ltr">
     <Head />
-    <Preview>Confirm your email change for {siteName}</Preview>
+    <Preview>{siteName} 이메일 변경 확인</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email change</Heading>
+        <Heading style={h1}>이메일 변경 확인</Heading>
         <Text style={text}>
-          You requested to change your email address for {siteName} from{' '}
+          {siteName}의 이메일 주소를{' '}
           <Link href={`mailto:${email}`} style={link}>
             {email}
-          </Link>{' '}
-          to{' '}
+          </Link>
+          에서{' '}
           <Link href={`mailto:${newEmail}`} style={link}>
             {newEmail}
           </Link>
-          .
+          (으)로 변경 요청하셨습니다.
         </Text>
         <Text style={text}>
-          Click the button below to confirm this change:
+          아래 버튼을 클릭하여 이메일 변경을 확인해 주세요.
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Confirm Email Change
+          이메일 변경 확인하기
         </Button>
         <Text style={footer}>
-          If you didn't request this change, please secure your account
-          immediately.
+          본인이 요청하지 않으셨다면 즉시 계정 보안을 확인해 주세요.
         </Text>
       </Container>
     </Body>
@@ -61,26 +60,26 @@ export const EmailChangeEmail = ({
 
 export default EmailChangeEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'Noto Sans KR', Arial, sans-serif" }
 const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: 'hsl(159, 15%, 22%)',
   margin: '0 0 20px',
 }
 const text = {
   fontSize: '14px',
-  color: '#55575d',
+  color: 'hsl(159, 10%, 45%)',
   lineHeight: '1.5',
   margin: '0 0 25px',
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: 'hsl(69, 55%, 63%)',
   color: '#ffffff',
   fontSize: '14px',
-  borderRadius: '8px',
+  borderRadius: '0.75rem',
   padding: '12px 20px',
   textDecoration: 'none',
 }
