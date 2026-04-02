@@ -206,7 +206,7 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming schedule card */}
-            <div className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
+            <div data-onboarding="upcoming-schedule" className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
               <p className="text-xs font-semibold text-muted-foreground mb-2">다가오는 일정</p>
               {isDemo ? (
                 /* Demo upcoming plan */
