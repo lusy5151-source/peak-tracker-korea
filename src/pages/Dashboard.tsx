@@ -28,7 +28,7 @@ import {
   Users, Flag, Crown, Flame,
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
-import OnboardingTutorial from "@/components/OnboardingTutorial";
+// OnboardingTutorial moved to Layout
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -179,7 +179,7 @@ const Dashboard = () => {
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
       <div className="-mx-4 -mt-6 pb-24">
         {!isDemo && <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />}
-        <OnboardingTutorial />
+        {/* OnboardingTutorial is now in Layout */}
 
         {/* ── Hero: Mountain illustration + Upcoming Hike ── */}
         <section className="relative overflow-hidden px-5 pb-8 pt-6" style={{ background: "hsl(205, 50%, 88%)" }}>
@@ -204,7 +204,7 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming schedule card */}
-            <div data-onboarding="upcoming-schedule" className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
+            <div className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
               <p className="text-xs font-semibold text-muted-foreground mb-2">다가오는 일정</p>
               {isDemo ? (
                 /* Demo upcoming plan */
@@ -500,7 +500,7 @@ const Dashboard = () => {
           )}
 
           {/* ── Community Feed ── */}
-          <section data-onboarding="community-feed">
+          <section>
             <SectionHeader title="커뮤니티" linkTo={isDemo ? "/auth" : "/feed"} linkLabel="전체 보기" />
             {isDemo || recentJournals.length === 0 ? (
               <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
@@ -541,7 +541,7 @@ const Dashboard = () => {
           </section>
 
           {/* ── Badge Gallery ── */}
-          <section data-onboarding="badge-gallery">
+          <section>
             <SectionHeader title="업적 갤러리" linkTo="/achievements" linkLabel="전체 보기" />
             <div className="rounded-3xl bg-purple-light border border-border p-5 shadow-sm">
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">

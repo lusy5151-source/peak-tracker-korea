@@ -1,39 +1,64 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 
 const ONBOARDING_KEY = "onboarding_completed";
 
 interface OnboardingStep {
   targetSelector: string;
+  route: string;
   title: string;
   description: string;
 }
 
 const steps: OnboardingStep[] = [
   {
-    targetSelector: '[data-onboarding="upcoming-schedule"]',
-    title: "등산 계획을 세워보세요 📅",
-    description: "친구들과 함께 등산 일정을 만들고 공유할 수 있어요",
-  },
-  {
-    targetSelector: '[data-onboarding="summit-claim"]',
-    title: "정상을 인증하세요 🏔",
-    description: "산 정상에서 인증하면 리더보드에 이름이 올라가요!",
-  },
-  {
+    route: "/",
     targetSelector: '[data-onboarding="progress-ring"]',
     title: "100대 명산 완등에 도전하세요 🎯",
     description: "완등한 산을 기록하고 목표를 향해 나아가세요",
   },
   {
-    targetSelector: '[data-onboarding="community-feed"]',
-    title: "친구들의 등산 기록을 확인하세요 👥",
-    description: "친구를 추가하고 서로의 등산 일지를 공유해보세요",
+    route: "/",
+    targetSelector: '[data-onboarding="summit-claim"]',
+    title: "정상을 인증하세요 🏔",
+    description: "산 정상에서 인증하면 리더보드에 이름이 올라가요!",
   },
   {
-    targetSelector: '[data-onboarding="badge-gallery"]',
-    title: "업적을 모아보세요 🏆",
-    description: "등산하면서 다양한 업적과 챌린지를 달성할 수 있어요",
+    route: "/mountains",
+    targetSelector: '[data-onboarding="mountain-explore"]',
+    title: "산을 탐색해보세요 🗺",
+    description: "140개의 산을 지도에서 찾고 완등/미등으로 관리하세요",
+  },
+  {
+    route: "/records",
+    targetSelector: '[data-onboarding="journal-feed"]',
+    title: "등산 일지를 작성하세요 📔",
+    description: "등산 후 사진과 함께 소중한 기록을 남겨보세요",
+  },
+  {
+    route: "/records",
+    targetSelector: '[data-onboarding="journal-create"]',
+    title: "나만의 등산 기록 작성 ✍️",
+    description: "코스, 날씨, 사진, 메모를 함께 기록할 수 있어요",
+  },
+  {
+    route: "/leaderboard",
+    targetSelector: '[data-onboarding="leaderboard"]',
+    title: "정상 정복 순위를 확인하세요 🏆",
+    description: "가장 많은 정상을 정복한 등산왕은 누구일까요?",
+  },
+  {
+    route: "/plans",
+    targetSelector: '[data-onboarding="plan-create"]',
+    title: "등산 계획을 세워보세요 📅",
+    description: "친구들과 함께 등산 일정을 만들고 공유할 수 있어요",
+  },
+  {
+    route: "/social",
+    targetSelector: '[data-onboarding="social-tabs"]',
+    title: "친구와 함께 걸어요 👥",
+    description: "친구를 추가하고 산악회를 만들어 함께 등산해요",
   },
 ];
 
@@ -52,7 +77,10 @@ const OnboardingTutorial = () => {
     top: 0, left: 0, arrowLeft: 50, arrowDir: "up",
   });
   const [fading, setFading] = useState(false);
+  const [ready, setReady] = useState(false);
   const rafRef = useRef<number>(0);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
@@ -65,7 +93,8 @@ const OnboardingTutorial = () => {
   const dismiss = useCallback(() => {
     setVisible(false);
     localStorage.setItem(ONBOARDING_KEY, "true");
-  }, []);
+    navigate("/");
+  }, [navigate]);
 
   const isFinal = currentStep >= steps.length;
 
@@ -83,7 +112,6 @@ const OnboardingTutorial = () => {
     };
     setRect(sr);
 
-    // tooltip
     const tw = Math.min(280, window.innerWidth - 32);
     const spaceBelow = window.innerHeight - r.bottom;
     let tTop: number;
@@ -103,12 +131,48 @@ const OnboardingTutorial = () => {
     setTooltipPos({ top: tTop, left: tLeft, arrowLeft, arrowDir });
   }, [currentStep, isFinal, visible]);
 
+  // Navigate to correct route when step changes
   useEffect(() => {
-    if (!visible || isFinal) { setRect(null); return; }
+    if (!visible || isFinal) return;
+    const step = steps[currentStep];
+    if (location.pathname !== step.route) {
+      setReady(false);
+      navigate(step.route);
+    } else {
+      // Already on the right route, wait for DOM
+      setReady(false);
+      const t = setTimeout(() => setReady(true), 300);
+      return () => clearTimeout(t);
+    }
+  }, [visible, currentStep, isFinal]);
+
+  // After route change, wait for elements to render
+  useEffect(() => {
+    if (!visible || isFinal) return;
+    const step = steps[currentStep];
+    if (location.pathname === step.route && !ready) {
+      const t = setTimeout(() => setReady(true), 500);
+      return () => clearTimeout(t);
+    }
+  }, [location.pathname, visible, currentStep, isFinal, ready]);
+
+  // Measure when ready
+  useEffect(() => {
+    if (!ready || !visible || isFinal) { setRect(null); return; }
     const el = document.querySelector(steps[currentStep].targetSelector);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       setTimeout(measure, 450);
+    } else {
+      // Element not found, try again
+      const retryTimer = setTimeout(() => {
+        const el2 = document.querySelector(steps[currentStep].targetSelector);
+        if (el2) {
+          el2.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(measure, 300);
+        }
+      }, 500);
+      return () => clearTimeout(retryTimer);
     }
 
     const onScroll = () => {
@@ -122,26 +186,27 @@ const OnboardingTutorial = () => {
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [visible, currentStep, isFinal, measure]);
+  }, [ready, visible, currentStep, isFinal, measure]);
 
   const goNext = useCallback(() => {
     setFading(true);
     setTimeout(() => {
       setCurrentStep((s) => s + 1);
+      setReady(false);
       setFading(false);
     }, 200);
   }, []);
 
   if (!visible) return null;
 
-  const totalDots = steps.length + 1; // +1 for final screen
+  const totalSteps = steps.length;
 
   return (
     <>
-      {/* Overlay: dark background */}
-      <div className="fixed inset-0 z-[9998]" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} />
+      {/* Overlay */}
+      <div className="fixed inset-0 z-[9998]" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} />
 
-      {/* Spotlight cutout (uses huge box-shadow to darken everything except the rect) */}
+      {/* Spotlight */}
       {rect && !isFinal && (
         <div
           className="fixed z-[9999] rounded-2xl transition-all duration-300 ease-out"
@@ -151,25 +216,30 @@ const OnboardingTutorial = () => {
             width: rect.width,
             height: rect.height,
             border: "3px solid #C7D66D",
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6), 0 0 20px rgba(199,214,109,0.3)",
+            boxShadow: "0 0 0 9999px rgba(0,0,0,0.3), 0 0 20px rgba(199,214,109,0.3)",
             backgroundColor: "transparent",
             pointerEvents: "none",
           }}
         />
       )}
 
-      {/* Skip button */}
+      {/* Top bar: Skip + Step counter */}
       {!isFinal && (
-        <button
-          onClick={dismiss}
-          className="fixed top-4 right-4 z-[10001] flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors backdrop-blur-sm"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        >
-          건너뛰기 <X className="h-4 w-4" />
-        </button>
+        <div className="fixed top-4 right-4 z-[10001] flex items-center gap-3">
+          <span className="text-sm font-semibold text-white/90 tabular-nums">
+            {currentStep + 1}/{totalSteps}
+          </span>
+          <button
+            onClick={dismiss}
+            className="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors backdrop-blur-sm"
+            style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+          >
+            건너뛰기 <X className="h-4 w-4" />
+          </button>
+        </div>
       )}
 
-      {/* Tooltip bubble */}
+      {/* Tooltip */}
       {!isFinal && rect && (
         <div
           className={`fixed z-[10001] transition-all duration-200 ${fading ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
@@ -180,7 +250,6 @@ const OnboardingTutorial = () => {
             width: Math.min(280, window.innerWidth - 32),
           }}
         >
-          {/* Arrow up */}
           {tooltipPos.arrowDir === "up" && (
             <div
               className="absolute -top-2 w-4 h-4 rotate-45 bg-white"
@@ -192,7 +261,7 @@ const OnboardingTutorial = () => {
             <p className="text-[13px] text-[#2F403A]/70 leading-relaxed">{steps[currentStep].description}</p>
             <div className="mt-4 flex items-center justify-between">
               <div className="flex gap-1.5">
-                {Array.from({ length: totalDots }).map((_, i) => (
+                {Array.from({ length: totalSteps + 1 }).map((_, i) => (
                   <div
                     key={i}
                     className="h-2 w-2 rounded-full transition-all duration-200"
@@ -212,7 +281,6 @@ const OnboardingTutorial = () => {
               </button>
             </div>
           </div>
-          {/* Arrow down */}
           {tooltipPos.arrowDir === "down" && (
             <div
               className="absolute -bottom-2 w-4 h-4 rotate-45 bg-white"
@@ -227,8 +295,8 @@ const OnboardingTutorial = () => {
         <div className="fixed inset-0 z-[10001] flex items-center justify-center px-8">
           <div className={`bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transition-all duration-300 ${fading ? "opacity-0 scale-90" : "opacity-100 scale-100"}`}>
             <div className="text-5xl mb-4">🏔</div>
-            <h2 className="text-xl font-bold text-[#2F403A] mb-2">완등과 함께 시작해볼까요? 🏔</h2>
-            <p className="text-sm text-[#2F403A]/70 mb-6">지금 바로 첫 번째 산을 기록해보세요!</p>
+            <h2 className="text-xl font-bold text-[#2F403A] mb-2">이제 시작할 준비가 됐어요! 🏔</h2>
+            <p className="text-sm text-[#2F403A]/70 mb-6">완등과 함께 나만의 등산 기록을 시작해볼까요?</p>
             <button
               onClick={dismiss}
               className="w-full rounded-2xl px-6 py-3.5 text-base font-bold transition-all hover:opacity-90 active:scale-95"
@@ -237,11 +305,11 @@ const OnboardingTutorial = () => {
               시작하기
             </button>
             <div className="flex justify-center gap-1.5 mt-5">
-              {Array.from({ length: totalDots }).map((_, i) => (
+              {Array.from({ length: totalSteps + 1 }).map((_, i) => (
                 <div
                   key={i}
                   className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: i === steps.length ? "#C7D66D" : "#E5E7EB" }}
+                  style={{ backgroundColor: i === totalSteps ? "#C7D66D" : "#E5E7EB" }}
                 />
               ))}
             </div>

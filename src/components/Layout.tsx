@@ -3,6 +3,7 @@ import { Mountain, BookOpen, Users, Home, Trophy, User, LogIn, Flag, FileText } 
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/NotificationCenter";
 import MountainMascot from "@/components/MountainMascot";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 
 const navItems = [
   { to: "/", label: "홈", icon: Home },
@@ -54,6 +55,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       <main className="container mx-auto px-5 py-7">{children}</main>
+      <OnboardingTutorial />
 
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card" style={{ borderTop: '0.5px solid hsl(210, 58%, 86%)' }}>
