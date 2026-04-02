@@ -288,13 +288,13 @@ function DemoRecordsView() {
           <p className="text-xs text-muted-foreground mt-0.5">등산 커뮤니티의 최근 기록</p>
         </div>
         <Link to="/auth">
-          <Button size="sm" className="rounded-xl gap-1.5">
+          <Button data-onboarding="journal-create" size="sm" className="rounded-xl gap-1.5">
             <Plus className="h-4 w-4" /> 기록 작성
           </Button>
         </Link>
       </div>
 
-      <div className="space-y-4">
+      <div data-onboarding="journal-feed" className="space-y-4">
         {demoJournals.map((j) => {
           const mt = mountains.find((m) => m.id === j.mountain_id);
           return (
