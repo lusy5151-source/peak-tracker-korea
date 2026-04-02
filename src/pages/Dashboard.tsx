@@ -273,7 +273,7 @@ const Dashboard = () => {
 
           {/* ── CTA Buttons (side by side) ── */}
           <section className="grid grid-cols-2 gap-3">
-            <Link to={isDemo ? "/auth" : "/summit-claim"}>
+            <Link to={isDemo ? "/auth" : "/summit-claim"} data-onboarding="summit-claim">
               <Button className="w-full h-14 rounded-2xl text-sm font-bold gap-2 shadow-lg bg-primary hover:bg-primary/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
                 <Flag className="h-5 w-5" />
                 정상 인증하기
