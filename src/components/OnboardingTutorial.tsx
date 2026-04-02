@@ -144,29 +144,25 @@ const OnboardingTutorial = () => {
     setRect(sr);
 
     const tw = Math.min(300, window.innerWidth - 32);
-    const spaceBelow = window.innerHeight - r.bottom;
+    const th = 148;
     const bannerHeight = 52;
-    const spaceAbove = r.top - bannerHeight - 40; // 40px for skip button area
-    let tTop: number;
-    let arrowDir: "up" | "down";
-    if (spaceBelow > 180) {
-      tTop = sr.top + sr.height + 14;
-      arrowDir = "up";
-    } else if (spaceAbove > 140) {
-      tTop = sr.top - 14;
-      arrowDir = "down";
-    } else {
-      // Neither above nor below has enough space — place below anyway, clamped
-      tTop = Math.max(bannerHeight + 48, sr.top + sr.height + 14);
-      arrowDir = "up";
-    }
-    // Never render behind the top banner
-    if (arrowDir === "up") {
-      tTop = Math.max(bannerHeight + 48, tTop);
-    }
+    const topSafe = bannerHeight + 12;
+    const bottomSafe = 16;
+    const gap = 14;
+    const spaceBelow = window.innerHeight - r.bottom - bottomSafe;
+    const spaceAbove = r.top - topSafe;
+
+    let tTop = spaceBelow >= th + gap
+      ? sr.top + sr.height + gap
+      : sr.top - th - gap;
+
+    const arrowDir: "up" | "down" =
+      spaceBelow >= th + gap || spaceBelow >= spaceAbove ? "up" : "down";
+
+    tTop = Math.max(topSafe, Math.min(tTop, window.innerHeight - th - bottomSafe));
+
     const cx = sr.left + sr.width / 2;
-    let tLeft = cx - tw / 2;
-    tLeft = Math.max(16, Math.min(tLeft, window.innerWidth - tw - 16));
+    let tLeft = Math.max(16, Math.min(cx - tw / 2, window.innerWidth - tw - 16));
     const arrowLeft = Math.max(20, Math.min(cx - tLeft, tw - 20));
 
     setTooltipPos({ top: tTop, left: tLeft, arrowLeft, arrowDir });
