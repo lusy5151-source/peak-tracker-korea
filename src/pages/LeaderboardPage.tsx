@@ -1,5 +1,6 @@
 import { useLeaderboard } from "@/hooks/useSummits";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import { demoLeaderboard, demoGroups } from "@/data/demoFeed";
 import { mountains } from "@/data/mountains";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
