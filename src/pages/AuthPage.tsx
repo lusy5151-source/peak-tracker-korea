@@ -280,13 +280,61 @@ const AuthPage = () => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {fieldErrors.password && <p className="mt-1 text-xs text-destructive">{fieldErrors.password}</p>}
+          {fieldErrors.password && <p className="mt-1 text-xs text-destructive">{fieldErrors.password}</p>}
           </div>
+
+          {/* Consent checkboxes - signup only */}
+          {!isLogin && (
+            <div className="space-y-2.5 py-1">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreePrivacy}
+                  onChange={(e) => { setAgreePrivacy(e.target.checked); setFieldErrors(prev => ({ ...prev, consent: "" })); }}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-[#C7D66D] shrink-0"
+                />
+                <span className="text-[13px] text-foreground leading-snug">
+                  <span className="text-destructive font-medium">(필수)</span> 개인정보처리방침에 동의합니다{" "}
+                  <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">전문 보기</a>
+                </span>
+              </label>
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreeTerms}
+                  onChange={(e) => { setAgreeTerms(e.target.checked); setFieldErrors(prev => ({ ...prev, consent: "" })); }}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-[#C7D66D] shrink-0"
+                />
+                <span className="text-[13px] text-foreground leading-snug">
+                  <span className="text-destructive font-medium">(필수)</span> 이용약관에 동의합니다{" "}
+                  <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">전문 보기</a>
+                </span>
+              </label>
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreeMarketing}
+                  onChange={(e) => setAgreeMarketing(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-[#C7D66D] shrink-0"
+                />
+                <span className="text-[13px] text-muted-foreground leading-snug">
+                  (선택) 마케팅 정보 수신에 동의합니다
+                </span>
+              </label>
+              {fieldErrors.consent && <p className="text-xs text-destructive">{fieldErrors.consent}</p>}
+            </div>
+          )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            disabled={loading || (!isLogin && !canSignup)}
+            className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-50 ${
+              !isLogin && canSignup
+                ? "bg-[#C7D66D] text-[#2F403A] hover:bg-[#b8c85e]"
+                : !isLogin
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+            }`}
           >
             {loading ? "처리 중..." : isLogin ? "로그인" : "회원가입"}
             {!loading && <ArrowRight className="h-4 w-4" />}
@@ -295,17 +343,9 @@ const AuthPage = () => {
 
         <p className="text-center text-sm text-muted-foreground">
           {isLogin ? "계정이 없으신가요?" : "이미 계정이 있으신가요?"}{" "}
-          <button onClick={() => { setIsLogin(!isLogin); setFieldErrors({}); }} className="font-medium text-primary hover:underline">
+          <button onClick={() => { setIsLogin(!isLogin); setFieldErrors({}); setAgreePrivacy(false); setAgreeTerms(false); setAgreeMarketing(false); }} className="font-medium text-primary hover:underline">
             {isLogin ? "회원가입" : "로그인"}
           </button>
-        </p>
-
-        <p className="text-center text-[11px] text-muted-foreground/70">
-          가입 시{" "}
-          <a href="/privacy" className="text-primary hover:underline">
-            개인정보처리방침
-          </a>
-          에 동의하는 것으로 간주합니다.
         </p>
       </div>
     </div>
