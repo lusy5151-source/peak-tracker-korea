@@ -141,7 +141,7 @@ const PlansPage = () => {
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
         <Mountain className="h-10 w-10 text-muted-foreground" />
         <p className="text-muted-foreground">로그인이 필요합니다</p>
-        <Button onClick={() => navigate("/auth")}>로그인</Button>
+        <Button data-onboarding="plan-create" onClick={() => navigate("/auth")}>로그인</Button>
       </div>);
 
   }
