@@ -95,7 +95,39 @@ const sections = [
     ),
   },
   {
-    title: "제8조 (개인정보 자동 수집 장치)",
+    title: "제8조 (위치정보 수집 및 이용)",
+    content: (
+      <>
+        <p>회사는 다음의 목적으로 이용자의 위치 정보를 수집·이용할 수 있습니다.</p>
+        <p className="mt-3 font-medium text-foreground">수집 목적:</p>
+        <ul className="ml-4 list-disc space-y-1">
+          <li>주변 산 검색 및 추천</li>
+          <li>등산 코스 안내 및 정상 인증</li>
+          <li>날씨 정보 제공 (현재 위치 기반)</li>
+        </ul>
+        <p className="mt-3 font-medium text-foreground">수집 방법:</p>
+        <ul className="ml-4 list-disc space-y-1">
+          <li>이용자가 서비스 이용 시 직접 동의 후 수집</li>
+          <li>GPS, Wi-Fi, 기지국 정보를 통해 수집</li>
+        </ul>
+        <p className="mt-3 font-medium text-foreground">보유 기간:</p>
+        <ul className="ml-4 list-disc space-y-1">
+          <li>서비스 이용 목적 달성 시 즉시 삭제</li>
+          <li>등산 기록에 저장된 위치 정보는 이용자가 삭제 시 삭제</li>
+        </ul>
+        <p className="mt-3 font-medium text-foreground">동의 철회:</p>
+        <ul className="ml-4 list-disc space-y-1">
+          <li>기기 설정 → 앱 권한 → 위치 권한 해제로 언제든지 철회 가능</li>
+          <li>위치 권한 미동의 시 일부 서비스 이용이 제한될 수 있습니다.</li>
+        </ul>
+        <p className="mt-3 text-xs text-muted-foreground/70">
+          관련 법령: 위치정보의 보호 및 이용 등에 관한 법률
+        </p>
+      </>
+    ),
+  },
+  {
+    title: "제9조 (개인정보 자동 수집 장치)",
     content: (
       <p>
         회사는 서비스 개선을 위해 쿠키 및 유사 기술을 사용할 수 있습니다.
@@ -112,7 +144,6 @@ const PrivacyPolicyPage = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F8FAED" }}>
       <div className="mx-auto max-w-2xl px-4 py-8 pb-24">
-        {/* Back button */}
         <button
           onClick={() => navigate(-1)}
           className="mb-6 flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -121,14 +152,12 @@ const PrivacyPolicyPage = () => {
           돌아가기
         </button>
 
-        {/* Header */}
         <h1 className="text-2xl font-bold text-foreground">개인정보처리방침</h1>
         <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           완등(이하 "회사")은 이용자의 개인정보를 중요시하며, 「개인정보 보호법」을 준수합니다.
         </p>
         <p className="mt-1 text-xs text-muted-foreground/70">시행일: 2026년 4월 2일</p>
 
-        {/* Sections */}
         <div className="mt-8 space-y-4">
           {sections.map((section) => (
             <section
