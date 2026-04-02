@@ -26,6 +26,9 @@ const AuthPage = () => {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [signupEmail, setSignupEmail] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeMarketing, setAgreeMarketing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
