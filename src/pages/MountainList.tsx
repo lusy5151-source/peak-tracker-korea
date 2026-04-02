@@ -96,7 +96,7 @@ const MountainList = () => {
       </div>
 
       {/* Interactive Map + filters area */}
-      <div data-onboarding="mountain-explore">
+      <div data-onboarding="mountain-map">
         <Suspense fallback={<LoadingSpinner message="지도를 불러오는 중..." />}>
           <MountainMapSection />
         </Suspense>
