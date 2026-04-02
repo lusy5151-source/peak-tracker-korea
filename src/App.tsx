@@ -48,6 +48,7 @@ const AdminReportsPage = lazy(() => import("@/pages/AdminReportsPage"));
 const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const DeleteAccountPage = lazy(() => import("@/pages/DeleteAccountPage"));
+const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
