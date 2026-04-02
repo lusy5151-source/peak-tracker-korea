@@ -44,9 +44,12 @@ const AuthPage = () => {
     if (!email.trim()) errors.email = "이메일을 입력해주세요.";
     if (!password) errors.password = "비밀번호를 입력해주세요.";
     else if (password.length < 8) errors.password = "비밀번호는 최소 8자 이상이어야 합니다.";
+    if (!isLogin && (!agreePrivacy || !agreeTerms)) errors.consent = "필수 약관에 동의해주세요.";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
+  const canSignup = isLogin || (agreePrivacy && agreeTerms);
 
   const handleResendEmail = useCallback(async () => {
     if (resendCooldown > 0 || !signupEmail) return;
