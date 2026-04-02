@@ -1,13 +1,13 @@
 project_id = "mnrwrppfwaftzhfqewsu"
 
-[functions.get-weather]
-verify_jwt = false
-
-[functions.plan-reminders]
-verify_jwt = false
-
-[functions.kakao-auth]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.get-weather]
+    verify_jwt = false
+  [functions.kakao-auth]
+    verify_jwt = false
+  [functions.plan-reminders]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
