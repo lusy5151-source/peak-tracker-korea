@@ -96,7 +96,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: "https://wandeung.com",
         },
       });
       if (error) throw error;
