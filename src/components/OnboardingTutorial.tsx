@@ -37,7 +37,7 @@ const steps: OnboardingStep[] = [
   },
 ];
 
-interface SpotlightRect {
+interface Rect {
   top: number;
   left: number;
   width: number;
@@ -47,18 +47,18 @@ interface SpotlightRect {
 const OnboardingTutorial = () => {
   const [visible, setVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [spotlight, setSpotlight] = useState<SpotlightRect | null>(null);
-  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
-  const [arrowStyle, setArrowStyle] = useState<React.CSSProperties>({});
-  const [arrowDirection, setArrowDirection] = useState<"top" | "bottom">("top");
-  const [transitioning, setTransitioning] = useState(false);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<Rect | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; arrowLeft: number; arrowDir: "up" | "down" }>({
+    top: 0, left: 0, arrowLeft: 50, arrowDir: "up",
+  });
+  const [fading, setFading] = useState(false);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) {
-      const timer = setTimeout(() => setVisible(true), 800);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setVisible(true), 1000);
+      return () => clearTimeout(t);
     }
   }, []);
 
@@ -67,189 +67,132 @@ const OnboardingTutorial = () => {
     localStorage.setItem(ONBOARDING_KEY, "true");
   }, []);
 
-  const isFinalScreen = currentStep >= steps.length;
+  const isFinal = currentStep >= steps.length;
 
-  const computePositions = useCallback(() => {
-    if (isFinalScreen) {
-      setSpotlight(null);
-      return;
-    }
-    const step = steps[currentStep];
-    const el = document.querySelector(step.targetSelector);
-    if (!el) {
-      setSpotlight(null);
-      return;
-    }
-    const rect = el.getBoundingClientRect();
-    const padding = 8;
-    const sr: SpotlightRect = {
-      top: rect.top - padding + window.scrollY,
-      left: rect.left - padding,
-      width: rect.width + padding * 2,
-      height: rect.height + padding * 2,
+  const measure = useCallback(() => {
+    if (isFinal || !visible) return;
+    const el = document.querySelector(steps[currentStep].targetSelector);
+    if (!el) { setRect(null); return; }
+    const r = el.getBoundingClientRect();
+    const pad = 6;
+    const sr: Rect = {
+      top: r.top - pad,
+      left: r.left - pad,
+      width: r.width + pad * 2,
+      height: r.height + pad * 2,
     };
-    setSpotlight(sr);
+    setRect(sr);
 
-    // Tooltip positioning
-    const tooltipWidth = Math.min(300, window.innerWidth - 32);
-    const viewportTop = rect.top;
-    const viewportBottom = window.innerHeight - rect.bottom;
-
-    let top: number;
-    let dir: "top" | "bottom";
-
-    if (viewportBottom > 160) {
-      top = sr.top + sr.height + 16;
-      dir = "top";
+    // tooltip
+    const tw = Math.min(280, window.innerWidth - 32);
+    const spaceBelow = window.innerHeight - r.bottom;
+    let tTop: number;
+    let arrowDir: "up" | "down";
+    if (spaceBelow > 170) {
+      tTop = sr.top + sr.height + 12;
+      arrowDir = "up";
     } else {
-      top = sr.top - 16;
-      dir = "bottom";
+      tTop = sr.top - 12;
+      arrowDir = "down";
     }
+    const cx = sr.left + sr.width / 2;
+    let tLeft = cx - tw / 2;
+    tLeft = Math.max(16, Math.min(tLeft, window.innerWidth - tw - 16));
+    const arrowLeft = Math.max(20, Math.min(cx - tLeft, tw - 20));
 
-    const centerX = sr.left + sr.width / 2;
-    let left = centerX - tooltipWidth / 2;
-    left = Math.max(16, Math.min(left, window.innerWidth - tooltipWidth - 16));
-
-    if (dir === "bottom") {
-      setTooltipStyle({
-        position: "absolute",
-        top: "auto",
-        bottom: `${document.documentElement.scrollHeight - top}px`,
-        left: `${left}px`,
-        width: `${tooltipWidth}px`,
-      });
-    } else {
-      setTooltipStyle({
-        position: "absolute",
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${tooltipWidth}px`,
-      });
-    }
-
-    const arrowLeft = centerX - left - 8;
-    setArrowStyle({ left: `${Math.max(16, Math.min(arrowLeft, tooltipWidth - 32))}px` });
-    setArrowDirection(dir);
-  }, [currentStep, isFinalScreen]);
+    setTooltipPos({ top: tTop, left: tLeft, arrowLeft, arrowDir });
+  }, [currentStep, isFinal, visible]);
 
   useEffect(() => {
-    if (!visible) return;
-    if (isFinalScreen) {
-      setSpotlight(null);
-      return;
-    }
-
-    const step = steps[currentStep];
-    const el = document.querySelector(step.targetSelector);
+    if (!visible || isFinal) { setRect(null); return; }
+    const el = document.querySelector(steps[currentStep].targetSelector);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(computePositions, 400);
-    } else {
-      computePositions();
+      setTimeout(measure, 450);
     }
 
-    const handleResize = () => computePositions();
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleResize);
+    const onScroll = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(measure);
     };
-  }, [visible, currentStep, computePositions, isFinalScreen]);
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [visible, currentStep, isFinal, measure]);
 
   const goNext = useCallback(() => {
-    setTransitioning(true);
+    setFading(true);
     setTimeout(() => {
       setCurrentStep((s) => s + 1);
-      setTransitioning(false);
+      setFading(false);
     }, 200);
   }, []);
 
   if (!visible) return null;
 
-  return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[9999]"
-      style={{ pointerEvents: "auto" }}
-    >
-      {/* Dark overlay with spotlight cutout */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        style={{ minHeight: document.documentElement.scrollHeight }}
-        preserveAspectRatio="none"
-        viewBox={`0 0 ${window.innerWidth} ${document.documentElement.scrollHeight}`}
-      >
-        <defs>
-          <mask id="onboarding-mask">
-            <rect width="100%" height="100%" fill="white" />
-            {spotlight && (
-              <rect
-                x={spotlight.left}
-                y={spotlight.top}
-                width={spotlight.width}
-                height={spotlight.height}
-                rx="16"
-                fill="black"
-                className="transition-all duration-300 ease-out"
-              />
-            )}
-          </mask>
-        </defs>
-        <rect
-          width="100%"
-          height="100%"
-          fill="rgba(0,0,0,0.6)"
-          mask="url(#onboarding-mask)"
-        />
-      </svg>
+  const totalDots = steps.length + 1; // +1 for final screen
 
-      {/* Spotlight highlight border */}
-      {spotlight && !isFinalScreen && (
+  return (
+    <>
+      {/* Overlay: dark background */}
+      <div className="fixed inset-0 z-[9998]" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} />
+
+      {/* Spotlight cutout (uses huge box-shadow to darken everything except the rect) */}
+      {rect && !isFinal && (
         <div
-          className="absolute rounded-2xl transition-all duration-300 ease-out pointer-events-none"
+          className="fixed z-[9999] rounded-2xl transition-all duration-300 ease-out"
           style={{
-            top: spotlight.top,
-            left: spotlight.left,
-            width: spotlight.width,
-            height: spotlight.height,
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
             border: "3px solid #C7D66D",
-            boxShadow: "0 0 20px rgba(199, 214, 109, 0.3)",
+            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6), 0 0 20px rgba(199,214,109,0.3)",
+            backgroundColor: "transparent",
+            pointerEvents: "none",
           }}
         />
       )}
 
       {/* Skip button */}
-      {!isFinalScreen && (
+      {!isFinal && (
         <button
           onClick={dismiss}
-          className="fixed top-4 right-4 z-[10001] flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors"
+          className="fixed top-4 right-4 z-[10001] flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors backdrop-blur-sm"
+          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
         >
           건너뛰기 <X className="h-4 w-4" />
         </button>
       )}
 
-      {/* Tooltip */}
-      {!isFinalScreen && spotlight && (
+      {/* Tooltip bubble */}
+      {!isFinal && rect && (
         <div
-          className={`z-[10001] transition-all duration-200 ease-out ${transitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
-          style={tooltipStyle}
+          className={`fixed z-[10001] transition-all duration-200 ${fading ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+          style={{
+            top: tooltipPos.arrowDir === "up" ? tooltipPos.top : undefined,
+            bottom: tooltipPos.arrowDir === "down" ? window.innerHeight - tooltipPos.top : undefined,
+            left: tooltipPos.left,
+            width: Math.min(280, window.innerWidth - 32),
+          }}
         >
-          {/* Arrow */}
-          {arrowDirection === "top" && (
+          {/* Arrow up */}
+          {tooltipPos.arrowDir === "up" && (
             <div
-              className="absolute -top-2 w-4 h-4 rotate-45 bg-white rounded-sm"
-              style={arrowStyle}
+              className="absolute -top-2 w-4 h-4 rotate-45 bg-white"
+              style={{ left: tooltipPos.arrowLeft - 8, borderRadius: 2 }}
             />
           )}
-          <div className="relative bg-white rounded-2xl p-5 shadow-2xl">
-            <h3 className="text-base font-bold text-[#2F403A] mb-1.5">{steps[currentStep].title}</h3>
-            <p className="text-sm text-[#2F403A]/70 leading-relaxed">{steps[currentStep].description}</p>
-
-            {/* Progress dots + buttons */}
-            <div className="mt-5 flex items-center justify-between">
+          <div className="bg-white rounded-2xl p-5 shadow-2xl">
+            <h3 className="text-[15px] font-bold text-[#2F403A] mb-1">{steps[currentStep].title}</h3>
+            <p className="text-[13px] text-[#2F403A]/70 leading-relaxed">{steps[currentStep].description}</p>
+            <div className="mt-4 flex items-center justify-between">
               <div className="flex gap-1.5">
-                {steps.map((_, i) => (
+                {Array.from({ length: totalDots }).map((_, i) => (
                   <div
                     key={i}
                     className="h-2 w-2 rounded-full transition-all duration-200"
@@ -269,21 +212,20 @@ const OnboardingTutorial = () => {
               </button>
             </div>
           </div>
-          {arrowDirection === "bottom" && (
+          {/* Arrow down */}
+          {tooltipPos.arrowDir === "down" && (
             <div
-              className="absolute -bottom-2 w-4 h-4 rotate-45 bg-white rounded-sm"
-              style={arrowStyle}
+              className="absolute -bottom-2 w-4 h-4 rotate-45 bg-white"
+              style={{ left: tooltipPos.arrowLeft - 8, borderRadius: 2 }}
             />
           )}
         </div>
       )}
 
       {/* Final screen */}
-      {isFinalScreen && (
+      {isFinal && (
         <div className="fixed inset-0 z-[10001] flex items-center justify-center px-8">
-          <div
-            className={`bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transition-all duration-300 ${transitioning ? "opacity-0 scale-90" : "opacity-100 scale-100"}`}
-          >
+          <div className={`bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transition-all duration-300 ${fading ? "opacity-0 scale-90" : "opacity-100 scale-100"}`}>
             <div className="text-5xl mb-4">🏔</div>
             <h2 className="text-xl font-bold text-[#2F403A] mb-2">완등과 함께 시작해볼까요? 🏔</h2>
             <p className="text-sm text-[#2F403A]/70 mb-6">지금 바로 첫 번째 산을 기록해보세요!</p>
@@ -295,7 +237,7 @@ const OnboardingTutorial = () => {
               시작하기
             </button>
             <div className="flex justify-center gap-1.5 mt-5">
-              {[...steps, null].map((_, i) => (
+              {Array.from({ length: totalDots }).map((_, i) => (
                 <div
                   key={i}
                   className="h-2 w-2 rounded-full"
@@ -306,7 +248,7 @@ const OnboardingTutorial = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
