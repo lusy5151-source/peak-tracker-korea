@@ -93,6 +93,9 @@ export function useHikingPlans() {
     planned_date: string;
     start_time?: string;
     notes?: string;
+    meeting_location?: string;
+    is_public?: boolean;
+    max_participants?: number;
   }) => {
     if (!user) return { error: { message: "Not authenticated" } };
     const { data, error } = await supabase
@@ -100,7 +103,17 @@ export function useHikingPlans() {
       .insert({ ...plan, creator_id: user.id } as any)
       .select()
       .single();
-    if (!error) fetchPlans();
+    if (!error && data) {
+      fetchPlans();
+      // Send auto welcome message for plan chat
+      const mt = (await import("@/data/mountains")).mountains.find((m) => m.id === plan.mountain_id);
+      const mtName = mt?.nameKo || "등산";
+      await supabase.from("plan_messages").insert({
+        plan_id: (data as any).id,
+        user_id: user.id,
+        message: `📅 ${mtName} 등산 계획 채팅방이 생성되었어요!\n참가자들과 자유롭게 이야기해보세요 🏔`,
+      } as any);
+    }
     return { data: data as HikingPlan | null, error };
   };
 
