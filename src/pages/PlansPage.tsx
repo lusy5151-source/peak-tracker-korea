@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Plus, Mountain, Calendar, Clock, Users, Bell, ChevronRight, Link2, UserCheck, UserX, Mail, Globe, MapPin } from
 "lucide-react";
+import PublicPlansList from "@/components/PublicPlansList";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
