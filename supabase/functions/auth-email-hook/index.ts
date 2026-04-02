@@ -17,7 +17,7 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
+  signup: '완등 이메일 인증',
   invite: "You've been invited",
   magiclink: 'Your login link',
   recovery: 'Reset your password',
@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "peak-tracker-korea"
+const SITE_NAME = "완등"
 const SENDER_DOMAIN = "notify.wandeung.com"
 const ROOT_DOMAIN = "wandeung.com"
 const FROM_DOMAIN = "wandeung.com" // Domain shown in From address (may be root or sender subdomain)
