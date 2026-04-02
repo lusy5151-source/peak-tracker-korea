@@ -142,6 +142,7 @@ const App = () => {
                 </Layout>
               </BrowserRouter>
             </StoreProvider>
+            </OnboardingProvider>
           </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
