@@ -375,7 +375,7 @@ const Dashboard = () => {
 
           {/* ── Progress Rings Section ── */}
           <section className="grid grid-cols-2 gap-4">
-            <Link to={isDemo ? "/mountains" : "/mountains"} className="block rounded-3xl bg-card p-5 shadow-sm border border-border hover:border-primary/30 transition-colors">
+            <Link to={isDemo ? "/mountains" : "/mountains"} data-onboarding="progress-ring" className="block rounded-3xl bg-card p-5 shadow-sm border border-border hover:border-primary/30 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-muted-foreground">100대 명산 진행률</p>
                 {!isDemo && (
