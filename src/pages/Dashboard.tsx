@@ -28,6 +28,7 @@ import {
   Users, Flag, Crown, Flame,
 } from "lucide-react";
 import { AnnouncementSection } from "@/components/AnnouncementSystem";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -178,6 +179,7 @@ const Dashboard = () => {
     <ErrorBoundary fallbackMessage="대시보드를 불러오는 중 문제가 발생했습니다">
       <div className="-mx-4 -mt-6 pb-24">
         {!isDemo && <AchievementModal badge={newlyEarned} onDismiss={dismissNewBadge} />}
+        <OnboardingTutorial />
 
         {/* ── Hero: Mountain illustration + Upcoming Hike ── */}
         <section className="relative overflow-hidden px-5 pb-8 pt-6" style={{ background: "hsl(205, 50%, 88%)" }}>
@@ -202,7 +204,7 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming schedule card */}
-            <div className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
+            <div data-onboarding="upcoming-schedule" className="rounded-2xl bg-card/90 p-5 shadow-sm backdrop-blur-sm">
               <p className="text-xs font-semibold text-muted-foreground mb-2">다가오는 일정</p>
               {isDemo ? (
                 /* Demo upcoming plan */
@@ -271,7 +273,7 @@ const Dashboard = () => {
 
           {/* ── CTA Buttons (side by side) ── */}
           <section className="grid grid-cols-2 gap-3">
-            <Link to={isDemo ? "/auth" : "/summit-claim"}>
+            <Link to={isDemo ? "/auth" : "/summit-claim"} data-onboarding="summit-claim">
               <Button className="w-full h-14 rounded-2xl text-sm font-bold gap-2 shadow-lg bg-primary hover:bg-primary/90 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
                 <Flag className="h-5 w-5" />
                 정상 인증하기
@@ -373,7 +375,7 @@ const Dashboard = () => {
 
           {/* ── Progress Rings Section ── */}
           <section className="grid grid-cols-2 gap-4">
-            <Link to={isDemo ? "/mountains" : "/mountains"} className="block rounded-3xl bg-card p-5 shadow-sm border border-border hover:border-primary/30 transition-colors">
+            <Link to={isDemo ? "/mountains" : "/mountains"} data-onboarding="progress-ring" className="block rounded-3xl bg-card p-5 shadow-sm border border-border hover:border-primary/30 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-muted-foreground">100대 명산 진행률</p>
                 {!isDemo && (
@@ -498,7 +500,7 @@ const Dashboard = () => {
           )}
 
           {/* ── Community Feed ── */}
-          <section>
+          <section data-onboarding="community-feed">
             <SectionHeader title="커뮤니티" linkTo={isDemo ? "/auth" : "/feed"} linkLabel="전체 보기" />
             {isDemo || recentJournals.length === 0 ? (
               <CommunityFeedPreview journals={demoJournals.slice(0, 3)} />
@@ -539,7 +541,7 @@ const Dashboard = () => {
           </section>
 
           {/* ── Badge Gallery ── */}
-          <section>
+          <section data-onboarding="badge-gallery">
             <SectionHeader title="업적 갤러리" linkTo="/achievements" linkLabel="전체 보기" />
             <div className="rounded-3xl bg-purple-light border border-border p-5 shadow-sm">
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
