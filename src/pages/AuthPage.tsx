@@ -94,13 +94,20 @@ const AuthPage = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: "https://wandeung.com",
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: "https://wandeung.com",
       });
-      if (error) throw error;
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (result.redirected) {
+        return;
+      }
+
+      // Session is set automatically, navigate to home
+      navigate("/");
     } catch (err: any) {
       toast({
         title: "오류",
