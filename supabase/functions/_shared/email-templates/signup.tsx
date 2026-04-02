@@ -29,13 +29,13 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="ko" dir="ltr">
     <Head />
-    <Preview>{siteName} 이메일 인증</Preview>
+    <Preview>완등 이메일 인증</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>이메일 인증</Heading>
         <Text style={text}>
           <Link href={siteUrl} style={link}>
-            <strong>{siteName}</strong>
+            <strong>완등</strong>
           </Link>
           에 가입해 주셔서 감사합니다! ⛰️
         </Text>
