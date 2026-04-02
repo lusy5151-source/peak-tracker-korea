@@ -145,14 +145,24 @@ const OnboardingTutorial = () => {
 
     const tw = Math.min(300, window.innerWidth - 32);
     const spaceBelow = window.innerHeight - r.bottom;
+    const bannerHeight = 52;
+    const spaceAbove = r.top - bannerHeight - 40; // 40px for skip button area
     let tTop: number;
     let arrowDir: "up" | "down";
     if (spaceBelow > 180) {
       tTop = sr.top + sr.height + 14;
       arrowDir = "up";
-    } else {
+    } else if (spaceAbove > 140) {
       tTop = sr.top - 14;
       arrowDir = "down";
+    } else {
+      // Neither above nor below has enough space — place below anyway, clamped
+      tTop = Math.max(bannerHeight + 48, sr.top + sr.height + 14);
+      arrowDir = "up";
+    }
+    // Never render behind the top banner
+    if (arrowDir === "up") {
+      tTop = Math.max(bannerHeight + 48, tTop);
     }
     const cx = sr.left + sr.width / 2;
     let tLeft = cx - tw / 2;
