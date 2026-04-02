@@ -165,7 +165,7 @@ const MountainList = () => {
             ))}
           </div>
         </div>
-        <div className="flex gap-1.5">
+        <div data-onboarding="mountain-filter" className="flex gap-1.5">
           {([["all", "전체"], ["done", "완등"], ["todo", "미등"]] as const).map(([val, label]) => (
             <button
               key={val}
