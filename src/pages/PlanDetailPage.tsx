@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import { getMockWeather } from "@/data/mockWeather";
 import { useHikingPlans, type PlanParticipant, type HikingPlan, type PlanEditHistory } from "@/hooks/useHikingPlans";
-import { useFriends } from "@/hooks/useFriends";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,8 +13,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
   ArrowLeft, Calendar, Clock, Mountain, Users, Copy, Check,
-  Cloud, Sun, CloudRain, CloudSnow, CloudSun, Wind, Droplets, UserPlus,
-  Share2, Edit3, History, CheckCircle2, XCircle, Save, X, MessageCircle, Trophy,
+  Cloud, Sun, CloudRain, CloudSnow, CloudSun, Wind, Droplets,
+  Share2, Edit3, History, Save, X, MessageCircle, Trophy,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -46,17 +45,14 @@ const PlanDetailPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const {
-    plans, fetchParticipants, inviteFriend, joinPlan, updateRsvp,
+    plans, fetchParticipants, updateRsvp,
     deletePlan, updatePlanWithHistory, fetchEditHistory,
-    acceptInvitation, declineInvitation,
   } = useHikingPlans();
-  const { friends } = useFriends();
   const { toast } = useToast();
 
   const [plan, setPlan] = useState<HikingPlan | null>(null);
   const [participants, setParticipants] = useState<PlanParticipant[]>([]);
   const [editHistory, setEditHistory] = useState<PlanEditHistory[]>([]);
-  const [showInvite, setShowInvite] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [copied, setCopied] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<{ nickname: string | null; avatar_url: string | null } | null>(null);
@@ -64,18 +60,26 @@ const PlanDetailPage = () => {
   const [completionDone, setCompletionDone] = useState(false);
   const [completing, setCompleting] = useState(false);
 
-  // Editing state
   const [editing, setEditing] = useState(false);
   const [editNotes, setEditNotes] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Chat access check
   const [canChat, setCanChat] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
     const found = plans.find((p) => p.id === id);
-    if (found) setPlan(found);
+    if (found) {
+      setPlan(found);
+    } else {
+      supabase
+        .from("hiking_plans")
+        .select("*")
+        .eq("id", id)
+        .single()
+        .then(({ data }) => { if (data) setPlan(data as any); });
+    }
   }, [plans, id]);
 
   useEffect(() => {
@@ -94,7 +98,6 @@ const PlanDetailPage = () => {
       .then(({ data }) => { if (data) setCreatorProfile(data); });
   }, [plan?.creator_id]);
 
-  // Check chat access
   useEffect(() => {
     if (!user || !id) return;
     const checkAccess = async () => {
@@ -119,47 +122,13 @@ const PlanDetailPage = () => {
   const isCreator = user?.id === plan?.creator_id;
   const myParticipation = participants.find((p) => p.user_id === user?.id);
   const canEdit = isCreator || myParticipation?.rsvp_status === "going";
-  const isInvited = !myParticipation && !isCreator;
   const isPastDate = plan ? new Date(plan.planned_date) < new Date() : false;
-
-  const uninvitedFriends = friends.filter(
-    (f) => !participants.some((p) => p.user_id === f.friendProfile.user_id)
-  );
-
-  const handleInvite = async (friendUserId: string) => {
-    if (!id) return;
-    const { error } = await inviteFriend(id, friendUserId);
-    if (error) {
-      toast({ title: "초대 실패", variant: "destructive" });
-    } else {
-      toast({ title: "초대를 보냈습니다" });
-      fetchParticipants(id).then(setParticipants);
-    }
-  };
 
   const handleRsvp = async (status: string) => {
     if (!id) return;
     const { error } = await updateRsvp(id, status);
     if (!error) {
       toast({ title: `"${rsvpLabels[status]?.label}"(으)로 응답했습니다` });
-      fetchParticipants(id).then(setParticipants);
-    }
-  };
-
-  const handleAccept = async () => {
-    if (!id) return;
-    const { error } = await acceptInvitation(id);
-    if (!error) {
-      toast({ title: "초대를 수락했습니다! 🎉" });
-      fetchParticipants(id).then(setParticipants);
-    }
-  };
-
-  const handleDecline = async () => {
-    if (!id) return;
-    const { error } = await declineInvitation(id);
-    if (!error) {
-      toast({ title: "초대를 거절했습니다" });
       fetchParticipants(id).then(setParticipants);
     }
   };
@@ -216,7 +185,6 @@ const PlanDetailPage = () => {
     if (!plan || !id || !user) return;
     setCompleting(true);
 
-    // Get all accepted participants + creator
     const { data: acceptedApps } = await supabase
       .from("plan_applications")
       .select("user_id")
@@ -229,7 +197,6 @@ const PlanDetailPage = () => {
       ...(acceptedApps as any[] || []).map((a) => a.user_id),
     ]);
 
-    // Create shared completion record
     const { data: completion, error } = await supabase
       .from("shared_completions")
       .insert({
@@ -247,7 +214,6 @@ const PlanDetailPage = () => {
       return;
     }
 
-    // Add all participants
     const participantInserts = [...allUserIds].map((uid) => ({
       shared_completion_id: (completion as any).id,
       user_id: uid,
@@ -272,7 +238,6 @@ const PlanDetailPage = () => {
 
   return (
     <div className="space-y-5 pb-24 max-w-lg mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate("/plans")} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
@@ -292,25 +257,6 @@ const PlanDetailPage = () => {
         </div>
       </div>
 
-      {/* Invitation Actions for non-participants */}
-      {isInvited && user && (
-        <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 space-y-4">
-          <div className="text-center">
-            <p className="text-sm font-semibold text-foreground">등산 계획에 초대되었습니다</p>
-            <p className="text-xs text-muted-foreground mt-1">아래 정보를 확인하고 응답해주세요</p>
-          </div>
-          <div className="flex gap-3">
-            <Button className="flex-1 gap-2" onClick={handleAccept}>
-              <CheckCircle2 className="h-4 w-4" /> 수락
-            </Button>
-            <Button variant="outline" className="flex-1 gap-2" onClick={handleDecline}>
-              <XCircle className="h-4 w-4" /> 거절
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Tabs: 계획 정보 | 참가자 | 채팅 */}
       <Tabs defaultValue="info" className="w-full">
         <TabsList className={cn("w-full", canChat ? "grid grid-cols-3" : "grid grid-cols-2")}>
           <TabsTrigger value="info">계획 정보</TabsTrigger>
@@ -324,9 +270,7 @@ const PlanDetailPage = () => {
           )}
         </TabsList>
 
-        {/* ======= 계획 정보 Tab ======= */}
         <TabsContent value="info" className="space-y-4 mt-4">
-          {/* Mountain & Route Card */}
           <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
             <div className="flex items-center gap-2">
               <Mountain className="h-5 w-5 text-primary" />
@@ -369,7 +313,6 @@ const PlanDetailPage = () => {
             </div>
           </div>
 
-          {/* Weather */}
           {weather && (
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground mb-2">🌤 예상 날씨</p>
@@ -387,7 +330,6 @@ const PlanDetailPage = () => {
             </div>
           )}
 
-          {/* Notes */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-xs font-medium text-muted-foreground mb-1">📝 메모</p>
             {editing ? (
@@ -414,7 +356,6 @@ const PlanDetailPage = () => {
             )}
           </div>
 
-          {/* Invite Code */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-xs font-medium text-muted-foreground mb-2">
               <Share2 className="inline h-3 w-3 mr-1" />초대 코드
@@ -429,7 +370,6 @@ const PlanDetailPage = () => {
             </div>
           </div>
 
-          {/* Creator */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-xs font-medium text-muted-foreground mb-2">👤 만든 사람</p>
             <div className="flex items-center gap-2">
@@ -442,7 +382,6 @@ const PlanDetailPage = () => {
             </div>
           </div>
 
-          {/* Edit History */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <button onClick={() => setShowHistory(!showHistory)} className="flex w-full items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
@@ -475,7 +414,6 @@ const PlanDetailPage = () => {
             )}
           </div>
 
-          {/* Shared Completion Button - only after hiking date */}
           {isPastDate && isCreator && !completionDone && (
             <Button
               onClick={handleSharedCompletion}
@@ -489,20 +427,11 @@ const PlanDetailPage = () => {
           )}
         </TabsContent>
 
-        {/* ======= 참가자 Tab ======= */}
         <TabsContent value="participants" className="space-y-4 mt-4">
-          {/* Participants list */}
           <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-muted-foreground">
-                <Users className="inline h-3 w-3 mr-1" />참가자 ({participants.length})
-              </p>
-              {isCreator && (
-                <Button variant="ghost" size="sm" onClick={() => setShowInvite(!showInvite)}>
-                  <UserPlus className="h-4 w-4 mr-1" /> 초대
-                </Button>
-              )}
-            </div>
+            <p className="text-xs font-medium text-muted-foreground mb-3">
+              <Users className="inline h-3 w-3 mr-1" />참가자 ({participants.length})
+            </p>
 
             {participants.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-3">아직 참가자가 없습니다</p>
@@ -525,32 +454,8 @@ const PlanDetailPage = () => {
                 })}
               </div>
             )}
-
-            {/* Invite friends panel */}
-            {showInvite && (
-              <div className="mt-3 border-t border-border pt-3 space-y-2">
-                <p className="text-xs text-muted-foreground">친구 초대하기</p>
-                {uninvitedFriends.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-2">초대할 수 있는 친구가 없습니다</p>
-                ) : (
-                  uninvitedFriends.map((f) => (
-                    <div key={f.id} className="flex items-center gap-2">
-                      <Avatar className="h-7 w-7">
-                        <AvatarImage src={f.friendProfile.avatar_url || ""} />
-                        <AvatarFallback className="text-[10px]">{f.friendProfile.nickname?.[0] || "?"}</AvatarFallback>
-                      </Avatar>
-                      <span className="flex-1 text-sm text-foreground">{f.friendProfile.nickname}</span>
-                      <Button size="sm" variant="outline" onClick={() => handleInvite(f.friendProfile.user_id)}>
-                        초대
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
           </div>
 
-          {/* RSVP for existing participants */}
           {myParticipation && !isCreator && (
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground mb-3">내 응답</p>
@@ -573,7 +478,6 @@ const PlanDetailPage = () => {
             </div>
           )}
 
-          {/* Application Manager (for public plans) */}
           {(plan as any).is_public && (
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground mb-3">
@@ -588,7 +492,6 @@ const PlanDetailPage = () => {
           )}
         </TabsContent>
 
-        {/* ======= 채팅 Tab ======= */}
         {canChat && (
           <TabsContent value="chat" className="mt-4">
             <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -598,7 +501,6 @@ const PlanDetailPage = () => {
         )}
       </Tabs>
 
-      {/* Shared Completion Modal */}
       <Dialog open={showCompletionModal} onOpenChange={setShowCompletionModal}>
         <DialogContent className="rounded-2xl text-center">
           <DialogHeader>
