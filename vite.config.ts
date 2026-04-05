@@ -36,12 +36,14 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "Wandeung",
-        short_name: "Wandeung",
-        start_url: "/",
+        name: "완등",
+        short_name: "완등",
+        start_url: "https://wandeung.com",
         display: "standalone",
-        background_color: "#ffffff",
+        background_color: "#F8FAED",
         theme_color: "#C7D66D",
+        orientation: "portrait",
+        scope: "/",
         icons: [
           { src: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
