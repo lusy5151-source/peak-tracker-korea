@@ -209,6 +209,18 @@ const MountainList = () => {
             </button>
           ))}
         </div>
+        {/* User-created mountain filter */}
+        <button
+          onClick={() => setShowUserOnly(!showUserOnly)}
+          className={`rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
+            showUserOnly
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+          }`}
+        >
+          <User className="inline h-3 w-3 mr-0.5" />
+          사용자 등록 산만
+        </button>
       </div>
 
       {/* Content */}
