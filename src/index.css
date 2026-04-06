@@ -201,3 +201,8 @@
 .animate-mascot-look { animation: mascot-look 2s ease-in-out infinite; }
 .animate-mascot-flag { animation: mascot-flag 0.5s ease-in-out infinite; }
 .animate-mascot-hand { animation: mascot-hand 0.8s ease-in-out infinite; }
+
+/* Prevent Leaflet map from overlapping dialogs/modals */
+.leaflet-container {
+  z-index: 0 !important;
+}
