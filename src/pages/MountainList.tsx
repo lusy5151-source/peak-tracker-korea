@@ -122,6 +122,9 @@ const MountainList = () => {
         />
       </div>
 
+      {/* Register mountain button */}
+      <RegisterMountainModal />
+
       {/* View mode tabs */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
         {viewModes.map(({ key, label, icon: Icon }) => (
