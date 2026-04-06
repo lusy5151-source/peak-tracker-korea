@@ -206,3 +206,13 @@
 .leaflet-container {
   z-index: 0 !important;
 }
+
+/* Keep Leaflet internal controls within the map container */
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 500 !important;
+}
+
+.leaflet-pane {
+  z-index: 400 !important;
+}
