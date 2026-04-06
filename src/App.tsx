@@ -46,6 +46,7 @@ const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage"));
 const MagazinePage = lazy(() => import("@/pages/MagazinePage"));
 const AdminMagazinePage = lazy(() => import("@/pages/AdminMagazinePage"));
 const AdminReportsPage = lazy(() => import("@/pages/AdminReportsPage"));
+const AdminMountainApprovalPage = lazy(() => import("@/pages/AdminMountainApprovalPage"));
 const SummitClaimPage = lazy(() => import("@/pages/SummitClaimPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const DeleteAccountPage = lazy(() => import("@/pages/DeleteAccountPage"));
@@ -110,6 +111,7 @@ const AppRoutes = () => {
       <Route path="/summit-claim" element={<ProtectedRoute><LazyPage><SummitClaimPage /></LazyPage></ProtectedRoute>} />
       <Route path="/admin/magazine" element={<ProtectedRoute><LazyPage><AdminMagazinePage /></LazyPage></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute><LazyPage><AdminReportsPage /></LazyPage></ProtectedRoute>} />
+      <Route path="/admin/mountains" element={<ProtectedRoute><LazyPage><AdminMountainApprovalPage /></LazyPage></ProtectedRoute>} />
       <Route path="/privacy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
       <Route path="/privacy-policy" element={<LazyPage><PrivacyPolicyPage /></LazyPage>} />
       <Route path="/terms-of-service" element={<LazyPage><TermsOfServicePage /></LazyPage>} />

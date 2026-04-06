@@ -293,7 +293,13 @@ const MountainCard = React.memo(function MountainCard({ m, isCompleted: complete
                 백대
               </Badge>
             )}
-            {isUserCreated && (
+            {isUserCreated && m.status === "pending" && (
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 gap-0.5 border-amber-300 text-amber-600">
+                <Clock className="h-2.5 w-2.5" />
+                승인 대기
+              </Badge>
+            )}
+            {isUserCreated && m.status !== "pending" && (
               <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 gap-0.5">
                 <User className="h-2.5 w-2.5" />
                 커스텀
