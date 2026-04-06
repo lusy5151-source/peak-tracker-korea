@@ -168,10 +168,11 @@ const MountainMapSection = () => {
   return (
     <div className="space-y-4">
       {/* Map container */}
-      <div className="relative">
+      <div className="relative" style={{ zIndex: 1, isolation: 'isolate' }}>
         <div
           ref={mapRef}
-          className="h-[280px] rounded-2xl border border-border overflow-hidden shadow-sm"
+          className="h-[200px] sm:h-[200px] rounded-xl border border-border overflow-hidden shadow-sm"
+          style={{ zIndex: 1 }}
         />
 
         {/* Map filters overlay */}
