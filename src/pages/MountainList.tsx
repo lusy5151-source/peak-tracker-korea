@@ -67,9 +67,6 @@ const MountainList = () => {
     })).filter((g) => g.mountains.length > 0);
   }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
 
-      {/* Register mountain button */}
-      <RegisterMountainModal />
-
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
     else { setSortKey(key); setSortAsc(key === "name"); }
