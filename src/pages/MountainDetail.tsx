@@ -136,6 +136,13 @@ const MountainDetail = () => {
         </div>
 
         <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{mountain.description}</p>
+
+        {isUserCreated && creatorName && (
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <User className="h-3.5 w-3.5" />
+            <span>등록자: {creatorName}</span>
+          </div>
+        )}
       </div>
 
       {/* Summit Claim */}
