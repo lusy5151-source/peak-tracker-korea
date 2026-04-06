@@ -6,9 +6,9 @@ import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import { SummitClaimSection } from "@/components/SummitClaimSection";
 import {
-  ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
+  ArrowLeft, Mountain as MountainIcon, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
   Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users,
-  Clock, Route, Flag, Save, UserPlus, UserMinus, Globe, Lock, Upload,
+  Clock, Route, Flag, Save, UserPlus, UserMinus, Globe, Lock, Upload, User,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { WeatherCondition, CompletionRecord } from "@/hooks/useMountainStore";
