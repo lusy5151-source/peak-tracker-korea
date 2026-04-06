@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import type { Mountain } from "@/data/mountains";
 import { useUserMountains, toMountain } from "@/hooks/useUserMountains";
+import { usePioneerBadges } from "@/hooks/usePioneerBadges";
+import DuplicateReportModal from "@/components/DuplicateReportModal";
 import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import { SummitClaimSection } from "@/components/SummitClaimSection";
@@ -70,6 +72,9 @@ const MountainDetail = () => {
 
   // Fetch creator profile for user-created mountains
   const [creatorName, setCreatorName] = useState<string | null>(null);
+  const [showDuplicateReport, setShowDuplicateReport] = useState(false);
+  const { pioneerBadges } = usePioneerBadges(createdBy);
+
   useEffect(() => {
     if (!createdBy) return;
     supabase.from("profiles").select("nickname").eq("user_id", createdBy).single().then(({ data }) => {
