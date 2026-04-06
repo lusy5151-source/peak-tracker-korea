@@ -66,7 +66,7 @@ const MountainList = () => {
       mountains: filterAndSort(allMountains.filter((m) => m.region === r)),
     })).filter((g) => g.mountains.length > 0);
   }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
-  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
