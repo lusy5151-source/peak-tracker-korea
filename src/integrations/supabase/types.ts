@@ -1463,6 +1463,63 @@ export type Database = {
           },
         ]
       }
+      user_mountains: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          difficulty: string
+          height: number
+          id: string
+          image_url: string | null
+          is_user_created: boolean
+          lat: number | null
+          lng: number | null
+          mountain_id: number
+          name: string | null
+          name_ko: string
+          region: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          difficulty?: string
+          height: number
+          id?: string
+          image_url?: string | null
+          is_user_created?: boolean
+          lat?: number | null
+          lng?: number | null
+          mountain_id?: number
+          name?: string | null
+          name_ko: string
+          region: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          difficulty?: string
+          height?: number
+          id?: string
+          image_url?: string | null
+          is_user_created?: boolean
+          lat?: number | null
+          lng?: number | null
+          mountain_id?: number
+          name?: string | null
+          name_ko?: string
+          region?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
