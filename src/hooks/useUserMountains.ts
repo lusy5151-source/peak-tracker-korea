@@ -35,7 +35,7 @@ export interface CreateMountainInput {
 }
 
 /** Convert a user_mountains row to a Mountain-compatible object */
-export function toMountain(row: UserMountainRow): Mountain & { isUserCreated: true; createdBy: string; dbId: string } {
+export function toMountain(row: UserMountainRow): Mountain & { isUserCreated: true; createdBy: string; dbId: string; status: string } {
   return {
     id: row.mountain_id,
     name: row.name || row.name_ko,
@@ -51,6 +51,7 @@ export function toMountain(row: UserMountainRow): Mountain & { isUserCreated: tr
     isUserCreated: true,
     createdBy: row.created_by,
     dbId: row.id,
+    status: row.status,
   };
 }
 
@@ -59,12 +60,12 @@ export function useUserMountains() {
   const queryClient = useQueryClient();
 
   const { data: userMountains = [], isLoading } = useQuery({
-    queryKey: ["user-mountains"],
+    queryKey: ["user-mountains", user?.id],
     queryFn: async () => {
+      // Fetch all visible mountains (RLS handles visibility: active + own pending + admin)
       const { data, error } = await supabase
         .from("user_mountains")
         .select("*")
-        .eq("status", "active")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as unknown as UserMountainRow[];
