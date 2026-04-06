@@ -55,15 +55,17 @@ const MountainList = () => {
     return filtered;
   };
 
-  const allFiltered = useMemo(() => filterAndSort(mountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  const allFiltered = useMemo(() => filterAndSort(allMountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
   const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
   const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
 
+  const allRegions = [...regions, "기타"] as const;
   const regionGroups = useMemo(() => {
-    return regions.map((r) => ({
+    return allRegions.map((r) => ({
       region: r,
-      mountains: filterAndSort(mountains.filter((m) => m.region === r)),
+      mountains: filterAndSort(allMountains.filter((m) => m.region === r)),
     })).filter((g) => g.mountains.length > 0);
+  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
   }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
 
   const toggleSort = (key: SortKey) => {
@@ -81,7 +83,7 @@ const MountainList = () => {
   };
 
   const viewModes: { key: ViewMode; label: string; icon: any }[] = [
-    { key: "all", label: "전체", icon: Mountain },
+    { key: "all", label: "전체", icon: MountainIcon },
     { key: "baekdu", label: "백대명산", icon: Star },
     { key: "region", label: "지역별", icon: MapPin },
     { key: "oreum", label: "제주 오름", icon: Flame },
