@@ -31,7 +31,17 @@ const MountainList = () => {
   const [showUserOnly, setShowUserOnly] = useState(false);
 
   // Merge static + user-created mountains
-  const allMountains = useMemo(() => [...mountains, ...userMountainsAsMountains], [userMountainsAsMountains]);
+  const allMountains = useMemo(() => {
+    // Include pending mountains for the creator only
+    const visibleUserMountains = userMountainsAsMountains.filter((m) => {
+      const row = userMountains.find((um) => um.mountain_id === m.id);
+      if (!row) return false;
+      if (row.status === "active") return true;
+      if (row.status === "pending" && user && row.created_by === user.id) return true;
+      return false;
+    });
+    return [...mountains, ...visibleUserMountains];
+  }, [userMountainsAsMountains, userMountains, user]);
 
   const totalBaekdu = mountains.filter((m) => m.is_baekdu).length;
   const completedBaekdu = mountains.filter((m) => m.is_baekdu && isCompleted(m.id)).length;
