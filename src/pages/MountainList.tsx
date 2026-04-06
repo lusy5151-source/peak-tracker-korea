@@ -1,12 +1,15 @@
 import { useState, useMemo } from "react";
 import { mountains, regions } from "@/data/mountains";
+import type { Mountain } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain, Star, Smile, MapPin, Flame } from "lucide-react";
+import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain as MountainIcon, Star, Smile, MapPin, Flame, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import React, { lazy, Suspense } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useUserMountains } from "@/hooks/useUserMountains";
+import RegisterMountainModal from "@/components/RegisterMountainModal";
 
 const MountainMapSection = lazy(() => import("@/components/MountainMapSection"));
 
@@ -15,6 +18,7 @@ type ViewMode = "all" | "baekdu" | "region" | "oreum" | "full";
 
 const MountainList = () => {
   const { isCompleted, toggleComplete, completedCount } = useStore();
+  const { userMountainsAsMountains } = useUserMountains();
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("전체");
   const [showCompleted, setShowCompleted] = useState<"all" | "done" | "todo">("all");
@@ -22,6 +26,9 @@ const MountainList = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [openRegions, setOpenRegions] = useState<Set<string>>(new Set());
+
+  // Merge static + user-created mountains
+  const allMountains = useMemo(() => [...mountains, ...userMountainsAsMountains], [userMountainsAsMountains]);
 
   const totalBaekdu = mountains.filter((m) => m.is_baekdu).length;
   const completedBaekdu = mountains.filter((m) => m.is_baekdu && isCompleted(m.id)).length;
