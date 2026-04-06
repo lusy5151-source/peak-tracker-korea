@@ -175,7 +175,16 @@ const MountainDetail = () => {
             </div>
           </div>
         </div>
-      )
+      )}
+
+      {/* Duplicate Report Modal */}
+      {isUserCreated && (
+        <DuplicateReportModal
+          reportedMountainId={mountainId}
+          open={showDuplicateReport}
+          onOpenChange={setShowDuplicateReport}
+        />
+      )}
 
       {/* Summit Claim */}
       <SummitClaimSection mountainId={mountain.id} mountainName={mountain.nameKo} />
