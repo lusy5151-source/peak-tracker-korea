@@ -100,7 +100,7 @@ const MountainList = () => {
       <div>
         <h1 className="text-2xl font-bold text-foreground">산 탐색</h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          전체 {mountains.length}개 · 완등 {completedCount}개 · 백대명산 {completedBaekdu}/{totalBaekdu}
+          전체 {allMountains.length}개 · 완등 {completedCount}개 · 백대명산 {completedBaekdu}/{totalBaekdu}
         </p>
       </div>
 
@@ -238,7 +238,8 @@ const MountainList = () => {
   );
 };
 
-const MountainCard = React.memo(function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof mountains[0]; isCompleted: boolean; toggleComplete: (id: number) => void }) {
+const MountainCard = React.memo(function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: any; isCompleted: boolean; toggleComplete: (id: number) => void }) {
+  const isUserCreated = !!(m as any).isUserCreated;
   const diffColor =
     m.difficulty === "쉬움" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
     : m.difficulty === "보통" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
@@ -262,6 +263,12 @@ const MountainCard = React.memo(function MountainCard({ m, isCompleted: complete
             {m.is_baekdu && (
               <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400">
                 백대
+              </Badge>
+            )}
+            {isUserCreated && (
+              <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 gap-0.5">
+                <User className="h-2.5 w-2.5" />
+                커스텀
               </Badge>
             )}
           </div>
