@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
 import type { Mountain } from "@/data/mountains";
 import { useUserMountains, toMountain } from "@/hooks/useUserMountains";
+import { usePioneerBadges } from "@/hooks/usePioneerBadges";
+import DuplicateReportModal from "@/components/DuplicateReportModal";
 import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import { SummitClaimSection } from "@/components/SummitClaimSection";
@@ -70,6 +72,9 @@ const MountainDetail = () => {
 
   // Fetch creator profile for user-created mountains
   const [creatorName, setCreatorName] = useState<string | null>(null);
+  const [showDuplicateReport, setShowDuplicateReport] = useState(false);
+  const { pioneerBadges } = usePioneerBadges(createdBy);
+
   useEffect(() => {
     if (!createdBy) return;
     supabase.from("profiles").select("nickname").eq("user_id", createdBy).single().then(({ data }) => {
@@ -141,9 +146,45 @@ const MountainDetail = () => {
           <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <User className="h-3.5 w-3.5" />
             <span>등록자: {creatorName}</span>
+            {pioneerBadges.some((p) => p.mountainId === mountainId) && (
+              <span title="개척자">🗺️</span>
+            )}
+          </div>
+        )}
+
+        {isUserCreated && (
+          <div className="mt-3">
+            <button
+              onClick={() => setShowDuplicateReport(true)}
+              className="text-xs text-muted-foreground hover:text-destructive transition-colors underline underline-offset-2"
+            >
+              이 산은 이미 목록에 있어요
+            </button>
           </div>
         )}
       </div>
+
+      {/* Pioneer badge display for user-created mountains */}
+      {isUserCreated && pioneerBadges.some((p) => p.mountainId === mountainId) && (
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🗺️</span>
+            <div>
+              <p className="text-sm font-medium text-foreground">이 산의 개척자</p>
+              <p className="text-xs text-muted-foreground">{creatorName} 🗺️</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicate Report Modal */}
+      {isUserCreated && (
+        <DuplicateReportModal
+          reportedMountainId={mountainId}
+          open={showDuplicateReport}
+          onOpenChange={setShowDuplicateReport}
+        />
+      )}
 
       {/* Summit Claim */}
       <SummitClaimSection mountainId={mountain.id} mountainName={mountain.nameKo} />

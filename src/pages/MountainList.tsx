@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { mountains, regions } from "@/data/mountains";
 import type { Mountain } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain as MountainIcon, Star, Smile, MapPin, Flame, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain as MountainIcon, Star, Smile, MapPin, Flame, User, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -18,7 +19,8 @@ type ViewMode = "all" | "baekdu" | "region" | "oreum" | "full";
 
 const MountainList = () => {
   const { isCompleted, toggleComplete, completedCount } = useStore();
-  const { userMountainsAsMountains } = useUserMountains();
+  const { user } = useAuth();
+  const { userMountainsAsMountains, userMountains } = useUserMountains();
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("전체");
   const [showCompleted, setShowCompleted] = useState<"all" | "done" | "todo">("all");
@@ -26,25 +28,37 @@ const MountainList = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [openRegions, setOpenRegions] = useState<Set<string>>(new Set());
+  const [showUserOnly, setShowUserOnly] = useState(false);
 
   // Merge static + user-created mountains
-  const allMountains = useMemo(() => [...mountains, ...userMountainsAsMountains], [userMountainsAsMountains]);
+  const allMountains = useMemo(() => {
+    // Include pending mountains for the creator only
+    const visibleUserMountains = userMountainsAsMountains.filter((m) => {
+      const row = userMountains.find((um) => um.mountain_id === m.id);
+      if (!row) return false;
+      if (row.status === "active") return true;
+      if (row.status === "pending" && user && row.created_by === user.id) return true;
+      return false;
+    });
+    return [...mountains, ...visibleUserMountains];
+  }, [userMountainsAsMountains, userMountains, user]);
 
   const totalBaekdu = mountains.filter((m) => m.is_baekdu).length;
   const completedBaekdu = mountains.filter((m) => m.is_baekdu && isCompleted(m.id)).length;
 
-  const filterAndSort = (list: typeof mountains) => {
-    let filtered = list.filter((m) => {
+  const filterAndSort = (list: any[]) => {
+    let filtered = list.filter((m: any) => {
       const matchSearch = !search.trim() || m.nameKo.includes(search) || m.name.toLowerCase().includes(search.toLowerCase());
       const matchDifficulty = difficultyFilter === "전체" || m.difficulty === difficultyFilter;
       const matchStatus =
         showCompleted === "all" ||
         (showCompleted === "done" && isCompleted(m.id)) ||
         (showCompleted === "todo" && !isCompleted(m.id));
-      return matchSearch && matchDifficulty && matchStatus;
+      const matchUserOnly = !showUserOnly || !!(m as any).isUserCreated;
+      return matchSearch && matchDifficulty && matchStatus && matchUserOnly;
     });
 
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       let cmp = 0;
       if (sortKey === "name") cmp = a.nameKo.localeCompare(b.nameKo, "ko");
       else if (sortKey === "height") cmp = a.height - b.height;
@@ -55,9 +69,9 @@ const MountainList = () => {
     return filtered;
   };
 
-  const allFiltered = useMemo(() => filterAndSort(allMountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
-  const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
-  const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  const allFiltered = useMemo(() => filterAndSort(allMountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains, showUserOnly]);
+  const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, showUserOnly]);
+  const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, showUserOnly]);
 
   const allRegions = [...regions, "기타"] as const;
   const regionGroups = useMemo(() => {
@@ -65,7 +79,7 @@ const MountainList = () => {
       region: r,
       mountains: filterAndSort(allMountains.filter((m) => m.region === r)),
     })).filter((g) => g.mountains.length > 0);
-  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
+  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains, showUserOnly]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -195,6 +209,18 @@ const MountainList = () => {
             </button>
           ))}
         </div>
+        {/* User-created mountain filter */}
+        <button
+          onClick={() => setShowUserOnly(!showUserOnly)}
+          className={`rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
+            showUserOnly
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+          }`}
+        >
+          <User className="inline h-3 w-3 mr-0.5" />
+          사용자 등록 산만
+        </button>
       </div>
 
       {/* Content */}
@@ -267,7 +293,13 @@ const MountainCard = React.memo(function MountainCard({ m, isCompleted: complete
                 백대
               </Badge>
             )}
-            {isUserCreated && (
+            {isUserCreated && m.status === "pending" && (
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 gap-0.5 border-amber-300 text-amber-600">
+                <Clock className="h-2.5 w-2.5" />
+                승인 대기
+              </Badge>
+            )}
+            {isUserCreated && m.status !== "pending" && (
               <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 gap-0.5">
                 <User className="h-2.5 w-2.5" />
                 커스텀
