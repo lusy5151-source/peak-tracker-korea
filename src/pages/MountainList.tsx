@@ -1,12 +1,15 @@
 import { useState, useMemo } from "react";
 import { mountains, regions } from "@/data/mountains";
+import type { Mountain } from "@/data/mountains";
 import { useStore } from "@/context/StoreContext";
-import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain, Star, Smile, MapPin, Flame } from "lucide-react";
+import { Search, CheckCircle2, Circle, ChevronRight, ChevronDown, ArrowUpDown, Mountain as MountainIcon, Star, Smile, MapPin, Flame, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import React, { lazy, Suspense } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useUserMountains } from "@/hooks/useUserMountains";
+import RegisterMountainModal from "@/components/RegisterMountainModal";
 
 const MountainMapSection = lazy(() => import("@/components/MountainMapSection"));
 
@@ -15,6 +18,7 @@ type ViewMode = "all" | "baekdu" | "region" | "oreum" | "full";
 
 const MountainList = () => {
   const { isCompleted, toggleComplete, completedCount } = useStore();
+  const { userMountainsAsMountains } = useUserMountains();
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("전체");
   const [showCompleted, setShowCompleted] = useState<"all" | "done" | "todo">("all");
@@ -22,6 +26,9 @@ const MountainList = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [openRegions, setOpenRegions] = useState<Set<string>>(new Set());
+
+  // Merge static + user-created mountains
+  const allMountains = useMemo(() => [...mountains, ...userMountainsAsMountains], [userMountainsAsMountains]);
 
   const totalBaekdu = mountains.filter((m) => m.is_baekdu).length;
   const completedBaekdu = mountains.filter((m) => m.is_baekdu && isCompleted(m.id)).length;
@@ -48,16 +55,17 @@ const MountainList = () => {
     return filtered;
   };
 
-  const allFiltered = useMemo(() => filterAndSort(mountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  const allFiltered = useMemo(() => filterAndSort(allMountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
   const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
   const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
 
+  const allRegions = [...regions, "기타"] as const;
   const regionGroups = useMemo(() => {
-    return regions.map((r) => ({
+    return allRegions.map((r) => ({
       region: r,
-      mountains: filterAndSort(mountains.filter((m) => m.region === r)),
+      mountains: filterAndSort(allMountains.filter((m) => m.region === r)),
     })).filter((g) => g.mountains.length > 0);
-  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -74,7 +82,7 @@ const MountainList = () => {
   };
 
   const viewModes: { key: ViewMode; label: string; icon: any }[] = [
-    { key: "all", label: "전체", icon: Mountain },
+    { key: "all", label: "전체", icon: MountainIcon },
     { key: "baekdu", label: "백대명산", icon: Star },
     { key: "region", label: "지역별", icon: MapPin },
     { key: "oreum", label: "제주 오름", icon: Flame },
@@ -91,7 +99,7 @@ const MountainList = () => {
       <div>
         <h1 className="text-2xl font-bold text-foreground">산 탐색</h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          전체 {mountains.length}개 · 완등 {completedCount}개 · 백대명산 {completedBaekdu}/{totalBaekdu}
+          전체 {allMountains.length}개 · 완등 {completedCount}개 · 백대명산 {completedBaekdu}/{totalBaekdu}
         </p>
       </div>
 
@@ -113,6 +121,9 @@ const MountainList = () => {
           className="w-full rounded-xl border border-input bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
+
+      {/* Register mountain button */}
+      <RegisterMountainModal />
 
       {/* View mode tabs */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
@@ -229,7 +240,8 @@ const MountainList = () => {
   );
 };
 
-const MountainCard = React.memo(function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: typeof mountains[0]; isCompleted: boolean; toggleComplete: (id: number) => void }) {
+const MountainCard = React.memo(function MountainCard({ m, isCompleted: completed, toggleComplete }: { m: any; isCompleted: boolean; toggleComplete: (id: number) => void }) {
+  const isUserCreated = !!(m as any).isUserCreated;
   const diffColor =
     m.difficulty === "쉬움" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
     : m.difficulty === "보통" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
@@ -253,6 +265,12 @@ const MountainCard = React.memo(function MountainCard({ m, isCompleted: complete
             {m.is_baekdu && (
               <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400">
                 백대
+              </Badge>
+            )}
+            {isUserCreated && (
+              <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 gap-0.5">
+                <User className="h-2.5 w-2.5" />
+                커스텀
               </Badge>
             )}
           </div>

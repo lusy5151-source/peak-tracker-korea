@@ -1,12 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
+import type { Mountain } from "@/data/mountains";
+import { useUserMountains, toMountain } from "@/hooks/useUserMountains";
 import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import { SummitClaimSection } from "@/components/SummitClaimSection";
 import {
-  ArrowLeft, Mountain, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
+  ArrowLeft, Mountain as MountainIcon, MapPin, TrendingUp, CheckCircle2, Circle, Calendar,
   Sun, Cloud, CloudRain, CloudSnow, CloudFog, CloudSun, ImagePlus, X, Users,
-  Clock, Route, Flag, Save, UserPlus, UserMinus, Globe, Lock, Upload,
+  Clock, Route, Flag, Save, UserPlus, UserMinus, Globe, Lock, Upload, User,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { WeatherCondition, CompletionRecord } from "@/hooks/useMountainStore";
@@ -50,12 +52,30 @@ async function resizeImage(file: File): Promise<string> {
 
 const MountainDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const mountain = mountains.find((m) => m.id === Number(id));
+  const { userMountains } = useUserMountains();
+
+  // Try static mountains first, then user-created
+  const mountainId = Number(id);
+  const staticMountain = mountains.find((m) => m.id === mountainId);
+  const userMountainRow = !staticMountain ? userMountains.find((m) => m.mountain_id === mountainId) : null;
+  const mountain = staticMountain || (userMountainRow ? toMountain(userMountainRow) : null);
+  const isUserCreated = !!(mountain as any)?.isUserCreated;
+  const createdBy = (mountain as any)?.createdBy as string | undefined;
+
   const {
     isCompleted, toggleComplete, addCompletion, getRecord, getCompletionCount,
     updateNotes, updateDate, updateWeather, addPhotos, removePhoto,
     updateTaggedFriends, updateCourseInfo, updateDuration, updateDifficulty,
   } = useStore();
+
+  // Fetch creator profile for user-created mountains
+  const [creatorName, setCreatorName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!createdBy) return;
+    supabase.from("profiles").select("nickname").eq("user_id", createdBy).single().then(({ data }) => {
+      setCreatorName(data?.nickname || "사용자");
+    });
+  }, [createdBy]);
 
   if (!mountain) {
     return (
@@ -110,12 +130,19 @@ const MountainDetail = () => {
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-4">
-          <InfoItem icon={Mountain} label="높이" value={`${mountain.height}m`} />
+          <InfoItem icon={MountainIcon} label="높이" value={`${mountain.height}m`} />
           <InfoItem icon={MapPin} label="지역" value={mountain.region} />
           <InfoItem icon={TrendingUp} label="난이도" value={mountain.difficulty} />
         </div>
 
         <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{mountain.description}</p>
+
+        {isUserCreated && creatorName && (
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <User className="h-3.5 w-3.5" />
+            <span>등록자: {creatorName}</span>
+          </div>
+        )}
       </div>
 
       {/* Summit Claim */}
