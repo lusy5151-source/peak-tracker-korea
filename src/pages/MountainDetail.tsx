@@ -1,5 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { mountains } from "@/data/mountains";
+import type { Mountain } from "@/data/mountains";
+import { useUserMountains, toMountain } from "@/hooks/useUserMountains";
 import HikingShareCard from "@/components/HikingShareCard";
 import { useStore } from "@/context/StoreContext";
 import { SummitClaimSection } from "@/components/SummitClaimSection";
