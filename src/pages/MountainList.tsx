@@ -46,18 +46,19 @@ const MountainList = () => {
   const totalBaekdu = mountains.filter((m) => m.is_baekdu).length;
   const completedBaekdu = mountains.filter((m) => m.is_baekdu && isCompleted(m.id)).length;
 
-  const filterAndSort = (list: typeof mountains) => {
-    let filtered = list.filter((m) => {
+  const filterAndSort = (list: any[]) => {
+    let filtered = list.filter((m: any) => {
       const matchSearch = !search.trim() || m.nameKo.includes(search) || m.name.toLowerCase().includes(search.toLowerCase());
       const matchDifficulty = difficultyFilter === "전체" || m.difficulty === difficultyFilter;
       const matchStatus =
         showCompleted === "all" ||
         (showCompleted === "done" && isCompleted(m.id)) ||
         (showCompleted === "todo" && !isCompleted(m.id));
-      return matchSearch && matchDifficulty && matchStatus;
+      const matchUserOnly = !showUserOnly || !!(m as any).isUserCreated;
+      return matchSearch && matchDifficulty && matchStatus && matchUserOnly;
     });
 
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       let cmp = 0;
       if (sortKey === "name") cmp = a.nameKo.localeCompare(b.nameKo, "ko");
       else if (sortKey === "height") cmp = a.height - b.height;
@@ -68,9 +69,9 @@ const MountainList = () => {
     return filtered;
   };
 
-  const allFiltered = useMemo(() => filterAndSort(allMountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
-  const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
-  const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc]);
+  const allFiltered = useMemo(() => filterAndSort(allMountains), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains, showUserOnly]);
+  const baekduFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, showUserOnly]);
+  const oreumFiltered = useMemo(() => filterAndSort(mountains.filter((m) => m.region === "제주" && !m.is_baekdu)), [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, showUserOnly]);
 
   const allRegions = [...regions, "기타"] as const;
   const regionGroups = useMemo(() => {
@@ -78,7 +79,7 @@ const MountainList = () => {
       region: r,
       mountains: filterAndSort(allMountains.filter((m) => m.region === r)),
     })).filter((g) => g.mountains.length > 0);
-  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains]);
+  }, [search, difficultyFilter, showCompleted, isCompleted, sortKey, sortAsc, allMountains, showUserOnly]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
