@@ -852,6 +852,30 @@ export type Database = {
           },
         ]
       }
+      mountain_duplicate_reports: {
+        Row: {
+          created_at: string
+          existing_mountain_id: number
+          id: string
+          reported_by: string
+          reported_mountain_id: number
+        }
+        Insert: {
+          created_at?: string
+          existing_mountain_id: number
+          id?: string
+          reported_by: string
+          reported_mountain_id: number
+        }
+        Update: {
+          created_at?: string
+          existing_mountain_id?: number
+          id?: string
+          reported_by?: string
+          reported_mountain_id?: number
+        }
+        Relationships: []
+      }
       plan_applications: {
         Row: {
           created_at: string
@@ -1479,6 +1503,7 @@ export type Database = {
           name: string | null
           name_ko: string
           region: string
+          reject_reason: string | null
           status: string
           updated_at: string
         }
@@ -1497,6 +1522,7 @@ export type Database = {
           name?: string | null
           name_ko: string
           region: string
+          reject_reason?: string | null
           status?: string
           updated_at?: string
         }
@@ -1515,6 +1541,7 @@ export type Database = {
           name?: string | null
           name_ko?: string
           region?: string
+          reject_reason?: string | null
           status?: string
           updated_at?: string
         }
