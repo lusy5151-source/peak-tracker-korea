@@ -1352,18 +1352,23 @@ export type Database = {
           description: string | null
           difficulty: string
           distance_km: number
+          down_minutes: number | null
           duration_minutes: number
           elevation_gain_m: number | null
           end_point: string | null
+          geometry: Json | null
           id: string
           is_popular: boolean
           mountain_id: number
+          mountain_name: string | null
           name: string
           parking_info: Json | null
           public_transit: Json | null
           starting_point: string
           starting_point_description: string | null
           tips: Json | null
+          trail_distance_m: number | null
+          up_minutes: number | null
         }
         Insert: {
           car_access?: Json | null
@@ -1372,18 +1377,23 @@ export type Database = {
           description?: string | null
           difficulty?: string
           distance_km: number
+          down_minutes?: number | null
           duration_minutes: number
           elevation_gain_m?: number | null
           end_point?: string | null
+          geometry?: Json | null
           id?: string
           is_popular?: boolean
           mountain_id: number
+          mountain_name?: string | null
           name: string
           parking_info?: Json | null
           public_transit?: Json | null
           starting_point: string
           starting_point_description?: string | null
           tips?: Json | null
+          trail_distance_m?: number | null
+          up_minutes?: number | null
         }
         Update: {
           car_access?: Json | null
@@ -1392,18 +1402,23 @@ export type Database = {
           description?: string | null
           difficulty?: string
           distance_km?: number
+          down_minutes?: number | null
           duration_minutes?: number
           elevation_gain_m?: number | null
           end_point?: string | null
+          geometry?: Json | null
           id?: string
           is_popular?: boolean
           mountain_id?: number
+          mountain_name?: string | null
           name?: string
           parking_info?: Json | null
           public_transit?: Json | null
           starting_point?: string
           starting_point_description?: string | null
           tips?: Json | null
+          trail_distance_m?: number | null
+          up_minutes?: number | null
         }
         Relationships: []
       }
