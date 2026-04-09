@@ -83,6 +83,7 @@ const AuthPage = () => {
         });
         if (error) throw error;
         const { data: { user } } = await supabase.auth.getUser();
+        console.log("로그인 유저:", user);
         if (user) {
           await supabase.from('profiles').upsert({
             user_id: user.id,
@@ -107,6 +108,7 @@ const AuthPage = () => {
 
         if (data.session) {
           const { data: { user } } = await supabase.auth.getUser();
+          console.log("회원가입 유저:", user);
           if (user) {
             await supabase.from('profiles').upsert({
               user_id: user.id,
