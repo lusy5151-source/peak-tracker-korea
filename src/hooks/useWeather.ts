@@ -42,10 +42,10 @@ export function useWeather(mountainId: number, lat: number, lng: number) {
     try {
       const { data, error } = await supabase.functions.invoke("get-weather", {
         body: { lat, lon: lng, type: "current" },
-      });
+      }).catch(() => ({ data: null, error: new Error("Network error") }));
 
-      if (error || data?.error) {
-        // Fall back to mock data
+      if (error || !data || data?.error) {
+        // Fall back to mock data (handles 401/network errors gracefully)
         setWeather(getMockWeather(mountainId));
         setIsReal(false);
         return;
