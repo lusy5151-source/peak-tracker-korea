@@ -135,6 +135,17 @@ const AuthPage = () => {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
+      // Upsert profile after Google login
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const u = session.user;
+        await supabase.from("profiles").upsert({
+          user_id: u.id,
+          nickname: u.user_metadata?.full_name || u.email?.split("@")[0] || "",
+          avatar_url: u.user_metadata?.avatar_url || null,
+          provider: "google",
+        }, { onConflict: "user_id" });
+      }
       navigate("/");
     } catch (err: any) {
       toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
