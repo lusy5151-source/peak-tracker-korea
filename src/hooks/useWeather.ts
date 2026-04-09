@@ -109,7 +109,7 @@ export function useForecast(lat: number, lng: number) {
     try {
       const { data, error } = await supabase.functions.invoke("get-weather", {
         body: { lat, lon: lng, type: "forecast" },
-      });
+      }).catch(() => ({ data: null, error: new Error("Network error") }));
 
       if (error || data?.error || !data?.list) {
         setForecast([]);
