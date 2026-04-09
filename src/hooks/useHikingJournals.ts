@@ -173,6 +173,11 @@ export function useHikingJournals() {
       .insert({ ...journal, user_id: user.id } as any)
       .select()
       .single();
+    if (error) {
+      console.error("Failed to create journal:", error);
+      const { toast } = await import("sonner");
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+    }
 
     // Notify tagged friends
     if (!error && journal.tagged_friends && journal.tagged_friends.length > 0) {
@@ -281,6 +286,11 @@ export function useHikingJournals() {
       .from("hiking_journals")
       .update(updates as any)
       .eq("id", id);
+    if (error) {
+      console.error("Failed to update journal:", error);
+      const { toast } = await import("sonner");
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+    }
     return { error };
   };
 

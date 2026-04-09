@@ -100,6 +100,11 @@ export function useHikingGroups() {
       .insert({ ...params, creator_id: user.id } as any)
       .select()
       .single();
+    if (error) {
+      console.error("Failed to create group:", error);
+      const { toast } = await import("sonner");
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+    }
     if (!error && data) {
       await supabase.from("group_members").insert({
         group_id: (data as any).id,
