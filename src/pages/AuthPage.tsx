@@ -104,12 +104,13 @@ const AuthPage = () => {
         if (error) throw error;
 
         if (data.session) {
-          // Auto-confirm enabled — direct login
           if (data.user) {
-            await supabase
-              .from("profiles")
-              .update({ nickname: name.trim() })
-              .eq("user_id", data.user.id);
+            await supabase.from("profiles").upsert({
+              user_id: data.user.id,
+              nickname: name.trim(),
+              avatar_url: null,
+              provider: "email",
+            }, { onConflict: "user_id" });
           }
           navigate("/");
         } else {
