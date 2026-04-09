@@ -224,7 +224,8 @@ export function useSummits(mountainId?: number) {
       } as any);
 
     if (insertError) {
-      return { success: false, error: "인증 등록에 실패했습니다" };
+      console.error("Failed to claim summit:", insertError);
+      return { success: false, error: "저장에 실패했습니다. 다시 시도해주세요." };
     }
 
     toast({
