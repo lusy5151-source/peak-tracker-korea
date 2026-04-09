@@ -77,11 +77,19 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: loginData, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
         if (error) throw error;
+        if (loginData.user) {
+          await supabase.from("profiles").upsert({
+            user_id: loginData.user.id,
+            nickname: loginData.user.user_metadata?.full_name || loginData.user.email?.split("@")[0] || "",
+            avatar_url: loginData.user.user_metadata?.avatar_url || null,
+            provider: "email",
+          }, { onConflict: "user_id" });
+        }
         navigate("/");
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -96,12 +104,13 @@ const AuthPage = () => {
         if (error) throw error;
 
         if (data.session) {
-          // Auto-confirm enabled — direct login
           if (data.user) {
-            await supabase
-              .from("profiles")
-              .update({ nickname: name.trim() })
-              .eq("user_id", data.user.id);
+            await supabase.from("profiles").upsert({
+              user_id: data.user.id,
+              nickname: name.trim(),
+              avatar_url: null,
+              provider: "email",
+            }, { onConflict: "user_id" });
           }
           navigate("/");
         } else {
@@ -126,6 +135,17 @@ const AuthPage = () => {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
+      // Upsert profile after Google login
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const u = session.user;
+        await supabase.from("profiles").upsert({
+          user_id: u.id,
+          nickname: u.user_metadata?.full_name || u.email?.split("@")[0] || "",
+          avatar_url: u.user_metadata?.avatar_url || null,
+          provider: "google",
+        }, { onConflict: "user_id" });
+      }
       navigate("/");
     } catch (err: any) {
       toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
