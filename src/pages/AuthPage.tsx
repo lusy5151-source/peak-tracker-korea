@@ -138,12 +138,13 @@ const AuthPage = () => {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
-      if (result.user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
         await supabase.from('profiles').upsert({
-          user_id: result.user.id,
-          email: result.user.email,
-          nickname: result.user.name || result.user.email?.split('@')[0],
-          avatar_url: result.user.avatar_url || null,
+          user_id: session.user.id,
+          email: session.user.email,
+          nickname: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+          avatar_url: session.user.user_metadata?.avatar_url || null,
           provider: 'google'
         }, { onConflict: 'user_id' });
       }
