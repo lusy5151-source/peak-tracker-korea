@@ -93,6 +93,7 @@ const AuthPage = () => {
         }
         navigate("/");
       } else {
+        console.log("signUp 시도:", email.trim());
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -101,6 +102,8 @@ const AuthPage = () => {
             data: { full_name: name.trim() },
           },
         });
+        console.log("signUp 결과 data:", data);
+        console.log("signUp 결과 error:", error);
 
         if (error) throw error;
 
