@@ -28,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await supabase.from('profiles').upsert({
           user_id: u.id,
+          email: u.email,
           nickname: u.user_metadata?.full_name || u.email?.split('@')[0] || '사용자',
           avatar_url: u.user_metadata?.avatar_url || null,
           provider: u.app_metadata?.provider || 'email',
@@ -37,13 +38,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setTimeout(() => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        if (session?.user) syncProfile(session.user);
       }, 0);
+
+      if ((_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED') && session?.user) {
+        await syncProfile(session.user);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
