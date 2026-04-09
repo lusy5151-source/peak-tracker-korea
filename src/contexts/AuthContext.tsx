@@ -24,11 +24,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const syncProfile = async (u: User) => {
+      try {
+        await supabase.from('profiles').upsert({
+          user_id: u.id,
+          nickname: u.user_metadata?.full_name || u.email?.split('@')[0] || '사용자',
+          avatar_url: u.user_metadata?.avatar_url || null,
+          provider: u.app_metadata?.provider || 'email',
+        }, { onConflict: 'user_id' });
+      } catch (e) {
+        console.warn('Profile sync failed:', e);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setTimeout(() => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        if (session?.user) syncProfile(session.user);
       }, 0);
     });
 
@@ -36,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) syncProfile(session.user);
     });
 
     return () => subscription.unsubscribe();
