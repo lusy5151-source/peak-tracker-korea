@@ -82,14 +82,12 @@ const AuthPage = () => {
           password,
         });
         if (error) throw error;
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log("로그인 유저:", user);
-        if (user) {
+        if (loginData.user) {
           await supabase.from('profiles').upsert({
-            user_id: user.id,
-            email: user.email,
-            nickname: user.user_metadata?.full_name || user.email?.split('@')[0],
-            avatar_url: user.user_metadata?.avatar_url || null,
+            user_id: loginData.user.id,
+            email: loginData.user.email,
+            nickname: loginData.user.user_metadata?.full_name || loginData.user.email?.split('@')[0],
+            avatar_url: loginData.user.user_metadata?.avatar_url || null,
             provider: 'email'
           }, { onConflict: 'user_id' });
         }
@@ -107,14 +105,12 @@ const AuthPage = () => {
         if (error) throw error;
 
         if (data.session) {
-          const { data: { user } } = await supabase.auth.getUser();
-          console.log("회원가입 유저:", user);
-          if (user) {
+          if (data.user) {
             await supabase.from('profiles').upsert({
-              user_id: user.id,
-              email: user.email,
-              nickname: name.trim() || user.email?.split('@')[0],
-              avatar_url: user.user_metadata?.avatar_url || null,
+              user_id: data.user.id,
+              email: data.user.email,
+              nickname: name.trim() || data.user.email?.split('@')[0],
+              avatar_url: null,
               provider: 'email'
             }, { onConflict: 'user_id' });
           }
