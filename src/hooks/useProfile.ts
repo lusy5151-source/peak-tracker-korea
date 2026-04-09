@@ -41,7 +41,11 @@ export function useProfile() {
       .select()
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error("Failed to update profile:", error);
+      const { toast } = await import("sonner");
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+    } else if (data) {
       setProfile(data);
     }
     return { data, error };

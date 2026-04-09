@@ -103,6 +103,11 @@ export function useHikingPlans() {
       .insert({ ...plan, creator_id: user.id } as any)
       .select()
       .single();
+    if (error) {
+      console.error("Failed to create plan:", error);
+      const { toast } = await import("sonner");
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+    }
     if (!error && data) {
       fetchPlans();
       // Send auto welcome message for plan chat

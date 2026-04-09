@@ -79,7 +79,13 @@ export function useFriends() {
       requester_id: user.id,
       addressee_id: addresseeId,
     });
-    if (!error) fetchFriendships();
+    if (error) {
+      console.error("Failed to send friend request:", error);
+      const { toast } = await import("sonner");
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+    } else {
+      fetchFriendships();
+    }
     return { error };
   };
 
