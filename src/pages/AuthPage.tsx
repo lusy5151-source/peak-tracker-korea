@@ -87,8 +87,8 @@ const AuthPage = () => {
           await supabase.from('profiles').upsert({
             user_id: user.id,
             email: user.email,
-            nickname: user.name || user.email?.split('@')[0],
-            avatar_url: user.avatar_url || null,
+            nickname: user.user_metadata?.full_name || user.email?.split('@')[0],
+            avatar_url: user.user_metadata?.avatar_url || null,
             provider: 'email'
           }, { onConflict: 'user_id' });
         }
@@ -112,7 +112,7 @@ const AuthPage = () => {
               user_id: user.id,
               email: user.email,
               nickname: name.trim() || user.email?.split('@')[0],
-              avatar_url: user.avatar_url || null,
+              avatar_url: user.user_metadata?.avatar_url || null,
               provider: 'email'
             }, { onConflict: 'user_id' });
           }
@@ -146,8 +146,8 @@ const AuthPage = () => {
         await supabase.from('profiles').upsert({
           user_id: user.id,
           email: user.email,
-          nickname: user.name || user.email?.split('@')[0],
-          avatar_url: user.avatar_url || null,
+          nickname: user.user_metadata?.full_name || user.email?.split('@')[0],
+          avatar_url: user.user_metadata?.avatar_url || null,
           provider: 'google'
         }, { onConflict: 'user_id' });
       }
