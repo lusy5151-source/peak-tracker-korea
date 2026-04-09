@@ -82,7 +82,7 @@ const AuthPage = () => {
           password,
         });
         if (error) throw error;
-        const user = await lovable.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase.from('profiles').upsert({
             user_id: user.id,
@@ -106,7 +106,7 @@ const AuthPage = () => {
         if (error) throw error;
 
         if (data.session) {
-          const user = await lovable.auth.getUser();
+          const { data: { user } } = await supabase.auth.getUser();
           if (user) {
             await supabase.from('profiles').upsert({
               user_id: user.id,
@@ -141,7 +141,7 @@ const AuthPage = () => {
       if (result.redirected) return;
 
       // 구글 로그인 후 유저 정보 가져오기
-      const user = await lovable.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         await supabase.from('profiles').upsert({
           user_id: user.id,
