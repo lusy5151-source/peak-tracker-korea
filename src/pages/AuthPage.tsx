@@ -77,11 +77,19 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: loginData, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
         if (error) throw error;
+        if (loginData.user) {
+          await supabase.from("profiles").upsert({
+            user_id: loginData.user.id,
+            nickname: loginData.user.user_metadata?.full_name || loginData.user.email?.split("@")[0] || "",
+            avatar_url: loginData.user.user_metadata?.avatar_url || null,
+            provider: "email",
+          }, { onConflict: "user_id" });
+        }
         navigate("/");
       } else {
         const { data, error } = await supabase.auth.signUp({
