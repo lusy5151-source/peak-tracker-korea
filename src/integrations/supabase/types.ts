@@ -1096,6 +1096,7 @@ export type Database = {
           id: string
           location: string | null
           nickname: string | null
+          provider: string | null
           updated_at: string
           user_id: string
         }
@@ -1107,6 +1108,7 @@ export type Database = {
           id?: string
           location?: string | null
           nickname?: string | null
+          provider?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1118,6 +1120,7 @@ export type Database = {
           id?: string
           location?: string | null
           nickname?: string | null
+          provider?: string | null
           updated_at?: string
           user_id?: string
         }
