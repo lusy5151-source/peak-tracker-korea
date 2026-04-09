@@ -138,13 +138,16 @@ const AuthPage = () => {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
+
+      // 구글 로그인 후 세션에서 유저 정보 가져오기
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData?.session?.user;
+      if (user) {
         await supabase.from('profiles').upsert({
-          user_id: session.user.id,
-          email: session.user.email,
-          nickname: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
-          avatar_url: session.user.user_metadata?.avatar_url || null,
+          user_id: user.id,
+          email: user.email,
+          nickname: user.user_metadata?.full_name || user.email?.split('@')[0],
+          avatar_url: user.user_metadata?.avatar_url || null,
           provider: 'google'
         }, { onConflict: 'user_id' });
       }
