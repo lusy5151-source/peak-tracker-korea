@@ -70,12 +70,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: 'local' });
-    } finally {
-      setSession(null);
-      setUser(null);
-      setLoading(false);
-      window.location.replace('/auth');
+    } catch (e) {
+      // ignore signOut errors
     }
+    // Clear all local storage to remove any cached auth tokens
+    try { localStorage.clear(); } catch (e) {}
+    try { sessionStorage.clear(); } catch (e) {}
+    setSession(null);
+    setUser(null);
+    setLoading(false);
+    window.location.replace('/auth');
   };
 
   return (
