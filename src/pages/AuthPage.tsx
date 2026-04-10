@@ -17,6 +17,7 @@ const friendlyError = (msg: string) => {
 };
 
 const AuthPage = () => {
+  const { syncProfile } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
