@@ -1,30 +1,41 @@
 
 
-## Plan: Replace hardcoded URLs with wandeung.com
+## Analysis: Current Auth Configuration
 
-### Findings
+### Current State
+The code is **already correctly structured**:
+- **AuthPage.tsx**: Email/password uses `supabase.auth.signUp` and `supabase.auth.signInWithPassword` directly (lines 80, 97)
+- **AuthPage.tsx**: Google login uses `lovable.auth.signInWithOAuth("google")` (line 138)
+- **AuthContext.tsx**: Session management uses `supabase.auth.onAuthStateChange` and `supabase.auth.getSession`
 
-Only one file contains `peak-tracker-korea.lovable.app`: **`src/pages/AuthPage.tsx`**. The same file also uses `window.location.origin` for Google OAuth redirect. No other files reference the old domain.
+### Root Cause of "auth.users not populated"
+The Lovable **preview environment** intercepts and blocks direct `supabase.auth.signUp` and `supabase.auth.signInWithPassword` requests. This is a known limitation — email/password auth only works on the **published URL** (wandeung.com), not in the editor preview.
 
-### Changes
+### What Actually Needs Fixing
+The code structure is correct but has some issues worth cleaning up:
 
-**File: `src/pages/AuthPage.tsx`**
+1. **Remove debug console.logs** from AuthContext.tsx (lines 42, 52, 60) and AuthPage.tsx (lines 96, 104-105)
+2. **Duplicate profile sync logic** — profiles are upserted in 3 places (AuthContext onAuthStateChange, AuthContext getSession, and AuthPage handleSubmit). Consolidate to just AuthContext
+3. **signOut robustness** — current implementation is already good with `scope: 'local'`
 
-1. **Line 57** — Change `emailRedirectTo` in `signUp()`:
-   - From: `"https://peak-tracker-korea.lovable.app"`
-   - To: `"https://wandeung.com"`
+### Plan
 
-2. **Line 99** — Change `redirectTo` in Google OAuth:
-   - From: `window.location.origin`
-   - To: `"https://wandeung.com"`
+**Step 1: Clean up AuthContext.tsx**
+- Remove debug `console.log` statements
+- Keep the existing dual-path profile sync (onAuthStateChange + getSession)
 
-### Note on Supabase redirect URL allowlist
+**Step 2: Clean up AuthPage.tsx**  
+- Remove debug `console.log` statements (lines 96, 104-105)
+- Remove redundant `profiles.upsert` calls from handleSubmit and handleGoogleLogin — AuthContext already handles this on SIGNED_IN/TOKEN_REFRESHED events
+- Keep all email/password calls as `supabase.auth.*` (already correct)
+- Keep Google login as `lovable.auth.signInWithOAuth("google")` (already correct)
 
-The redirect URL allowlist (`https://wandeung.com` and `https://wandeung.com/**`) must be configured in the backend auth settings. This is a dashboard-level setting, not a client code change. I will configure this using the auth configuration tool after implementing the code changes.
+**Step 3: No structural changes needed**
+- The auth architecture is already correct per Lovable docs
+- Email/password → `supabase.auth` 
+- Google OAuth → `lovable.auth`
+- Testing must be done on wandeung.com, not in the preview editor
 
-### No other files affected
-
-- `src/integrations/supabase/client.ts` — auto-generated, uses env vars, no hardcoded URLs
-- `supabase/functions/kakao-auth/index.ts` — uses dynamic `redirect_uri` from request body
-- All other files — no references found
+### Technical Note
+To verify email/password signup works, you must test on **https://wandeung.com** — it will not work in the Lovable editor preview due to proxy restrictions.
 
