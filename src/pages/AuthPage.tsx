@@ -17,7 +17,7 @@ const friendlyError = (msg: string) => {
 };
 
 const AuthPage = () => {
-  const { syncProfile } = useAuth();
+  
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -122,9 +122,6 @@ const AuthPage = () => {
       if (result.error) throw result.error;
       if (result.redirected) return;
 
-      // Explicitly sync profile after non-redirect OAuth success
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) await syncProfile(user);
 
       navigate("/");
     } catch (err: any) {
