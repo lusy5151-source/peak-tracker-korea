@@ -29,11 +29,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isReady, setIsReady] = useState(false);
 
   // Sync profile via edge function (service_role bypasses RLS)
-  const syncProfile = useCallback(async (u: User) => {
+  const syncProfile = useCallback(async (_u?: User) => {
     try {
-      await supabase.functions.invoke('sync-profile', {
-        body: {},
-      });
+      const { error } = await supabase.functions.invoke('sync-profile');
+      if (error) console.warn('sync-profile error:', error);
     } catch (e) {
       console.warn('Profile sync failed:', e);
     }
