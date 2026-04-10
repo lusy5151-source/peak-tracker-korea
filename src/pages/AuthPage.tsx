@@ -82,18 +82,8 @@ const AuthPage = () => {
           password,
         });
         if (error) throw error;
-        if (loginData.user) {
-          await supabase.from('profiles').upsert({
-            user_id: loginData.user.id,
-            email: loginData.user.email,
-            nickname: loginData.user.user_metadata?.full_name || loginData.user.email?.split('@')[0],
-            avatar_url: loginData.user.user_metadata?.avatar_url || null,
-            provider: 'email'
-          }, { onConflict: 'user_id' });
-        }
         navigate("/");
       } else {
-        console.log("signUp 시도:", email.trim());
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -102,21 +92,10 @@ const AuthPage = () => {
             data: { full_name: name.trim() },
           },
         });
-        console.log("signUp 결과 data:", data);
-        console.log("signUp 결과 error:", error);
 
         if (error) throw error;
 
         if (data.session) {
-          if (data.user) {
-            await supabase.from('profiles').upsert({
-              user_id: data.user.id,
-              email: data.user.email,
-              nickname: name.trim() || data.user.email?.split('@')[0],
-              avatar_url: null,
-              provider: 'email'
-            }, { onConflict: 'user_id' });
-          }
           navigate("/");
         } else {
           // Email confirmation required
@@ -140,18 +119,6 @@ const AuthPage = () => {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
-
-      // 구글 로그인 후 유저 정보 가져오기
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('profiles').upsert({
-          user_id: user.id,
-          email: user.email,
-          nickname: user.user_metadata?.full_name || user.email?.split('@')[0],
-          avatar_url: user.user_metadata?.avatar_url || null,
-          provider: 'google'
-        }, { onConflict: 'user_id' });
-      }
       navigate("/");
     } catch (err: any) {
       toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });

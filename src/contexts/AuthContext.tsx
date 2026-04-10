@@ -39,8 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("🔥 AUTH EVENT:", _event, session?.user?.email);
-
       setTimeout(() => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -49,15 +47,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if ((_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED') && session?.user) {
         const user = session.user;
-        console.log("✅ profiles upsert 시도:", user.email);
-        const { error } = await supabase.from('profiles').upsert({
+        await supabase.from('profiles').upsert({
           user_id: user.id,
           email: user.email,
           nickname: user.user_metadata?.full_name || user.email?.split('@')[0],
           avatar_url: user.user_metadata?.avatar_url || null,
           provider: user.app_metadata?.provider || 'email'
         }, { onConflict: 'user_id' });
-        console.log("📝 upsert 결과:", error ? error.message : "성공");
       }
     });
 
