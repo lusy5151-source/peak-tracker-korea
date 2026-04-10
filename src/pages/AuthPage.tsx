@@ -82,18 +82,8 @@ const AuthPage = () => {
           password,
         });
         if (error) throw error;
-        if (loginData.user) {
-          await supabase.from('profiles').upsert({
-            user_id: loginData.user.id,
-            email: loginData.user.email,
-            nickname: loginData.user.user_metadata?.full_name || loginData.user.email?.split('@')[0],
-            avatar_url: loginData.user.user_metadata?.avatar_url || null,
-            provider: 'email'
-          }, { onConflict: 'user_id' });
-        }
         navigate("/");
       } else {
-        console.log("signUp 시도:", email.trim());
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
