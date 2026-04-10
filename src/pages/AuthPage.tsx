@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { useAuth } from "@/contexts/AuthContext";
 import { Mountain, Mail, Lock, Eye, EyeOff, ArrowRight, User, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ const friendlyError = (msg: string) => {
 };
 
 const AuthPage = () => {
+  const { syncProfile } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -119,6 +121,11 @@ const AuthPage = () => {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
+
+      // Explicitly sync profile after non-redirect OAuth success
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await syncProfile(user);
+
       navigate("/");
     } catch (err: any) {
       toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
