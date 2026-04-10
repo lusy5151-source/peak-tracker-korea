@@ -1,158 +1,35 @@
 
-요청 내용을 기준으로 현재 `src/contexts/AuthContext.tsx`를 확인한 결과:
+긴급 복구 계획:
 
-1. `syncProfile`은 이미 Edge Function 호출 방식이지만, 아직 사용하지 않는 인자 이름과 `body: {}`가 남아 있어 요청하신 “정확한 코드”와는 다릅니다.
-2. `onAuthStateChange` 안에는 현재 직접 `upsert()` 코드는 없고, 이미 `await syncProfile(session.user)`를 호출하고 있습니다.
-3. 따라서 실제 수정 범위는 `syncProfile` 함수만 요청하신 코드와 완전히 동일하게 맞추는 것입니다. 다른 로직은 건드릴 필요가 없습니다.
+1. `src/contexts/AuthContext.tsx`를 요청하신 단순 세션 기반 버전으로 교체합니다.
+   - 초기 마운트 시 `supabase.auth.getSession()`으로 세션을 가져오고
+   - `onAuthStateChange`로 로그인/로그아웃 변화를 반영하고
+   - `loading`을 두 군데 모두에서 반드시 `false`로 내려 무한 로딩을 끊습니다.
+   - `signOut()`도 단순하게 `supabase.auth.signOut()` 후 `/auth`로 이동하도록 맞춥니다.
 
-적용할 변경:
+2. 동시에 `src/pages/AuthPage.tsx`를 최소 보정합니다.
+   - 현재 이 파일은 `const { syncProfile } = useAuth();`를 사용하고 있어서,
+     `AuthContext`를 요청하신 코드로 “완전 교체”하면 즉시 타입/런타임 불일치가 생길 수 있습니다.
+   - 따라서 가장 작은 범위로:
+     - `useAuth()`에서 `syncProfile` 구조분해를 제거하고
+     - Google 로그인 성공 후 호출하는 `syncProfile(user)` 라인을 제거합니다.
+   - 이유: 새 `AuthContext` 인터페이스에는 `syncProfile`이 없기 때문입니다.
 
-```tsx
-const syncProfile = useCallback(async (_u?: User) => {
-  try {
-    const { error } = await supabase.functions.invoke('sync-profile');
+3. `src/App.tsx`는 현재 확인 결과 `ProtectedRoute`가 이미 `user, loading`만 사용하고 있어 추가 수정 없이 유지합니다.
+   - 즉, 이번 복구는 주로 `AuthContext` 단순화 + `AuthPage` 호환성 정리입니다.
 
-    if (error) console.warn('sync-profile error:', error);
-  } catch (e) {
-    console.warn('Profile sync failed:', e);
-  }
-}, []);
-```
-
-유지할 부분:
-- `onAuthStateChange` 내부의 `await syncProfile(session.user);`
-- `initSession()` 내부의 `await syncProfile(resolvedUser);`
-- 나머지 상태 관리(`user`, `session`, `loading`, `isReady`, `signOut`) 전부 그대로 유지
-
-수정 후 파일 상태는 아래와 같아야 합니다:
-
-```tsx
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  isReady: boolean;
-  signOut: () => Promise<void>;
-  syncProfile: (u: User) => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  session: null,
-  loading: true,
-  isReady: false,
-  signOut: async () => {},
-  syncProfile: async () => {},
-});
-
-export const useAuth = () => useContext(AuthContext);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isReady, setIsReady] = useState(false);
-
-  const syncProfile = useCallback(async (_u?: User) => {
-    try {
-      const { error } = await supabase.functions.invoke('sync-profile');
-
-      if (error) console.warn('sync-profile error:', error);
-    } catch (e) {
-      console.warn('Profile sync failed:', e);
-    }
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      if ((_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED') && session?.user) {
-        await syncProfile(session.user);
-      }
-    });
-
-    const initSession = async () => {
-      let resolvedUser: User | null = null;
-
-      try {
-        const { data: { session: localSession } } = await supabase.auth.getSession();
-        if (localSession?.user) {
-          if (mounted) {
-            setSession(localSession);
-            setUser(localSession.user);
-            resolvedUser = localSession.user;
-          }
-        }
-      } catch (e) {
-        console.warn('getSession failed:', e);
-      }
-
-      if (!resolvedUser) {
-        try {
-          const { data: { user: serverUser } } = await supabase.auth.getUser();
-          if (mounted && serverUser) {
-            setUser(serverUser);
-            resolvedUser = serverUser;
-          }
-        } catch (e) {
-        }
-      }
-
-      if (resolvedUser) {
-        await syncProfile(resolvedUser);
-      }
-
-      if (mounted) {
-        setLoading(false);
-        setIsReady(true);
-      }
-    };
-
-    initSession();
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [syncProfile]);
-
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut({ scope: 'local' });
-    } catch (e) {
-    }
-    try { localStorage.clear(); } catch (e) {}
-    try { sessionStorage.clear(); } catch (e) {}
-    setSession(null);
-    setUser(null);
-    setLoading(false);
-    setIsReady(true);
-    window.location.replace('/auth');
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, session, loading, isReady, signOut, syncProfile }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-```
-
-실행 계획:
-- `src/contexts/AuthContext.tsx`의 `syncProfile` 함수만 위 코드로 정확히 교체
-- `onAuthStateChange`는 이미 `syncProfile()` 호출 형태라 그대로 유지
-- 배포는 수정 적용 후 진행
+4. 적용 후 즉시 배포합니다.
+   - 배포 후 확인 포인트:
+     - `/profile` 진입 시 “인증 확인 중...” 무한 로딩 해소
+     - 로그인 후 `/` 또는 보호 라우트 접근 가능
+     - 로그아웃 시 `/auth`로 정상 이동
+     - `/auth`에서 Google 로그인 버튼 클릭 시 최소한 화면이 깨지지 않고 흐름이 정상 진행
 
 기술 메모:
-- 현재 문제는 “직접 upsert 호출”보다, `syncProfile` 구현이 요청하신 정확한 형태와 1:1로 일치하지 않는 점입니다.
-- 특히 `body: {}` 제거, `const { error } = ...` 추가, `_u?: User` 시그니처 반영이 핵심입니다.
+- 현재 코드베이스 기준으로 `App.tsx`의 `isReady` 문제는 이미 사라졌습니다.
+- 지금 더 큰 실제 위험은 `AuthContext`를 단순 버전으로 되돌리면서 `AuthPage`가 아직 `syncProfile`을 참조하는 점입니다.
+- 그래서 “AuthContext만 교체”하면 복구가 아니라 새 오류를 만들 가능성이 큽니다.
+- 가장 안전한 긴급 복구는:
+  - `AuthContext`를 단순 세션 리스너 패턴으로 교체
+  - `AuthPage`의 `syncProfile` 의존 제거
+- 이후 안정화가 끝나면 필요 시 별도 단계에서 프로필 동기화를 다시 도입할 수 있습니다.
