@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import { useState, useCallback, lazy, Suspense } from "react";
 import PageSkeleton from "@/components/PageSkeleton";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
+import { useProfileSync } from "@/hooks/useProfileSync";
 
 // Eagerly loaded (auth only)
 import AuthPage from "@/pages/AuthPage";
