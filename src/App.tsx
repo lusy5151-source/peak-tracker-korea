@@ -67,8 +67,8 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  if (loading) return <LoadingSpinner message="인증 확인 중..." />;
+  const { user, loading, isReady } = useAuth();
+  if (loading || !isReady) return <LoadingSpinner message="인증 확인 중..." />;
   if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
