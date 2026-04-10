@@ -82,6 +82,7 @@ const LazyPage = ({ children, fallback }: { children: React.ReactNode; fallback?
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
+  useProfileSync();
 
   return (
     <Routes>
