@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Mountain, Camera, X, Clock, Route, Globe, Users, Lock, Loader2,
+  Mountain, Camera, X, Clock, Route, Globe, Users, Lock, Loader2, Plus,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,13 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const { toast } = useToast();
   const { isPrivateAccount, defaultJournalVisibility } = usePrivacySettings();
 
-  const [mountainId, setMountainId] = useState<number>(editJournal?.mountain_id || 0);
+  const [mountainIds, setMountainIds] = useState<number[]>(
+    editJournal?.mountain_ids?.length
+      ? (editJournal.mountain_ids as number[])
+      : editJournal?.mountain_id
+        ? [editJournal.mountain_id]
+        : []
+  );
   const [hikedAt, setHikedAt] = useState(editJournal?.hiked_at || new Date().toISOString().split("T")[0]);
   const [courseName, setCourseName] = useState(editJournal?.course_name || "");
   const [courseStartingPoint, setCourseStartingPoint] = useState(editJournal?.course_starting_point || "");
@@ -59,14 +65,18 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [mountainSearch, setMountainSearch] = useState("");
+  const [showMountainSearch, setShowMountainSearch] = useState(false);
 
   const isEdit = !!editJournal;
 
   const filteredMountains = mountainSearch
-    ? mountains.filter((m) => m.nameKo.includes(mountainSearch) || m.name.toLowerCase().includes(mountainSearch.toLowerCase()))
-    : mountains;
+    ? mountains.filter((m) =>
+        !mountainIds.includes(m.id) &&
+        (m.nameKo.includes(mountainSearch) || m.name.toLowerCase().includes(mountainSearch.toLowerCase()))
+      )
+    : mountains.filter((m) => !mountainIds.includes(m.id));
 
-  const selectedMountain = mountains.find((m) => m.id === mountainId);
+  const selectedMountains = mountainIds.map((id) => mountains.find((m) => m.id === id)).filter(Boolean) as typeof mountains;
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
