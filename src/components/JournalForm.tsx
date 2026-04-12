@@ -440,7 +440,7 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
         {/* Submit */}
         <div className="sticky bottom-0 z-[61] bg-card border-t border-border p-4 pb-6 sm:pb-4 flex gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1">취소</Button>
-          <Button onClick={handleSubmit} disabled={saving || !mountainId} className="flex-1">
+          <Button onClick={handleSubmit} disabled={saving || mountainIds.length === 0} className="flex-1">
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
             {isEdit ? "수정 완료" : "일지 작성"}
           </Button>
