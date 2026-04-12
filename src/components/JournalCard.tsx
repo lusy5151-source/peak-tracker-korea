@@ -161,10 +161,14 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
         )}
 
         {/* Mountain info */}
-        <div className="flex items-center gap-2">
-          <Mountain className="h-4 w-4 text-primary shrink-0" />
-          <span className="font-semibold text-foreground text-sm">{mountain.nameKo}</span>
-          <span className="text-[10px] text-muted-foreground">{mountain.region} · {mountain.height}m</span>
+        <div className="space-y-1">
+          {allMountains.map((m) => (
+            <div key={m.id} className="flex items-center gap-2">
+              <Mountain className="h-4 w-4 text-primary shrink-0" />
+              <span className="font-semibold text-foreground text-sm">{m.nameKo}</span>
+              <span className="text-[10px] text-muted-foreground">{m.region} · {m.height}m</span>
+            </div>
+          ))}
         </div>
 
         {/* Course & duration */}
