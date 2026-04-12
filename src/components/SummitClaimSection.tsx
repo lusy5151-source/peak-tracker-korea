@@ -45,6 +45,28 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
   const { myGroups } = useHikingGroups();
   const { toast } = useToast();
 
+  // Import mountains data for fallback coordinates
+  const mountainData = useMemo(() => {
+    try {
+      const { mountains } = require("@/data/mountains");
+      return mountains.find((m: any) => m.id === mountainId);
+    } catch { return null; }
+  }, [mountainId]);
+
+  // Create fallback summit when no summits exist
+  const displaySummits = useMemo(() => {
+    if (summits.length > 0) return summits;
+    if (!mountainData) return [];
+    return [{
+      id: `fallback-${mountainId}`,
+      mountain_id: mountainId,
+      summit_name: `${mountainName} 정상`,
+      latitude: mountainData.lat,
+      longitude: mountainData.lng,
+      elevation: mountainData.height,
+    }] as Summit[];
+  }, [summits, mountainId, mountainName, mountainData]);
+
   const [showClaimDialog, setShowClaimDialog] = useState(false);
   const [selectedSummit, setSelectedSummit] = useState<Summit | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
