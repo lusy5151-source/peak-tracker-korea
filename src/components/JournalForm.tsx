@@ -162,40 +162,80 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
         <div className="p-4 space-y-4">
           {/* Mountain Selection */}
           <div>
-            <label className="text-xs font-medium text-foreground mb-1.5 block">산 선택 *</label>
-            <Input
-              placeholder="산 이름 검색..."
-              value={selectedMountain ? selectedMountain.nameKo : mountainSearch}
-              onChange={(e) => {
-                setMountainSearch(e.target.value);
-                if (mountainId) setMountainId(0);
-              }}
-              className="mb-2"
-            />
-            {!mountainId && mountainSearch && (
-              <div className="max-h-32 overflow-y-auto rounded-lg border border-border bg-background">
-                {filteredMountains.slice(0, 10).map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => { setMountainId(m.id); setMountainSearch(""); }}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-secondary/50 flex items-center gap-2"
-                  >
-                    <Mountain className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-foreground">{m.nameKo}</span>
-                    <span className="text-[10px] text-muted-foreground ml-auto">{m.region} · {m.height}m</span>
-                  </button>
+            <label className="text-xs font-medium text-foreground mb-1.5 block">산 선택 * (여러 개 가능)</label>
+
+            {/* Selected mountains list */}
+            {selectedMountains.length > 0 && (
+              <div className="space-y-1.5 mb-2">
+                {selectedMountains.map((m, idx) => (
+                  <div key={m.id} className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2">
+                    <Mountain className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">{m.nameKo}</span>
+                    <span className="text-[10px] text-muted-foreground">{m.region} · {m.height}m</span>
+                    {idx > 0 && (
+                      <button
+                        onClick={() => setMountainIds((prev) => prev.filter((id) => id !== m.id))}
+                        className="ml-auto text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    {idx === 0 && selectedMountains.length > 1 && (
+                      <span className="ml-auto text-[9px] text-muted-foreground">대표</span>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
-            {selectedMountain && (
-              <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2">
-                <Mountain className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{selectedMountain.nameKo}</span>
-                <span className="text-[10px] text-muted-foreground">{selectedMountain.region}</span>
-                <button onClick={() => { setMountainId(0); setMountainSearch(""); }} className="ml-auto text-muted-foreground hover:text-foreground">
-                  <X className="h-3.5 w-3.5" />
-                </button>
+
+            {/* Add mountain button / search */}
+            {showMountainSearch ? (
+              <div>
+                <Input
+                  placeholder="산 이름 검색..."
+                  value={mountainSearch}
+                  onChange={(e) => setMountainSearch(e.target.value)}
+                  className="mb-2"
+                  autoFocus
+                />
+                {mountainSearch && (
+                  <div className="max-h-32 overflow-y-auto rounded-lg border border-border bg-background mb-2">
+                    {filteredMountains.slice(0, 10).map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          setMountainIds((prev) => [...prev, m.id]);
+                          setMountainSearch("");
+                          setShowMountainSearch(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-secondary/50 flex items-center gap-2"
+                      >
+                        <Mountain className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-foreground">{m.nameKo}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{m.region} · {m.height}m</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setShowMountainSearch(false); setMountainSearch(""); }}
+                  className="text-xs text-muted-foreground"
+                >
+                  취소
+                </Button>
               </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowMountainSearch(true)}
+                className="rounded-full gap-1.5 text-xs"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {selectedMountains.length === 0 ? "산 선택" : "산 추가"}
+              </Button>
             )}
           </div>
 
