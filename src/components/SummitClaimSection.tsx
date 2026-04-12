@@ -205,7 +205,7 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
         </div>
 
         <div className="space-y-3">
-          {summits.map((summit) => {
+          {displaySummits.map((summit) => {
             const owner = getSummitOwner(summit.id);
             const summitClaims = claims.filter((c) => c.summit_id === summit.id);
 
