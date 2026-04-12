@@ -119,12 +119,20 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
   const handleSubmitClaim = async () => {
     if (!selectedSummit || !userLocation || !photoFile) return;
     setClaiming(true);
+    const isFallback = selectedSummit.id.startsWith("fallback-");
     const result = await claimSummit(
       selectedSummit.id,
       userLocation.lat,
       userLocation.lng,
       photoFile,
-      selectedGroupId || undefined
+      selectedGroupId || undefined,
+      isFallback ? {
+        mountain_id: mountainId,
+        summit_name: selectedSummit.summit_name,
+        latitude: selectedSummit.latitude,
+        longitude: selectedSummit.longitude,
+        elevation: selectedSummit.elevation,
+      } : undefined
     );
     setClaiming(false);
     if (result.success) {
