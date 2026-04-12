@@ -4,7 +4,7 @@ import { mountains } from "@/data/mountains";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHikingPlans } from "@/hooks/useHikingPlans";
 import { useHikingGroups } from "@/hooks/useHikingGroups";
-import { useSummits } from "@/hooks/useSummits";
+import { useSummits, type Summit } from "@/hooks/useSummits";
 import { useOfflineClaims } from "@/hooks/useOfflineClaims";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,7 +71,21 @@ export default function SummitClaimPage() {
   const { summits, claimSummit, fetchClaims } = useSummits(selectedMountainId ?? undefined);
 
   const selectedMountain = selectedMountainId ? mountains.find((m) => m.id === selectedMountainId) : null;
-  const selectedSummit = summits.find((s) => s.id === selectedSummitId);
+
+  // Create fallback summit when no summits exist for the selected mountain
+  const displaySummits = useMemo(() => {
+    if (summits.length > 0 || !selectedMountain) return summits;
+    return [{
+      id: `fallback-${selectedMountain.id}`,
+      mountain_id: selectedMountain.id,
+      summit_name: `${selectedMountain.nameKo} 정상`,
+      latitude: selectedMountain.lat,
+      longitude: selectedMountain.lng,
+      elevation: selectedMountain.height,
+    }] as Summit[];
+  }, [summits, selectedMountain]);
+
+  const selectedSummit = displaySummits.find((s) => s.id === selectedSummitId);
 
   // Online status
   useEffect(() => {
@@ -217,12 +231,20 @@ export default function SummitClaimPage() {
     const lat = userLocation?.lat ?? selectedSummit.latitude;
     const lng = userLocation?.lng ?? selectedSummit.longitude;
 
+    const isFallback = selectedSummit.id.startsWith("fallback-");
     const result = await claimSummit(
       selectedSummit.id,
       lat,
       lng,
       photoFile,
-      selectedGroupId || undefined
+      selectedGroupId || undefined,
+      isFallback ? {
+        mountain_id: selectedMountain.id,
+        summit_name: selectedSummit.summit_name,
+        latitude: selectedSummit.latitude,
+        longitude: selectedSummit.longitude,
+        elevation: selectedSummit.elevation,
+      } : undefined
     );
     setClaiming(false);
 
@@ -524,15 +546,9 @@ export default function SummitClaimPage() {
             </div>
           </div>
 
-          {summits.length === 0 ? (
-            <div className="text-center py-8 space-y-3">
-              <MountainMascot size={80} mood="default" />
-              <p className="text-sm text-muted-foreground">등록된 정상이 없습니다</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
+          <div className="space-y-2">
               <h3 className="text-sm font-semibold text-foreground">정상 선택</h3>
-              {summits.map((summit) => (
+              {displaySummits.map((summit) => (
                 <button
                   key={summit.id}
                   onClick={() => handleSelectSummit(summit.id)}
@@ -549,7 +565,6 @@ export default function SummitClaimPage() {
                 </button>
               ))}
             </div>
-          )}
         </div>
       )}
 

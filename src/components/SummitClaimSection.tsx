@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useSummits, type Summit, type SummitClaim } from "@/hooks/useSummits";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHikingGroups } from "@/hooks/useHikingGroups";
+import { mountains as mountainsData } from "@/data/mountains";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,25 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
   const { summits, claims, loading, getSummitOwner, getMountainLeader, claimSummit } = useSummits(mountainId);
   const { myGroups } = useHikingGroups();
   const { toast } = useToast();
+
+  // Get mountain data for fallback coordinates
+  const mountainData = useMemo(() => {
+    return mountainsData.find((m) => m.id === mountainId);
+  }, [mountainId]);
+
+  // Create fallback summit when no summits exist
+  const displaySummits = useMemo(() => {
+    if (summits.length > 0) return summits;
+    if (!mountainData) return [];
+    return [{
+      id: `fallback-${mountainId}`,
+      mountain_id: mountainId,
+      summit_name: `${mountainName} 정상`,
+      latitude: mountainData.lat,
+      longitude: mountainData.lng,
+      elevation: mountainData.height,
+    }] as Summit[];
+  }, [summits, mountainId, mountainName, mountainData]);
 
   const [showClaimDialog, setShowClaimDialog] = useState(false);
   const [selectedSummit, setSelectedSummit] = useState<Summit | null>(null);
@@ -97,12 +117,20 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
   const handleSubmitClaim = async () => {
     if (!selectedSummit || !userLocation || !photoFile) return;
     setClaiming(true);
+    const isFallback = selectedSummit.id.startsWith("fallback-");
     const result = await claimSummit(
       selectedSummit.id,
       userLocation.lat,
       userLocation.lng,
       photoFile,
-      selectedGroupId || undefined
+      selectedGroupId || undefined,
+      isFallback ? {
+        mountain_id: mountainId,
+        summit_name: selectedSummit.summit_name,
+        latitude: selectedSummit.latitude,
+        longitude: selectedSummit.longitude,
+        elevation: selectedSummit.elevation,
+      } : undefined
     );
     setClaiming(false);
     if (result.success) {
@@ -123,7 +151,7 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
     );
   }
 
-  if (summits.length === 0) return null;
+  if (displaySummits.length === 0) return null;
 
   return (
     <div className="space-y-4">
@@ -175,7 +203,7 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
         </div>
 
         <div className="space-y-3">
-          {summits.map((summit) => {
+          {displaySummits.map((summit) => {
             const owner = getSummitOwner(summit.id);
             const summitClaims = claims.filter((c) => c.summit_id === summit.id);
 

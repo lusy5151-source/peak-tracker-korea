@@ -167,11 +167,41 @@ export function useSummits(mountainId?: number) {
     userLat: number,
     userLng: number,
     photoFile: File,
-    groupId?: string
+    groupId?: string,
+    fallbackSummitData?: { mountain_id: number; summit_name: string; latitude: number; longitude: number; elevation: number }
   ): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: "로그인이 필요합니다" };
 
-    const summit = summits.find((s) => s.id === summitId);
+    // Handle fallback summit: create it in DB first
+    let actualSummitId = summitId;
+    if (summitId.startsWith("fallback-") && fallbackSummitData) {
+      const { data: inserted, error: insertErr } = await supabase
+        .from("summits")
+        .insert({
+          mountain_id: fallbackSummitData.mountain_id,
+          summit_name: fallbackSummitData.summit_name,
+          latitude: fallbackSummitData.latitude,
+          longitude: fallbackSummitData.longitude,
+          elevation: fallbackSummitData.elevation,
+        } as any)
+        .select("id")
+        .single();
+      if (insertErr || !inserted) {
+        console.error("Failed to create fallback summit:", insertErr);
+        return { success: false, error: "정상 정보 생성에 실패했습니다" };
+      }
+      actualSummitId = (inserted as any).id;
+      await fetchSummits();
+    }
+
+    const summit = summits.find((s) => s.id === actualSummitId) || (fallbackSummitData ? {
+      id: actualSummitId,
+      mountain_id: fallbackSummitData.mountain_id,
+      summit_name: fallbackSummitData.summit_name,
+      latitude: fallbackSummitData.latitude,
+      longitude: fallbackSummitData.longitude,
+      elevation: fallbackSummitData.elevation,
+    } : null);
     if (!summit) return { success: false, error: "정상을 찾을 수 없습니다" };
 
     // GPS verification (soft check - warn but allow if > 50m, skip if coordinates match summit exactly)
@@ -189,7 +219,7 @@ export function useSummits(mountainId?: number) {
       .from("summit_claims")
       .select("id")
       .eq("user_id", user.id)
-      .eq("summit_id", summitId)
+      .eq("summit_id", actualSummitId)
       .gte("claimed_at", twelveHoursAgo);
 
     if (recentClaims && (recentClaims as any[]).length > 0) {
@@ -216,7 +246,7 @@ export function useSummits(mountainId?: number) {
       .insert({
         user_id: user.id,
         mountain_id: summit.mountain_id,
-        summit_id: summitId,
+        summit_id: actualSummitId,
         group_id: groupId || null,
         latitude: userLat,
         longitude: userLng,
