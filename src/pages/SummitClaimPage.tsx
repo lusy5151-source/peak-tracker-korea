@@ -231,12 +231,20 @@ export default function SummitClaimPage() {
     const lat = userLocation?.lat ?? selectedSummit.latitude;
     const lng = userLocation?.lng ?? selectedSummit.longitude;
 
+    const isFallback = selectedSummit.id.startsWith("fallback-");
     const result = await claimSummit(
       selectedSummit.id,
       lat,
       lng,
       photoFile,
-      selectedGroupId || undefined
+      selectedGroupId || undefined,
+      isFallback ? {
+        mountain_id: selectedMountain.id,
+        summit_name: selectedSummit.summit_name,
+        latitude: selectedSummit.latitude,
+        longitude: selectedSummit.longitude,
+        elevation: selectedSummit.elevation,
+      } : undefined
     );
     setClaiming(false);
 
