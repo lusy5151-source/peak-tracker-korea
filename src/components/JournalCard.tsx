@@ -31,6 +31,9 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
   const { user } = useAuth();
   const { toggleLike, fetchComments, addComment, deleteComment } = useHikingJournals();
   const mountain = mountains.find((m) => m.id === journal.mountain_id);
+  const allMountains = (journal.mountain_ids?.length ? journal.mountain_ids : [journal.mountain_id])
+    .map((id) => mountains.find((m) => m.id === id))
+    .filter(Boolean) as typeof mountains;
 
   const [liked, setLiked] = useState(journal.is_liked || false);
   const [likeCount, setLikeCount] = useState(journal.like_count || 0);
@@ -158,10 +161,14 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
         )}
 
         {/* Mountain info */}
-        <div className="flex items-center gap-2">
-          <Mountain className="h-4 w-4 text-primary shrink-0" />
-          <span className="font-semibold text-foreground text-sm">{mountain.nameKo}</span>
-          <span className="text-[10px] text-muted-foreground">{mountain.region} · {mountain.height}m</span>
+        <div className="space-y-1">
+          {allMountains.map((m) => (
+            <div key={m.id} className="flex items-center gap-2">
+              <Mountain className="h-4 w-4 text-primary shrink-0" />
+              <span className="font-semibold text-foreground text-sm">{m.nameKo}</span>
+              <span className="text-[10px] text-muted-foreground">{m.region} · {m.height}m</span>
+            </div>
+          ))}
         </div>
 
         {/* Course & duration */}
@@ -354,7 +361,10 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
 
 // Compact card for profile grid
 export function JournalGridCard({ journal, onClick }: { journal: HikingJournal; onClick?: () => void }) {
-  const mountain = mountains.find((m) => m.id === journal.mountain_id);
+  const allMts = (journal.mountain_ids?.length ? journal.mountain_ids : [journal.mountain_id])
+    .map((id) => mountains.find((m) => m.id === id))
+    .filter(Boolean) as typeof mountains;
+  const mountain = allMts[0];
   if (!mountain) return null;
   const photo = journal.photos?.[0];
 
@@ -378,7 +388,9 @@ export function JournalGridCard({ journal, onClick }: { journal: HikingJournal; 
         </div>
       </div>
       <div className="p-2.5">
-        <p className="text-xs font-semibold text-foreground truncate">{mountain.nameKo}</p>
+        <p className="text-xs font-semibold text-foreground truncate">
+          {allMts.map((m) => m.nameKo).join(", ")}
+        </p>
         <p className="text-[10px] text-muted-foreground mt-0.5">
           {format(new Date(journal.hiked_at), "yyyy.M.d", { locale: ko })}
         </p>

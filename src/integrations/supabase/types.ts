@@ -496,6 +496,7 @@ export type Database = {
           hiked_at: string
           id: string
           mountain_id: number
+          mountain_ids: number[] | null
           notes: string | null
           photos: string[] | null
           tagged_friends: string[] | null
@@ -514,6 +515,7 @@ export type Database = {
           hiked_at?: string
           id?: string
           mountain_id: number
+          mountain_ids?: number[] | null
           notes?: string | null
           photos?: string[] | null
           tagged_friends?: string[] | null
@@ -532,6 +534,7 @@ export type Database = {
           hiked_at?: string
           id?: string
           mountain_id?: number
+          mountain_ids?: number[] | null
           notes?: string | null
           photos?: string[] | null
           tagged_friends?: string[] | null

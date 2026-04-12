@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Mountain, Camera, X, Clock, Route, Globe, Users, Lock, Loader2,
+  Mountain, Camera, X, Clock, Route, Globe, Users, Lock, Loader2, Plus,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,13 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const { toast } = useToast();
   const { isPrivateAccount, defaultJournalVisibility } = usePrivacySettings();
 
-  const [mountainId, setMountainId] = useState<number>(editJournal?.mountain_id || 0);
+  const [mountainIds, setMountainIds] = useState<number[]>(
+    editJournal?.mountain_ids?.length
+      ? (editJournal.mountain_ids as number[])
+      : editJournal?.mountain_id
+        ? [editJournal.mountain_id]
+        : []
+  );
   const [hikedAt, setHikedAt] = useState(editJournal?.hiked_at || new Date().toISOString().split("T")[0]);
   const [courseName, setCourseName] = useState(editJournal?.course_name || "");
   const [courseStartingPoint, setCourseStartingPoint] = useState(editJournal?.course_starting_point || "");
@@ -59,14 +65,18 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [mountainSearch, setMountainSearch] = useState("");
+  const [showMountainSearch, setShowMountainSearch] = useState(false);
 
   const isEdit = !!editJournal;
 
   const filteredMountains = mountainSearch
-    ? mountains.filter((m) => m.nameKo.includes(mountainSearch) || m.name.toLowerCase().includes(mountainSearch.toLowerCase()))
-    : mountains;
+    ? mountains.filter((m) =>
+        !mountainIds.includes(m.id) &&
+        (m.nameKo.includes(mountainSearch) || m.name.toLowerCase().includes(mountainSearch.toLowerCase()))
+      )
+    : mountains.filter((m) => !mountainIds.includes(m.id));
 
-  const selectedMountain = mountains.find((m) => m.id === mountainId);
+  const selectedMountains = mountainIds.map((id) => mountains.find((m) => m.id === id)).filter(Boolean) as typeof mountains;
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -92,14 +102,15 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   };
 
   const handleSubmit = async () => {
-    if (!mountainId) {
+    if (mountainIds.length === 0) {
       toast({ title: "산을 선택해주세요", variant: "destructive" });
       return;
     }
     setSaving(true);
 
     const journalData = {
-      mountain_id: mountainId,
+      mountain_id: mountainIds[0],
+      mountain_ids: mountainIds,
       hiked_at: hikedAt,
       course_name: courseName || undefined,
       course_starting_point: courseStartingPoint || undefined,
@@ -151,40 +162,80 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
         <div className="p-4 space-y-4">
           {/* Mountain Selection */}
           <div>
-            <label className="text-xs font-medium text-foreground mb-1.5 block">산 선택 *</label>
-            <Input
-              placeholder="산 이름 검색..."
-              value={selectedMountain ? selectedMountain.nameKo : mountainSearch}
-              onChange={(e) => {
-                setMountainSearch(e.target.value);
-                if (mountainId) setMountainId(0);
-              }}
-              className="mb-2"
-            />
-            {!mountainId && mountainSearch && (
-              <div className="max-h-32 overflow-y-auto rounded-lg border border-border bg-background">
-                {filteredMountains.slice(0, 10).map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => { setMountainId(m.id); setMountainSearch(""); }}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-secondary/50 flex items-center gap-2"
-                  >
-                    <Mountain className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-foreground">{m.nameKo}</span>
-                    <span className="text-[10px] text-muted-foreground ml-auto">{m.region} · {m.height}m</span>
-                  </button>
+            <label className="text-xs font-medium text-foreground mb-1.5 block">산 선택 * (여러 개 가능)</label>
+
+            {/* Selected mountains list */}
+            {selectedMountains.length > 0 && (
+              <div className="space-y-1.5 mb-2">
+                {selectedMountains.map((m, idx) => (
+                  <div key={m.id} className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2">
+                    <Mountain className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">{m.nameKo}</span>
+                    <span className="text-[10px] text-muted-foreground">{m.region} · {m.height}m</span>
+                    {idx > 0 && (
+                      <button
+                        onClick={() => setMountainIds((prev) => prev.filter((id) => id !== m.id))}
+                        className="ml-auto text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    {idx === 0 && selectedMountains.length > 1 && (
+                      <span className="ml-auto text-[9px] text-muted-foreground">대표</span>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
-            {selectedMountain && (
-              <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2">
-                <Mountain className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{selectedMountain.nameKo}</span>
-                <span className="text-[10px] text-muted-foreground">{selectedMountain.region}</span>
-                <button onClick={() => { setMountainId(0); setMountainSearch(""); }} className="ml-auto text-muted-foreground hover:text-foreground">
-                  <X className="h-3.5 w-3.5" />
-                </button>
+
+            {/* Add mountain button / search */}
+            {showMountainSearch ? (
+              <div>
+                <Input
+                  placeholder="산 이름 검색..."
+                  value={mountainSearch}
+                  onChange={(e) => setMountainSearch(e.target.value)}
+                  className="mb-2"
+                  autoFocus
+                />
+                {mountainSearch && (
+                  <div className="max-h-32 overflow-y-auto rounded-lg border border-border bg-background mb-2">
+                    {filteredMountains.slice(0, 10).map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          setMountainIds((prev) => [...prev, m.id]);
+                          setMountainSearch("");
+                          setShowMountainSearch(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-secondary/50 flex items-center gap-2"
+                      >
+                        <Mountain className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-foreground">{m.nameKo}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{m.region} · {m.height}m</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setShowMountainSearch(false); setMountainSearch(""); }}
+                  className="text-xs text-muted-foreground"
+                >
+                  취소
+                </Button>
               </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowMountainSearch(true)}
+                className="rounded-full gap-1.5 text-xs"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {selectedMountains.length === 0 ? "산 선택" : "산 추가"}
+              </Button>
             )}
           </div>
 
@@ -389,7 +440,7 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
         {/* Submit */}
         <div className="sticky bottom-0 z-[61] bg-card border-t border-border p-4 pb-6 sm:pb-4 flex gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1">취소</Button>
-          <Button onClick={handleSubmit} disabled={saving || !mountainId} className="flex-1">
+          <Button onClick={handleSubmit} disabled={saving || mountainIds.length === 0} className="flex-1">
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
             {isEdit ? "수정 완료" : "일지 작성"}
           </Button>

@@ -6,6 +6,7 @@ export interface HikingJournal {
   id: string;
   user_id: string;
   mountain_id: number;
+  mountain_ids?: number[];
   course_name: string | null;
   course_starting_point: string | null;
   course_notes: string | null;
@@ -155,6 +156,7 @@ export function useHikingJournals() {
 
   const createJournal = async (journal: {
     mountain_id: number;
+    mountain_ids?: number[];
     course_name?: string;
     course_starting_point?: string;
     course_notes?: string;
