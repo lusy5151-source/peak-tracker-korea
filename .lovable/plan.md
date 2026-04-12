@@ -1,27 +1,37 @@
 
 
-## 등산 계획 날짜 선택 버그 수정
+## AuthPage.tsx 긴급 복구 계획
 
-### 문제
-`CreatePlanPage.tsx` 라인 197에서 `disabled={(d) => d < new Date()}`로 되어 있어, `new Date()`가 현재 시각을 포함하므로 오늘 날짜가 비활성화됨.
+### 수정 내용
 
-### 수정
+**파일: `src/pages/AuthPage.tsx`**
 
-**파일: `src/pages/CreatePlanPage.tsx` (라인 197)**
+1. **import 추가**: 파일 상단에 `import { lovable } from "@/integrations/lovable";` 추가
+2. **handleGoogleLogin 교체**: 현재 `supabase.auth.signInWithOAuth` 방식을 `lovable.auth.signInWithOAuth("google")` 방식으로 되돌림
 
-변경 전:
+### 변경 코드
+
 ```ts
-disabled={(d) => d < new Date()}
+// import 추가
+import { lovable } from "@/integrations/lovable";
+
+// handleGoogleLogin 교체
+const handleGoogleLogin = async () => {
+  setLoading(true);
+  try {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: "https://wandeung.com",
+    });
+    if (result.error) throw result.error;
+    if (result.redirected) return;
+    navigate("/");
+  } catch (err: any) {
+    toast({ title: "오류", description: friendlyError(err.message), variant: "destructive" });
+  } finally {
+    setLoading(false);
+  }
+};
 ```
 
-변경 후:
-```ts
-disabled={(d) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return d < today;
-}}
-```
-
-오늘 날짜의 시작(00:00:00)과 비교하여 오늘은 선택 가능하고 어제 이전만 비활성화됩니다. 한 줄 수정입니다.
+수정 후 즉시 배포합니다.
 
