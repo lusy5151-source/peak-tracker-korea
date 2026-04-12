@@ -2,6 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { useSummits, type Summit, type SummitClaim } from "@/hooks/useSummits";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHikingGroups } from "@/hooks/useHikingGroups";
+import { mountains as mountainsData } from "@/data/mountains";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
