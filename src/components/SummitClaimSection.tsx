@@ -145,7 +145,7 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
     );
   }
 
-  if (summits.length === 0) return null;
+  if (displaySummits.length === 0) return null;
 
   return (
     <div className="space-y-4">
