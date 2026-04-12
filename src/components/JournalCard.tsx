@@ -31,6 +31,9 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
   const { user } = useAuth();
   const { toggleLike, fetchComments, addComment, deleteComment } = useHikingJournals();
   const mountain = mountains.find((m) => m.id === journal.mountain_id);
+  const allMountains = (journal.mountain_ids?.length ? journal.mountain_ids : [journal.mountain_id])
+    .map((id) => mountains.find((m) => m.id === id))
+    .filter(Boolean) as typeof mountains;
 
   const [liked, setLiked] = useState(journal.is_liked || false);
   const [likeCount, setLikeCount] = useState(journal.like_count || 0);

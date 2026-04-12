@@ -156,6 +156,7 @@ export function useHikingJournals() {
 
   const createJournal = async (journal: {
     mountain_id: number;
+    mountain_ids?: number[];
     course_name?: string;
     course_starting_point?: string;
     course_notes?: string;
