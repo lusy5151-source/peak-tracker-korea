@@ -102,14 +102,15 @@ export function JournalForm({ editJournal, onClose, onSaved }: JournalFormProps)
   };
 
   const handleSubmit = async () => {
-    if (!mountainId) {
+    if (mountainIds.length === 0) {
       toast({ title: "산을 선택해주세요", variant: "destructive" });
       return;
     }
     setSaving(true);
 
     const journalData = {
-      mountain_id: mountainId,
+      mountain_id: mountainIds[0],
+      mountain_ids: mountainIds,
       hiked_at: hikedAt,
       course_name: courseName || undefined,
       course_starting_point: courseStartingPoint || undefined,
