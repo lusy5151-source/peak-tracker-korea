@@ -388,7 +388,9 @@ export function JournalGridCard({ journal, onClick }: { journal: HikingJournal; 
         </div>
       </div>
       <div className="p-2.5">
-        <p className="text-xs font-semibold text-foreground truncate">{mountain.nameKo}</p>
+        <p className="text-xs font-semibold text-foreground truncate">
+          {allMts.map((m) => m.nameKo).join(", ")}
+        </p>
         <p className="text-[10px] text-muted-foreground mt-0.5">
           {format(new Date(journal.hiked_at), "yyyy.M.d", { locale: ko })}
         </p>
