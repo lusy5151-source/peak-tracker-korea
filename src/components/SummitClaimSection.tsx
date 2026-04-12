@@ -46,12 +46,9 @@ export function SummitClaimSection({ mountainId, mountainName }: Props) {
   const { myGroups } = useHikingGroups();
   const { toast } = useToast();
 
-  // Import mountains data for fallback coordinates
+  // Get mountain data for fallback coordinates
   const mountainData = useMemo(() => {
-    try {
-      const { mountains } = require("@/data/mountains");
-      return mountains.find((m: any) => m.id === mountainId);
-    } catch { return null; }
+    return mountainsData.find((m) => m.id === mountainId);
   }, [mountainId]);
 
   // Create fallback summit when no summits exist
