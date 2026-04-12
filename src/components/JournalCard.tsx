@@ -361,7 +361,10 @@ export function JournalCard({ journal, showAuthor = true, onRefresh }: JournalCa
 
 // Compact card for profile grid
 export function JournalGridCard({ journal, onClick }: { journal: HikingJournal; onClick?: () => void }) {
-  const mountain = mountains.find((m) => m.id === journal.mountain_id);
+  const allMts = (journal.mountain_ids?.length ? journal.mountain_ids : [journal.mountain_id])
+    .map((id) => mountains.find((m) => m.id === id))
+    .filter(Boolean) as typeof mountains;
+  const mountain = allMts[0];
   if (!mountain) return null;
   const photo = journal.photos?.[0];
 
