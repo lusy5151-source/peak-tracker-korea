@@ -1,8 +1,27 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.jeonnayeon.wandeung",
-    "sha256_cert_fingerprints": ["2A:03:CF:CB:7D:59:38:17:CB:25:6D:67:FF:DA:DC:71:76:81:44:28:89:49:BE:BA:7E:75:62:1D:57:96:91:EF"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.jeonnayeon.wandeung",
+      "sha256_cert_fingerprints": [
+        "2A:03:CF:CB:7D:59:38:17:CB:25:6D:67:FF:DA:DC:71:76:81:44:28:89:49:BE:BA:7E:75:62:1D:57:96:91:EF"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.wandeung.app",
+      "sha256_cert_fingerprints": [
+        "6B:1F:BF:CC:74:56:10:CD:22:27:50:A8:9B:18:54:20:7F:AA:2A:F4:16:60:B2:99:CD:77:6E:E7:3C:9B:B1:06"
+      ]
+    }
   }
-}]
+]
